@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Animal } from '../models/animal';
-import {AnimalCardComponent} from '../animal-card/animal-card';
+import { AnimalCardComponent } from '../animal-card/animal-card';
+import { AnimalService } from '../services/animal'; // 1. Importă Service-ul
+
 @Component({
   selector: 'app-animal-list',
   standalone: true,
@@ -9,62 +11,59 @@ import {AnimalCardComponent} from '../animal-card/animal-card';
   templateUrl: './animal-list.html',
   styleUrl: './animal-list.css',
 })
-export class AnimalList {
+export class AnimalList implements OnInit {
+  // Lista începe goală, o vom popula din Service
+  animals: Animal[] = [];
 
-  animals: Animal[] = [
-    {
-      id: 1,
-      name: 'Florica',
-      status: 'Sanatoasa',
-      location: 'Hambar',
-      type: 'vaca'
-    },
-    {
-      id: 2,
-      name: 'Coco',
-      status: 'Sanatoasa',
-      location: 'Curte',
-      type: 'gaina'
-    }
-  ];
+  // 2. Injectăm Service-ul în constructor
+  constructor(private animalService: AnimalService) {}
+
+  // 3. ngOnInit se execută automat când apare componenta pe ecran
+  ngOnInit() {
+    this.refreshList();
+  }
+
+  // Funcție utilitară ca să nu repetăm codul de citire a listei
+  refreshList() {
+    this.animals = this.animalService.getAnimals();
+  }
 
   // ➕ ADAUGARE
   addAnimal() {
     const newAnimal: Animal = {
-      id: Date.now(), // id simplu
+      id: Date.now(),
       name: 'Animal nou',
       status: 'Sanatos',
       location: 'Hambar',
-      type: 'vaca'
+      type: 'vaca',
+      sex: 'femela', // Adăugat pentru a respecta noul model din Service
+      age: 1
     };
 
-    this.animals.push(newAnimal);
+    this.animalService.addAnimal(newAnimal);
+    this.refreshList(); // Actualizăm ce vede utilizatorul
   }
 
   // ❌ STERGERE
   deleteAnimal(id: number) {
-    this.animals = this.animals.filter(animal => animal.id !== id);
+    this.animalService.deleteAnimal(id);
+    this.refreshList(); // Actualizăm lista după ștergere
   }
 
-  // ✏️ EDITARE (deocamdată doar log)
+  // ✏️ EDITARE
   editAnimal(animal: Animal) {
-    console.log('Editezi:', animal);
+    // Acum putem folosi updateAnimal din service
+    const updatedAnimal = { ...animal, status: 'In tratament' };
+    this.animalService.updateAnimal(updatedAnimal);
+    this.refreshList();
   }
 
-  // 🖼️ IMAGINI în funcție de tip
+  // 🖼️ Imaginile pot rămâne aici (țin de design/afisare)
   getImages(type: string): string[] {
     switch (type) {
-      case 'vaca':
-        return [
-          'assets/vaca/vector.svg',
-          'assets/vaca/vector-2.svg'
-        ];
-      case 'gaina':
-        return [
-          'assets/gaina/vector.svg'
-        ];
-      default:
-        return [];
+      case 'vaca': return ['assets/vaca/vector.svg', 'assets/vaca/vector-2.svg'];
+      case 'gaina': return ['assets/gaina/vector.svg'];
+      default: return [];
     }
   }
 }

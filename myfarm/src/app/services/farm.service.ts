@@ -9,7 +9,7 @@ function isoDateOnly(d: Date): string {
 }
 
 function emptyLog(date: string): DailyLogEntry {
-  return { date, milk: 0, eggs: 0, wool: 0, workHours: 0, };
+  return { date, milk: 0, eggs: 0, wool: 0, workHours: 0};
 }
 
 @Injectable({ providedIn: 'root' })

@@ -50,11 +50,13 @@ export class AddAnimal implements OnChanges {
   }
 
   get canSubmit(): boolean {
-    const nameOk = this.animal.name.trim().length > 0;
-    const locationOk = this.animal.location.trim().length > 0;
-    const typeOk = !!this.animal.type;
-    return nameOk && locationOk && typeOk;
-  }
+  const nameOk = this.animal.name?.trim().length > 0;
+  const locationOk = this.animal.location?.trim().length > 0;
+  const typeOk = !!this.animal.type;
+  const sexOk = !!this.animal.sex;
+  const ageOk = !isNaN(Number(this.animal.age)) && Number(this.animal.age) >= 0;  const statusOk = this.animal.status?.trim().length > 0;
+  return nameOk && locationOk && typeOk && sexOk && ageOk && statusOk;
+}
 
   togglePicker(event: Event) {
     event.preventDefault();

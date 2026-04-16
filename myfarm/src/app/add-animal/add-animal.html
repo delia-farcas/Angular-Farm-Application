@@ -55,11 +55,11 @@
         <label>Sex</label>
         <div class="gender-options">
           <label class="radio-option">
-            <input type="radio" name="sex" value="feminin" checked />
+            <input type="radio" name="sex" value="femela" [(ngModel)]="animal.sex" />
             Feminin
           </label>
           <label class="radio-option">
-            <input type="radio" name="sex" value="masculin" />
+            <input type="radio" name="sex" value="masculin" [(ngModel)]="animal.sex" />
             Masculin
           </label>
         </div>
@@ -69,7 +69,7 @@
         <label>Vârstă</label>
         <div class="age-row">
           <div class="age-input">
-            <input type="text" placeholder="ex: 5">
+            <input type="number" [(ngModel)]="animal.age" placeholder="ex: 5">
           </div>
           <select class="age-unit">
             <option>luni</option>
