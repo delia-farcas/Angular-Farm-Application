@@ -1,0 +1,11 @@
+<button (click)="addAnimal()">Adauga animal</button>
+
+<app-animal-card
+  *ngFor="let animal of animals"
+  [animal]="animal"
+  [animalImages]="getImages(animal.type)"
+  [editIcon]="'assets/edit.svg'"
+  (edit)="editAnimal($event)"
+  (delete)="deleteAnimal($event)"
+>
+</app-animal-card>

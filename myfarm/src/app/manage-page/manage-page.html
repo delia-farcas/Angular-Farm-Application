@@ -1,0 +1,69 @@
+<div class="content-panel">
+    <div class="header-row">
+      <h1 class="greeting">Salut, Delia!</h1>
+      <div class="header-actions">
+        <div class="search-bar">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+          <input type="text" placeholder="caută" [(ngModel)]="search" />
+        </div>
+        <div class="filter-select">
+          <div class="filter-select">
+            <select>
+                <option value="" disabled selected>Filtrează</option>
+            </select>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add button row -->
+    <div class="add-row">
+      <button class="btn-add" (click)="onAddAnimalClick()">Adaugă animal</button>
+    </div>
+
+    <!-- Table -->
+    <table class="animal-table">
+      <thead>
+        <tr>
+          <th>animal</th>
+          <th>capete</th>
+          <th>gestiune</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let animal of animals">
+          <td>
+            <span style="font-size: 20px; margin-right: 8px;">{{ animal.icon }}</span>
+            {{ animal.name }}
+          </td>
+          <td>{{ animal.count }}</td>
+          <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input
+                type="number"
+                min="0"
+                [disabled]="!isGestiuneEnabled(animal)"
+                [placeholder]="getGestiunePlaceholder(animal)"
+                [(ngModel)]="todaysInput[animal.id]"
+                (ngModelChange)="markValidity(animal.id, $event)"
+                style="width: 140px; padding: 6px 10px; border-radius: 8px; border: 1.5px solid #757575; background: #E9E9E9;"
+              />
+              <span style="color:#757575; min-width: 32px;">{{ getGestiuneUnit(animal) }}</span>
+            </div>
+            <div *ngIf="invalidInput[animal.id]" style="color:#c0392b; font-size: 0.8rem; margin-top: 2px;">
+              Introdu o valoare validă (număr ≥ 0).
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Manage button -->
+    <div class="manage-row">
+        <button class="btn-cancel" type="button" (click)="onBackClick()">Anulează</button>
+        <button class="btn-submit" type="button" (click)="onSaveToday()">Salvează</button>
+    </div>
+  </div>
+

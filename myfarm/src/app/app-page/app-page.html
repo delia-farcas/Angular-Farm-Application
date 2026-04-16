@@ -1,0 +1,53 @@
+<!-- Hamburger (mobile) -->
+<div class = "app-container">
+  <div class = navbar>
+    <button class="hamburger" onclick="document.body.classList.toggle('nav-open')">
+      <span></span><span></span><span></span>
+    </button>
+
+    <!-- Overlay (mobile) -->
+    <div class="overlay" onclick="document.body.classList.remove('nav-open')"></div>
+
+    <!-- Side Nav -->
+    
+    <nav class="side-nav">
+
+      <div class="logo">
+        <img src = "logo2.svg" alt="Logo">
+      </div>
+
+      <a class="nav-item">Acasa</a>
+      <a class="nav-item" (click)="navigateToBazinga()">Predictor genetic</a>
+      <a class="nav-item" (click)="navigateToRaports()">Rapoarte</a>
+
+      <div class="separator"></div>
+
+      <div class="user-account">
+        <div class="user-pfp">C</div>
+        <span class="user-name">Contul meu</span>
+      </div>
+
+    </nav>
+  </div>
+  <div class = "main-content">
+    @if (currentPage === 'home') {
+      <app-list-page 
+        (goToManage)="showManage()"
+        (goToAddAnimal)="showAddAnimal()"
+        (editAnimalRequest)="onEditAnimal($event)">
+      </app-list-page>
+    }
+    @else if (currentPage === 'manage') {
+      <app-manage-page 
+        (goBack)="showHome()"
+        (goToAddAnimal)="showAddAnimal()">
+      </app-manage-page>
+    }
+    @else if (currentPage === 'add') {
+      <app-add-animal 
+        [animalToEdit]="animalBeingEdited"
+        (goBack)="showHome()">
+      </app-add-animal>
+    }
+  </div>
+</div>

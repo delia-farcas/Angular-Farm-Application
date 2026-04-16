@@ -1,0 +1,137 @@
+<div class = "app-container">
+  <div class = navbar>
+    <button class="hamburger" onclick="document.body.classList.toggle('nav-open')">
+      <span></span><span></span><span></span>
+    </button>
+
+    <!-- Overlay (mobile) -->
+    <div class="overlay" onclick="document.body.classList.remove('nav-open')"></div>
+
+    <!-- Side Nav -->
+    
+    <nav class="side-nav">
+
+      <div class="logo">
+        <img src = "logo2.svg" alt="Logo">
+      </div>
+
+      <a class="nav-item" (click)="navigateHome()">Acasa</a>
+      <a class="nav-item">Predictor genetic</a>
+      <a class="nav-item" (click)="navigateToRaports()">Rapoarte</a>
+
+      <div class="separator"></div>
+
+      <div class="user-account">
+        <div class="user-pfp">C</div>
+        <span class="user-name">Contul meu</span>
+      </div>
+
+    </nav>
+  </div>
+  <div class="main-content">
+    <h1 class="title">Predictor genetic</h1>
+
+    <div class="animal-filter">
+      <span class="label">animal</span>
+      <div class="animal-buttons">
+        <input type="radio" name="animal" id="animal-pig" class="animal-radio" />
+        <label for="animal-pig" class="animal-btn" title="Porc">🐷</label>
+
+        <input type="radio" name="animal" id="animal-cow" class="animal-radio" />
+        <label for="animal-cow" class="animal-btn" title="Vacă">🐮</label>
+
+        <input type="radio" name="animal" id="animal-chicken" class="animal-radio" checked />
+        <label for="animal-chicken" class="animal-btn" title="Găină">🐔</label>
+
+        <input type="radio" name="animal" id="animal-sheep" class="animal-radio" />
+        <label for="animal-sheep" class="animal-btn" title="Oaie">🐑</label>
+
+        <input type="radio" name="animal" id="animal-horse" class="animal-radio" />
+        <label for="animal-horse" class="animal-btn" title="Cal">🐴</label>
+      </div>
+    </div>
+
+    <div class="parents">
+      <div class="parent-group">
+        <span class="label">mama</span>
+        <div class="dropdown-wrapper">
+          <select id="select-mama" class="dropdown">
+            <option value="12347">#12347 coca</option>
+            <option value="12348">#12348 mimi</option>
+            <option value="12349">#12349 lola</option>
+          </select>
+        </div>
+      </div>
+      <div class="parent-group">
+        <span class="label">tatăl</span>
+        <div class="dropdown-wrapper">
+          <select id="select-tata" class="dropdown">
+            <option value="12350">#12350 coco</option>
+            <option value="12351">#12351 rex</option>
+            <option value="12352">#12352 max</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="subtitle">Fişa viitorului pui</h2>
+
+    <div class="statistics">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">sănătate</span>
+          <div class="progress-bar">
+            <div class="progress-track">
+              <div class="progress-fill" style="width: 70%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="stat-description">
+          <p>Bazat pe istoricul părinților, copilul va fi în stare sănătoasă și imun la boli</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">longevitate</span>
+          <div class="progress-bar">
+            <div class="progress-track">
+              <div class="progress-fill" style="width: 85%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="stat-description">
+          <p>Bazat pe istoricul părinților, copilul va fi în stare sănătoasă și imun la boli</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">productivitate</span>
+          <div class="progress-bar">
+            <div class="progress-track">
+              <div class="progress-fill" style="width: 65%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="stat-description">
+          <p>Bazat pe istoricul părinților, copilul va fi în stare sănătoasă și imun la boli</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">greutate</span>
+          <div class="progress-bar">
+            <div class="progress-track">
+              <div class="progress-fill" style="width: 75%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="stat-description">
+          <p>Bazat pe istoricul părinților, copilul va fi în stare sănătoasă și imun la boli</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

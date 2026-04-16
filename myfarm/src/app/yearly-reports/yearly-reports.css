@@ -1,0 +1,230 @@
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.page {
+  font-family: "Poppins", sans-serif;
+  background-color: #f5f3ee;
+  color: #2e2f31;
+  width: 100%;
+  min-height: 100vh;
+  width: 100%;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+  justify-content: center;
+}
+
+.chart-container {
+  height: 350px; 
+  width: 100%;
+  background-color: #f5f3ee;   
+}
+
+.table-container{
+  display:flex;
+  gap: 2rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 400;
+  text-align: left;       
+  align-self: flex-start;  
+  width: 100%;
+}
+
+.label {
+  font-size: 1.1rem;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dropdown-wrapper {
+  position: relative;
+}
+
+.dropdown {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.95rem;
+  color: #2e2f31;
+  background-color: #d9d9d9;
+  border: 1px solid #757575;
+  border-radius: 6px;
+  padding: 0.4rem 2.2rem 0.4rem 0.85rem;
+  cursor: pointer;
+  min-width: 150px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+}
+
+.dropdown:focus {
+  outline: 2px solid #388333;
+  outline-offset: 1px;
+}
+
+.animal-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.animal-radio {
+  display: none;
+}
+
+.animal-btn {
+  width: 50px;
+  height: 50px;
+  font-size: 1.75rem;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.animal-btn:hover {
+  transform: scale(1.12);
+  background-color: rgba(0, 200, 200, 0.12);
+}
+
+.animal-radio:checked + .animal-btn {
+  border-color: #2ec4b6;
+  background-color: rgba(46, 196, 182, 0.25);
+  box-shadow: 0 0 0 3px rgba(46, 196, 182, 0.3);
+  transform: scale(1.15);
+}
+
+.data-table {
+  width: 100%;
+  max-width: 600px; /* Am păstrat o lățime rezonabilă */
+  border-collapse: collapse;
+  font-family: "Inter", "Poppins", sans-serif;
+  margin: 0 auto;
+}
+
+.data-table th,
+.data-table td {
+  border: 1px solid #757575;
+  /* Reducem padding-ul drastic: 0.2rem sus/jos, 0.5rem stânga/dreapta */
+  padding: 0.25rem 0.5rem; 
+  text-align: center;
+  font-size: 0.85rem; /* Micșorăm puțin scrisul ca să ocupe mai puțin loc */
+  line-height: 1.2;    /* Forțăm rândurile să fie mai apropiate */
+}
+
+.data-table th {
+  font-size: 1.05rem;
+}
+
+.data-table .total-row td {
+  font-weight: 500;
+}
+
+.view-toggle {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  align-self: flex-end;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.switch-input {
+  display: none;
+}
+
+.switch-track {
+  display: block;
+  width: 60px;
+  height: 30px;
+  background-color: #d9d9d9;
+  border: 1px solid #757575;
+  border-radius: 20px;
+  position: relative;
+  transition: background-color 0.25s;
+}
+
+.switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  background-color: #388333;
+  border: 1px solid #757575;
+  border-radius: 50%;
+  transition: left 0.25s;
+}
+
+.switch-input:checked + .switch-track .switch-knob {
+  left: 31px;
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 1.25rem 1rem;
+    gap: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .filters {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.6rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .animal-btn {
+    width: 42px;
+    height: 42px;
+    font-size: 1.4rem;
+  }
+
+  .dropdown {
+    min-width: 130px;
+    font-size: 0.85rem;
+  }
+
+  .view-toggle {
+    align-self: center;
+  }
+}

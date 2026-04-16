@@ -1,0 +1,17 @@
+<div class="frame">
+  <div class="vaca">
+    <img *ngFor="let img of animalImages" [src]="img" />
+  </div>
+
+  <div class="text-wrapper">{{ animal.id }}</div>
+  <div class="text-wrapper">{{ animal.name }}</div>
+  <div class="text-wrapper">{{ animal.status }}</div>
+  <div class="text-wrapper">{{ animal.location }}</div>
+
+  <div class="edit-delete-buttons">
+    <div class="vector-wrapper" (click)="onEdit()">
+      <img [src]="editIcon" />
+    </div>
+    <div class="div" (click)="onDelete()"></div>
+  </div>
+</div>

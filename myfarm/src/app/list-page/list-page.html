@@ -1,0 +1,62 @@
+<div class="content-panel">
+    <!-- Header row -->
+    <div class="header-row">
+      <h1 class="greeting">Salut, Delia!</h1>
+      <div class="header-actions">
+        <div class="search-bar">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+          <input type="text" placeholder="caută" />
+        </div>
+        <div class="filter-select">
+          <select [(ngModel)]="selectedType">
+            <option value="toate">Filtrează: Toate</option>
+            <option value="vaca">Vacă</option>
+            <option value="porc">Porc</option>
+            <option value="gaina">Găină</option>
+            <option value="cal">Cal</option>
+            <option value="oaie">Oaie</option>
+            <option value="capra">Capră</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add button row -->
+    <div class="add-row">
+      <button class="btn-add" (click)="onAddAnimalClick()">Adaugă animal</button>
+    </div>
+
+    <!-- Table -->
+    <table class="animal-table">
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>nume</th>
+          <th>sănătate</th>
+          <th>localizare</th>
+          <th>acțiuni</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let animal of filteredAnimals">
+          <td>{{ animal.id }}</td>
+          <td>{{ animal.name }}</td>
+          <td>{{ animal.status }}</td>
+          <td>{{ animal.location }}</td>
+
+          <td>
+            <img src="edit.svg" (click)="editAnimal(animal)" width="20">
+            <img src="delete.svg" (click)="deleteAnimal(animal.id)" width="20">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Manage button -->
+    <div class="manage-row">
+      <button class="btn-manage" (click)="onManageClick()">Gestionează</button>
+    </div>
+  </div>

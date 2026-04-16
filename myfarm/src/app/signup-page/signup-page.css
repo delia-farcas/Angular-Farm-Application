@@ -1,0 +1,203 @@
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+  /* Am adăugat fontul și aici pentru a fi sigur că toate elementele 
+     (inclusiv input-urile de sistem) îl moștenesc corect */
+  font-family: 'Poppins', Helvetica, sans-serif;
+}
+
+body {
+  font-family: 'Poppins', Helvetica, sans-serif;
+  color: #2e2f31;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== LAYOUT PAGINĂ ===== */
+.page { 
+  min-height: 100vh; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.auth-page { 
+  padding: 24px; 
+}
+
+/* Containerul principal (alb + maro) */
+.auth-container {
+  display: flex;
+  width: 100%;
+  border: 1px solid #2E2F31;
+  max-width: 900px;
+  /* No fixed height — stretches to signup content, both sides equal via flexbox stretch */
+  min-height: 600px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+/* ===== FORM SIDE (Stânga) ===== */
+.auth-form-side {
+  flex: 1;
+  color:#2E2F31;
+  background-color: #F9F7F2;
+  padding: 32px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auth-heading {
+  font-family: 'Poppins', Helvetica, sans-serif; /* Explicit */
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.auth-form { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 12px; 
+}
+
+.form-group { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 4px; 
+}
+
+.form-group label {
+  font-family: 'Poppins', Helvetica, sans-serif; /* Explicit */
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form-group input {
+  padding: 10px 14px;
+  border: 1.5px solid #c4c4c4;
+  border-radius: 8px;
+  font-family: 'Poppins', Helvetica, sans-serif; /* Deja prezent */
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus { 
+  border-color: #388333; 
+}
+
+.error-msg { 
+  font-family: 'Poppins', Helvetica, sans-serif; /* Explicit */
+  font-size: 12px; 
+  color: #d32f2f; 
+  min-height: 16px; 
+}
+
+/* ===== BRAND SIDE (Dreapta) ===== */
+.auth-brand-side {
+  flex: 1;
+  background-color: #BC8954;
+  border-right: 1px solid #2E2F31;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 32px 40px 32px;
+  color: #F9F7F2;
+  text-align: center;
+  gap: 80px;
+}
+
+.brand-logo {
+  max-width: 200px; 
+  width: 100%; 
+  height: auto; 
+  display: block; 
+  margin-bottom: 20px; 
+  object-fit: contain; 
+}
+
+.brand-texts{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Aici păstrăm Pacifico pentru logo/welcome */
+.brand-welcome {
+  font-family: 'Pacifico', cursive;
+  font-size: 28px;
+}
+
+.brand-subtitle { 
+  font-family: 'Poppins', Helvetica, sans-serif; /* Explicit */
+  font-size: 16px; 
+}
+
+.link-underline {
+  cursor: pointer;
+  font-family: 'Poppins', Helvetica, sans-serif; /* Explicit */
+  color: #F9F7F2;
+  text-decoration: none;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  padding-bottom: 2px;
+  transition: opacity 0.2s;
+}
+
+/* ===== BUTOANE ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  font-family: 'Poppins', Helvetica, sans-serif; /* Deja prezent */
+  font-weight: 500;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.btn-primary {
+  background-color: #388333;
+  color: #dfdfdf;
+}
+
+.btn-auth {
+  margin-top: 8px;
+  font-size: 18px;
+  padding: 12px;
+  border-radius: 10px;
+  width: 100%;
+}
+
+.btn:hover { 
+  opacity: 0.9; 
+  transform: translateY(-1px); 
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .auth-container { 
+    flex-direction: column; 
+    max-width: 480px; 
+  }
+  
+  .auth-brand-side { 
+    padding: 32px 24px; 
+    order: -1; 
+  }
+  
+  .auth-form-side { 
+    padding: 32px 24px; 
+  }
+
+  .brand-welcome { 
+    font-size: 22px; 
+  }
+}

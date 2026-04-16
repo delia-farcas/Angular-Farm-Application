@@ -1,0 +1,89 @@
+  <div class="page">
+    <h1 class="title">Raport Lunar</h1>
+
+    <!-- Filters -->
+    <div class="filters">
+      <!-- Product Category -->
+      <div class="filter-group">
+        <span class="label">categorii de produse</span>
+        <div class="dropdown-wrapper">
+          <select id="select-category" class="dropdown" [(ngModel)]="category">
+            <option value="lapte">lapte</option>
+            <option value="oua">ouă</option>
+            <option value="lana">lână</option>
+            <option value="ore_munca">ore muncă</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Animal Selection -->
+      <div class="filter-group">
+        <span class="label">animal</span>
+        <div class="dropdown-wrapper">
+          <select class="dropdown" [(ngModel)]="selectedAnimalId">
+            <option *ngFor="let a of animals" [ngValue]="a.id">{{ a.icon }} {{ a.name }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    @if (view === 'table') {
+    <div class = "table-container">
+      <table class="data-table" id="data-table">
+        <thead>
+          <tr>
+            <th>Săptămâna</th>
+            <th>{{ selectedAnimal?.name }} ({{ unit }})</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of tableRows">
+            <td>{{ row.label }}</td>
+            <td>{{ row.total }}</td>
+          </tr>
+          <tr class="total-row">
+            <td>Total</td>
+            <td>{{ total }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="background:#fff; border-radius: 14px; padding: 16px;">
+        <canvas
+          baseChart
+          [type]="'line'"
+          [data]="chartData"
+          [options]="chartOptions">
+        </canvas>
+      </div>
+    </div>
+    }
+    @else {
+      <div style="background:#fff; border-radius: 14px; padding: 16px;">
+        <canvas
+          baseChart
+          [type]="'line'"
+          [data]="chartData"
+          [options]="chartOptions">
+        </canvas>
+      </div>
+    }
+
+    <!-- View Toggle -->
+    <div class="view-toggle">
+      <span class="label">tabel</span>
+      <label class="switch" for="view-switch">
+        <input
+          type="checkbox"
+          id="view-switch"
+          class="switch-input"
+          [checked]="view === 'chart'"
+          (change)="onToggleView($event)"/>
+        <span class="switch-track">
+          <span class="switch-knob"></span>
+        </span>
+      </label>
+      <span class="label">grafic</span>
+    </div>
+  </div>
+
