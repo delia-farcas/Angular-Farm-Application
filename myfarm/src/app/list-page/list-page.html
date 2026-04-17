@@ -41,16 +41,9 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let animal of filteredAnimals">
-          <td>{{ animal.id }}</td>
-          <td>{{ animal.name }}</td>
-          <td>{{ animal.status }}</td>
-          <td>{{ animal.location }}</td>
-
-          <td>
-            <img src="edit.svg" (click)="editAnimal(animal)" width="20">
-            <img src="delete.svg" (click)="deleteAnimal(animal.id)" width="20">
-          </td>
+        <tr app-animal-row 
+          *ngFor="let animal of filteredAnimals" 
+          [animal]="animal">
         </tr>
       </tbody>
     </table>

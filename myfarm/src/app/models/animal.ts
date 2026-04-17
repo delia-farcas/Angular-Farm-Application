@@ -6,6 +6,7 @@ export interface Animal {
   age: number;
   status: string;
   location: string;
+  observations: string;
 }
 
 export interface Cow extends Animal {

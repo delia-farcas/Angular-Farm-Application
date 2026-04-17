@@ -8,10 +8,13 @@
   <div class="text-wrapper">{{ animal.status }}</div>
   <div class="text-wrapper">{{ animal.location }}</div>
 
-  <div class="edit-delete-buttons">
-    <div class="vector-wrapper" (click)="onEdit()">
-      <img [src]="editIcon" />
-    </div>
-    <div class="div" (click)="onDelete()"></div>
+  <div class="action-buttons-container">  
+    <button type="button" class="icon-button" (click)="onEdit()" aria-label="Edit">
+      <img [src]="editIcon" alt="Edit" />
+    </button>
+
+    <button type="button" class="icon-button" (click)="onDelete()" aria-label="Delete">
+      <img [src]="deleteIcon" alt="Delete" />
+    </button>
   </div>
 </div>

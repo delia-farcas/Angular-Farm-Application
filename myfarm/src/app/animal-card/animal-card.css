@@ -5,7 +5,11 @@
     gap: 10px;
 }
 
-.edit-delete-buttons{
+.action-buttons-container {
     display: flex;
     gap: 10px;
+}
+
+.button{
+    cursor: pointer;
 }

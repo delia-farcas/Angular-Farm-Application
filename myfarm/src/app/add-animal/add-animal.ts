@@ -26,7 +26,8 @@ export class AddAnimal implements OnChanges {
     type: 'vaca',
     sex: 'femela',
     age: 0,
-    location: ''
+    location: '',
+    observations: ''
   };
 
   constructor(private animalService: AnimalService) {}
@@ -45,6 +46,7 @@ export class AddAnimal implements OnChanges {
         age: 0,
         status: 'Sanatoasa',
         location: '',
+        observations: '',
       };
     }
   }
@@ -78,12 +80,15 @@ export class AddAnimal implements OnChanges {
 
     if (this.isEditMode && trimmed.id) {
       this.animalService.updateAnimal(trimmed);
+      window.alert('Animal editat cu succes!');
     } else {
       const uniqueId = Date.now() + Math.floor(Math.random() * 1000);
       this.animalService.addAnimal({ ...trimmed, id: uniqueId });
+      window.alert('Animal adăugat cu succes!');
     }
     this.goBack.emit();
   }
+
   onBackClick(): void {
     this.goBack.emit();
   }

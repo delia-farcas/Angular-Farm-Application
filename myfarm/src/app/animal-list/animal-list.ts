@@ -37,7 +37,8 @@ export class AnimalList implements OnInit {
       location: 'Hambar',
       type: 'vaca',
       sex: 'femela', // Adăugat pentru a respecta noul model din Service
-      age: 1
+      age: 1,
+      observations: ''
     };
 
     this.animalService.addAnimal(newAnimal);

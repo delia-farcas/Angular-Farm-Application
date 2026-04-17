@@ -94,12 +94,12 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 40px;
-  margin-bottom: 35px;
+  margin-bottom: 20px;
 }
 
 /* ---------- Fields ---------- */
 .field {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .field label {
@@ -140,7 +140,7 @@
 .field textarea {
   resize: vertical;
   min-height: 80px;
-  max-height: 120px;
+  max-height: 100px;
 }
 
 /* ---------- ID + Name Row ---------- */
@@ -161,17 +161,20 @@
 .gender-options {
   display: flex;
   flex-direction: row;
-  gap: 8px;
+  gap: 16px; 
   margin-top: 4px;
+  align-items: center; 
 }
 
 .radio-option {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: row;
+  align-items: center; 
+  gap: 6px;
   font-size: 18px;
   cursor: pointer;
-  user-select: none;
+  position: relative;
+  line-height: 1;
 }
 
 .radio-option input[type="radio"] {
@@ -179,15 +182,16 @@
 }
 
 .custom-radio {
-  width: 16px;
+   width: 16px;
   height: 16px;
   border-radius: 3px;
   background-color: #d9d9d9;
-  display: flex;
+
+  display: inline-flex;        
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  position: relative;
+
+  vertical-align: middle;    
 }
 
 .radio-option input[type="radio"]:checked + .custom-radio {
@@ -206,20 +210,17 @@
 .age-row {
   display: flex;
   gap: 12px;
-  align-items: flex-end; /* Aliniem input-urile la bază */
+  align-items: center;
 }
 
-/* Input-ul de cifră (DREPTUNGHIUL LUNG) */
+/* Input vârstă */
 .age-input {
-  flex: 3; /* Ocupă mai mult spațiu */
-  max-width: none; /* Scoatem limitarea anterioară */
+  flex: 0 0 100px;
 }
 
-/* Dropdown-ul (LUNI/ANI - MAI SCURT) */
+/* Dropdown luni/ani */
 .age-unit {
-  flex: 1; /* Ocupă mai puțin spațiu */
-  min-width: 100px; /* Să nu devină prea mic pe mobil */
-  width: auto; 
+  flex: 0 0 110px;
   background-color: #e8e8e8;
   border: 1px solid #757575;
   border-radius: 11px;
@@ -227,8 +228,24 @@
   cursor: pointer;
 }
 
+/* Input styling */
+.age-input input {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #e8e8e8;
+  border: 1px solid #757575;
+  border-radius: 11px;
+  padding: 10px 14px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  outline: none;
+}
+
+/* focus */
+.age-unit:focus {
+  border-color: #388333;
+}
 /* ---------- Ajustare pentru Input-ul de Vârstă ---------- */
-/* Asigură-te că în HTML ai un <input type="text"> sau <input type="number"> în .age-input */
 .age-input input {
   width: 100%;
   background-color: #e8e8e8;
@@ -244,7 +261,6 @@
 .age-unit:focus {
   border-color: #388333;
 }
-
 /* ---------- Form Actions ---------- */
 .form-actions {
   display: flex;
@@ -253,13 +269,13 @@
 }
 
 .btn-cancel {
-  padding: 12px 32px;
+  padding: 10px 28px;
   background-color: #f9f7f2;
   border: 1px solid #bc8954;
-  border-radius: 11px;
+  border-radius: 10px;
   color: #bc8954;
   font-family: 'Poppins', sans-serif;
-  font-size: 18px;
+  font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.2s;
 }
@@ -269,15 +285,14 @@
 }
 
 .btn-submit {
-  padding: 12px 32px;
-  background-color: #388333;
+  background: #398333;
+  color: #F9F7F2;
   border: none;
-  border-radius: 11px;
-  color: #fff;
-  font-family: 'Poppins', sans-serif;
-  font-size: 18px;
+  padding: 10px 28px;
+  border-radius: 10px;
+  font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background 0.2s;
 }
 
 .btn-submit:hover {

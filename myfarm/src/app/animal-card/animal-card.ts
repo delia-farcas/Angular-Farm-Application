@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Animal } from '../models/animal';
 
 @Component({
-  selector: 'app-animal-card',
+  selector: 'app-animal-card, [app-animal-row]',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './animal-card.html',
@@ -11,12 +11,15 @@ import { Animal } from '../models/animal';
 })
 export class AnimalCardComponent {
 
+  editIcon = 'edit.svg';
+  deleteIcon = 'delete.svg';
+
+  animalImages = [
+    'assets/images/vaca-front.png',
+    'assets/images/vaca-side.png'
+  ];
+
   @Input() animal!: Animal;
-
-  @Input() animalImages: string[] = [];
-
-  @Input() editIcon: string = '';
-  @Input() deleteIcon: string = '';
 
   @Output() edit = new EventEmitter<Animal>();
   @Output() delete = new EventEmitter<number>();

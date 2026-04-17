@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AnimalService } from '../services/animal';
 import { Animal } from '../models/animal';
+import { AnimalCardComponent } from '../animal-card/animal-card';
 
 @Component({
   selector: 'app-list-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AnimalCardComponent],
   templateUrl: './list-page.html',
   styleUrl: './list-page.css',
 })
@@ -32,6 +33,8 @@ export class ListPage {
   }
 
   deleteAnimal(id: number) {
+    const confirmed = window.confirm('Sigur vrei să ștergi animalul?');
+    if (!confirmed) return;
     this.animalService.deleteAnimal(id);
     this.animals = this.animalService.getAnimals();
   }

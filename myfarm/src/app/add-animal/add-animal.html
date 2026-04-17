@@ -32,16 +32,15 @@
             disabled
           />
         </div>
-        <div class="field name-field">
+        <div class="field">
           <label>Nume:</label>
-          <input [(ngModel)]="animal.name" placeholder="Nume">
+          <input type="text" [(ngModel)]="animal.name" placeholder="Nume">
         </div>
       </div>
 
       <div class="field">
         <label>Rasă/specie</label>
         <select class="age-unit" [(ngModel)]="animal.type">
-          <option value="">Selectează</option>
           <option value="vaca">Vacă</option>
           <option value="porc">Porc</option>
           <option value="cal">Cal</option>
@@ -56,10 +55,12 @@
         <div class="gender-options">
           <label class="radio-option">
             <input type="radio" name="sex" value="femela" [(ngModel)]="animal.sex" />
+            <span class="custom-radio"></span>
             Feminin
           </label>
           <label class="radio-option">
             <input type="radio" name="sex" value="masculin" [(ngModel)]="animal.sex" />
+            <span class="custom-radio"></span>
             Masculin
           </label>
         </div>
@@ -80,14 +81,21 @@
     </div>
 
     <div class="right-column">
+      <div class = "field">
+        <label>Stare de sănătate</label>
+        <select class="age-unit" [(ngModel)]="animal.status">
+          <option value="Sanatos">Sănătos</option>
+          <option value="Cu probleme">Cu probleme</option>
+        </select>
+      </div>
       <div class="field">
         <label>Localizare</label>
-        <textarea [(ngModel)]="animal.location" placeholder="ex: Padocul 3" rows="6"></textarea>
+        <textarea [(ngModel)]="animal.location" placeholder="ex: Padocul 3" rows="3"></textarea>
       </div>
 
       <div class="field">
         <label>Observatii</label>
-        <textarea placeholder="ex: Gestantă, luna 5" rows="6"></textarea>
+        <textarea [(ngModel)]="animal.observations" placeholder="ex: Gestantă, luna 5" rows="3"></textarea>
       </div>
     </div>
   </div>

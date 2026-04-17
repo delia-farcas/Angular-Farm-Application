@@ -4,7 +4,8 @@
   *ngFor="let animal of animals"
   [animal]="animal"
   [animalImages]="getImages(animal.type)"
-  [editIcon]="'assets/edit.svg'"
+  [editIcon]="'edit.svg'"
+  [deleteIcon]="'delete.svg'"
   (edit)="editAnimal($event)"
   (delete)="deleteAnimal($event)"
 >

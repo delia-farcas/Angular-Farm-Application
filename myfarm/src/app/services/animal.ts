@@ -7,7 +7,7 @@ import { Animal } from '../models/animal';
 export class AnimalService {
 
   private animals: Animal[] = [
-    { id: 1, name: 'Vaca', type: 'vaca', sex: 'femela', age: 5, status: 'Sanatoasa', location: 'Hambar' }
+    { id: 1, name: 'Vaca', type: 'vaca', sex: 'femela', age: 5, status: 'Sanatoasa', location: 'Hambar', observations: '' }
   ];
 
   getAnimals(): Animal[] {
