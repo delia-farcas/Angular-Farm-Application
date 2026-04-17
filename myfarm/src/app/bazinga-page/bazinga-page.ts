@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 @Component({
   selector: 'app-bazinga-page',
+  standalone: true,
   imports: [],
   templateUrl: './bazinga-page.html',
   styleUrl: './bazinga-page.css',

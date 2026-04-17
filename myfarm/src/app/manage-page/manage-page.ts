@@ -37,6 +37,7 @@ export class ManagePage {
   getGestiuneUnit(animal: Animal): string {
     switch (animal.name) {
       case 'Vaca':
+        return 'L';
       case 'Capra':
         return 'L';
       case 'Gaina':
@@ -45,6 +46,8 @@ export class ManagePage {
         return 'kg';
       case 'Cal':
         return 'ore';
+      case 'Porc':
+        return 'kg';
       default:
         return '';
     }
@@ -53,6 +56,7 @@ export class ManagePage {
   getGestiunePlaceholder(animal: Animal): string {
     switch (animal.name) {
       case 'Vaca':
+        return 'ex: 15';
       case 'Capra':
         return 'ex: 25';
       case 'Gaina':
@@ -61,13 +65,15 @@ export class ManagePage {
         return 'ex: 3';
       case 'Cal':
         return 'ex: 6';
+      case 'Porc':
+         return 'ex: 12';
       default:
         return 'N/A';
     }
   }
 
-  isGestiuneEnabled(animal: Animal): boolean {
-    return animal.name !== 'Porc';
+  isGestiuneEnabled(_: Animal): boolean {
+    return true;
   }
 
   markValidity(animalId: number, value: any): void {
@@ -81,7 +87,6 @@ export class ManagePage {
 
   onSaveToday(): void {
     for (const a of this.farm.getAnimals()) {
-      if (!this.isGestiuneEnabled(a)) continue;
       const raw = this.todaysInput[a.id];
       if (raw === null || raw === undefined) continue;
       const value = Number(raw);
@@ -101,9 +106,12 @@ export class ManagePage {
         case 'Cal':
           this.farm.upsertTodayLog(a.id, { workHours: value });
           break;
+        case 'Porc':
+          this.farm.upsertTodayLog(a.id, { meat: value });
+          break;
       }
     }
-    // clear inputs after save
+    
     for (const a of this.farm.getAnimals()) {
       this.todaysInput[a.id] = null;
       this.invalidInput[a.id] = false;

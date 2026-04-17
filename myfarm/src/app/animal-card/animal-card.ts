@@ -11,10 +11,11 @@ import { Animal } from '../models/animal';
 })
 export class AnimalCardComponent {
 
-  editIcon = 'edit.svg';
-  deleteIcon = 'delete.svg';
+  @Input() display: 'card' | 'row' = 'card';
+  @Input() editIcon = 'edit.svg';
+  @Input() deleteIcon = 'delete.svg';
 
-  animalImages = [
+  @Input() animalImages = [
     'assets/images/vaca-front.png',
     'assets/images/vaca-side.png'
   ];

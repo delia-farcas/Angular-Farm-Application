@@ -8,6 +8,7 @@ import { Router } from '@angular/router'; // 1. Importă Router
 
 @Component({
   selector: 'app-starting-page',
+  standalone: true,
   imports: [CommonModule, WelcomePage, LoginPage, SignupPage],
   templateUrl: './starting-page.html',
   styleUrl: './starting-page.css',

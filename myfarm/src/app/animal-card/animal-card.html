@@ -1,20 +1,38 @@
-<div class="frame">
-  <div class="vaca">
-    <img *ngFor="let img of animalImages" [src]="img" />
+@if (display === 'row') {
+  <td>{{ animal.id }}</td>
+  <td>{{ animal.name }}</td>
+  <td>{{ animal.status }}</td>
+  <td>{{ animal.location }}</td>
+  <td>
+    <div class="action-buttons-container">
+      <button type="button" class="icon-button" (click)="onEdit()" aria-label="Edit">
+        <img [src]="editIcon" alt="Edit" />
+      </button>
+
+      <button type="button" class="icon-button" (click)="onDelete()" aria-label="Delete">
+        <img [src]="deleteIcon" alt="Delete" />
+      </button>
+    </div>
+  </td>
+} @else {
+  <div class="frame">
+    <div class="vaca">
+      <img *ngFor="let img of animalImages" [src]="img" />
+    </div>
+
+    <div class="text-wrapper">{{ animal.id }}</div>
+    <div class="text-wrapper">{{ animal.name }}</div>
+    <div class="text-wrapper">{{ animal.status }}</div>
+    <div class="text-wrapper">{{ animal.location }}</div>
+
+    <div class="action-buttons-container">
+      <button type="button" class="icon-button" (click)="onEdit()" aria-label="Edit">
+        <img [src]="editIcon" alt="Edit" />
+      </button>
+
+      <button type="button" class="icon-button" (click)="onDelete()" aria-label="Delete">
+        <img [src]="deleteIcon" alt="Delete" />
+      </button>
+    </div>
   </div>
-
-  <div class="text-wrapper">{{ animal.id }}</div>
-  <div class="text-wrapper">{{ animal.name }}</div>
-  <div class="text-wrapper">{{ animal.status }}</div>
-  <div class="text-wrapper">{{ animal.location }}</div>
-
-  <div class="action-buttons-container">  
-    <button type="button" class="icon-button" (click)="onEdit()" aria-label="Edit">
-      <img [src]="editIcon" alt="Edit" />
-    </button>
-
-    <button type="button" class="icon-button" (click)="onDelete()" aria-label="Delete">
-      <img [src]="deleteIcon" alt="Delete" />
-    </button>
-  </div>
-</div>
+}

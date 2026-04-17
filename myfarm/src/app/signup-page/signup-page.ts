@@ -9,6 +9,7 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
 
 @Component({
   selector: 'app-signup-page',
+  standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './signup-page.html',
   styleUrl: './signup-page.css',

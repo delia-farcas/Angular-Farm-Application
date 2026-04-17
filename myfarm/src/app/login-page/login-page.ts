@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 
 @Component({
   selector: 'app-login-page',
+  standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './login-page.html',
   styleUrl: './login-page.css',

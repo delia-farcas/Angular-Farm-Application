@@ -3,8 +3,6 @@
    Ready for Angular integration
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Inter:wght@400;500&display=swap');
-
 /* ---------- Page Container ---------- */
 .add-animal-page {
   background: #F9F7F2;
@@ -50,7 +48,7 @@
 }
 
 .change-picture-link {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-size: 20px;
   color: #bc8954;
   text-decoration: underline;

@@ -9,7 +9,7 @@ function isoDateOnly(d: Date): string {
 }
 
 function emptyLog(date: string): DailyLogEntry {
-  return { date, milk: 0, eggs: 0, wool: 0, workHours: 0};
+  return { date, milk: 0, eggs: 0, wool: 0, workHours: 0, meat: 0};
 }
 
 @Injectable({ providedIn: 'root' })
@@ -29,6 +29,23 @@ export class FarmService {
 
   getAnimalById(id: number): Animal | undefined {
     return this.animals.find(a => a.id === id);
+  }
+
+  syncCounts(countsByType: Partial<Record<'vaca' | 'cal' | 'porc' | 'gaina' | 'oaie' | 'capra', number>>): void {
+    const typeToId: Record<'vaca' | 'cal' | 'porc' | 'gaina' | 'oaie' | 'capra', number> = {
+      vaca: 1,
+      cal: 2,
+      porc: 3,
+      gaina: 4,
+      oaie: 5,
+      capra: 6,
+    };
+
+    for (const [type, id] of Object.entries(typeToId) as Array<[keyof typeof typeToId, number]>) {
+      const animal = this.getAnimalById(id);
+      if (!animal) continue;
+      animal.count = countsByType[type] ?? 0;
+    }
   }
 
   setCount(id: number, count: number): void {

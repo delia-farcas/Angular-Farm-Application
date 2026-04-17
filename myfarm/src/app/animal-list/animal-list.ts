@@ -33,7 +33,7 @@ export class AnimalList implements OnInit {
     const newAnimal: Animal = {
       id: Date.now(),
       name: 'Animal nou',
-      status: 'Sanatos',
+      status: 'Sanatoasa',
       location: 'Hambar',
       type: 'vaca',
       sex: 'femela', // Adăugat pentru a respecta noul model din Service

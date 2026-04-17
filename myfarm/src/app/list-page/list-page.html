@@ -32,6 +32,7 @@
     <table class="animal-table">
       <thead>
         <tr>
+          <th>animal</th>
           <th>id</th>
           <th>nume</th>
           <th>sănătate</th>
@@ -43,7 +44,10 @@
       <tbody>
         <tr app-animal-row 
           *ngFor="let animal of filteredAnimals" 
-          [animal]="animal">
+          [animal]="animal"
+          [display]="'row'"
+          (edit)="editAnimal($event)"
+          (delete)="deleteAnimal($event)">
         </tr>
       </tbody>
     </table>

@@ -32,7 +32,7 @@ export class YearlyReports {
     return this.farm.getAnimalById(this.selectedAnimalId);
   }
 
-  private getValueForCategory(entry: { milk: number; eggs: number; wool: number; workHours: number }): number {
+  private getValueForCategory(entry: { milk: number; eggs: number; wool: number; workHours: number; meat: number }): number {
     switch (this.category) {
       case 'lapte':
         return entry.milk;
@@ -42,6 +42,8 @@ export class YearlyReports {
         return entry.wool;
       case 'ore_munca':
         return entry.workHours;
+      case 'carne':
+        return entry.meat;
     }
   }
 
@@ -79,6 +81,8 @@ export class YearlyReports {
         return 'kg';
       case 'ore_munca':
         return 'ore';
+      case 'carne':
+        return 'kg';
     }
   }
 

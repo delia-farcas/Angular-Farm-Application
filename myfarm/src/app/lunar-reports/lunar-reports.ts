@@ -35,7 +35,7 @@ export class LunarReports {
     return this.farm.getAnimalById(this.selectedAnimalId);
   }
 
-  private getValueForCategory(entry: { milk: number; eggs: number; wool: number; workHours: number }): number {
+  private getValueForCategory(entry: { milk: number; eggs: number; wool: number; workHours: number; meat: number }): number {
     switch (this.category) {
       case 'lapte':
         return entry.milk;
@@ -45,6 +45,8 @@ export class LunarReports {
         return entry.wool;
       case 'ore_munca':
         return entry.workHours;
+      case 'carne':
+        return entry.meat;
     }
   }
 
@@ -100,6 +102,8 @@ export class LunarReports {
         return 'kg';
       case 'ore_munca':
         return 'ore';
+      case 'carne':
+        return 'kg';
     }
   }
 

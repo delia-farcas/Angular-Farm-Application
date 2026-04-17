@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { BazingaPage } from '../bazinga-page/bazinga-page';
 import { Router } from '@angular/router';
 import { LunarReports } from '../lunar-reports/lunar-reports';
 import { YearlyReports } from '../yearly-reports/yearly-reports';
 
 @Component({
   selector: 'app-raports-page',
-  imports: [BazingaPage, LunarReports, YearlyReports],
+  standalone: true,
+  imports: [LunarReports, YearlyReports],
   templateUrl: './raports-page.html',
   styleUrl: './raports-page.css',
 })
