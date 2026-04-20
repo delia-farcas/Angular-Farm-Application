@@ -21,8 +21,9 @@
     </div>
   </div>
 
-  <div class="form-grid">
-    <div class="left-column">
+  <form #animalForm="ngForm" (ngSubmit)="onSubmit(animalForm)" novalidate>
+    <div class="form-grid">
+      <div class="left-column">
       <div class="id-name-row">
         <div class="field id-field">
           <label>id</label>
@@ -32,15 +33,23 @@
             disabled
           />
         </div>
-        <div class="field">
+        <!-- Name field -->
+        <div class="field name-field">
           <label>Nume:</label>
-          <input type="text" [(ngModel)]="animal.name" placeholder="Nume">
+          <input type="text" name="name" [(ngModel)]="animal.name"
+                placeholder="Nume" required #nameField="ngModel">
+          <div class="field-error-msg" *ngIf="nameField.invalid">
+            Numele este obligatoriu
+          </div>
         </div>
+        
       </div>
+
 
       <div class="field">
         <label>Rasă/specie</label>
-        <select class="age-unit" [(ngModel)]="animal.type">
+        <select class="age-unit" name="type" [(ngModel)]="animal.type" required #typeField="ngModel">
+          <option value="">Selectează</option>
           <option value="vaca">Vacă</option>
           <option value="porc">Porc</option>
           <option value="cal">Cal</option>
@@ -48,21 +57,27 @@
           <option value="oaie">Oaie</option>
           <option value="capra">Capră</option>
         </select>
+        <div class="field-error-msg" *ngIf="typeField.invalid">
+            Selectează o specie
+        </div>
       </div>
 
       <div class="field">
         <label>Sex</label>
         <div class="gender-options">
           <label class="radio-option">
-            <input type="radio" name="sex" value="femela" [(ngModel)]="animal.sex" />
+            <input type="radio" name="sex" value="femela" [(ngModel)]="animal.sex" required #sexField="ngModel" />
             <span class="custom-radio"></span>
             Feminin
           </label>
           <label class="radio-option">
-            <input type="radio" name="sex" value="mascul" [(ngModel)]="animal.sex" />
+            <input type="radio" name="sex" value="mascul" [(ngModel)]="animal.sex" required />
             <span class="custom-radio"></span>
             Masculin
           </label>
+        </div>
+        <div class="field-error-msg" *ngIf="sexField.invalid">
+            Selectează sexul
         </div>
       </div>
 
@@ -70,12 +85,15 @@
         <label>Vârstă</label>
         <div class="age-row">
           <div class="age-input">
-            <input type="number" [(ngModel)]="animal.age" placeholder="ex: 5">
+            <input type="number" name="age" [(ngModel)]="animal.age" placeholder="ex: 5" required min="0" #ageField="ngModel">
           </div>
           <select class="age-unit">
             <option>luni</option>
             <option>ani</option>
           </select>
+        </div>
+        <div class="field-error-msg" *ngIf="ageField.invalid">
+            Introdu o vârstă validă (0 sau mai mare)
         </div>
       </div>
     </div>
@@ -83,27 +101,31 @@
     <div class="right-column">
       <div class = "field">
         <label>Stare de sănătate</label>
-        <select class="age-unit" [(ngModel)]="animal.status">
+        <select class="age-unit" name="status" [(ngModel)]="animal.status">
           <option value="Sanatoasa">Sănătos</option>
           <option value="Cu probleme">Cu probleme</option>
         </select>
       </div>
       <div class="field">
         <label>Localizare</label>
-        <textarea [(ngModel)]="animal.location" placeholder="ex: Padocul 3" rows="3"></textarea>
+        <textarea name="location" [(ngModel)]="animal.location" placeholder="ex: Padocul 3" rows="3" required #locationField="ngModel"></textarea>
+        <div class="field-error-msg" *ngIf="locationField.invalid">
+            Localizarea este obligatorie
+        </div>
       </div>
 
       <div class="field">
         <label>Observatii</label>
-        <textarea [(ngModel)]="animal.observations" placeholder="ex: Gestantă, luna 5" rows="3"></textarea>
+        <textarea name="observations" [(ngModel)]="animal.observations" placeholder="ex: Gestantă, luna 5" rows="3"></textarea>
       </div>
     </div>
   </div>
 
   <div class="form-actions">
     <button class="btn-cancel" type="button" (click)="onBackClick()">Anulează</button>
-    <button class="btn-submit" type="button" (click)="onSubmit()" [disabled]="!canSubmit">
+    <button class="btn-submit" type="submit">
       {{ isEditMode ? 'Salvează modificările' : 'Adaugă animal' }}
     </button>
   </div>
+  </form>
 </div>

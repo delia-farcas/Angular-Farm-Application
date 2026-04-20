@@ -357,6 +357,22 @@
   }
 }
 
+.field-error-msg {
+  color: #c0392b;
+  font-size: 12px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.field input.ng-touched.ng-invalid,
+.field select.ng-touched.ng-invalid,
+.field textarea.ng-touched.ng-invalid {
+  border-color: #c0392b;
+  background-color: #fff0f0;
+}
+
 @media (max-width: 480px) {
   .page-title {
     font-size: 22px;

@@ -2,7 +2,7 @@ import { Component, Output, EventEmitter, Input, OnChanges, SimpleChanges } from
 import { CommonModule } from '@angular/common'; // Important pentru [style.display] sau *ngIf
 import { AnimalService } from '../services/animal';
 import { Animal } from '../models/animal';
-import { FormsModule } from '@angular/forms'; 
+import { FormsModule, NgForm } from '@angular/forms'; 
 
 @Component({
   selector: 'app-add-animal',
@@ -18,6 +18,7 @@ export class AddAnimal implements OnChanges {
   selectedEmoji = '🐄';
   isPickerVisible = false;
   isEditMode = false;
+  submitAttempted = false;
 
   animal: Animal = {
     id: 0,
@@ -71,8 +72,12 @@ export class AddAnimal implements OnChanges {
     this.selectedEmoji = icon;
     this.isPickerVisible = false;
   }
-  onSubmit() {
-    if (!this.canSubmit) return;
+  onSubmit(form: NgForm) {
+    this.submitAttempted = true;
+    if (form.invalid) {
+      form.form.markAllAsTouched();
+      return;
+    }
 
     const trimmed: Animal = {
       ...this.animal,
