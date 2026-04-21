@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import type { ChartConfiguration } from 'chart.js';
 import { FarmService } from '../services/farm.service';
 import { Animal, FarmProductCategory } from '../models/farm';
+import { UserTrackingService } from '../services/user-tracking.service';
 
 @Component({
   selector: 'app-lunar-reports',
@@ -13,18 +14,36 @@ import { Animal, FarmProductCategory } from '../models/farm';
   templateUrl: './lunar-reports.html',
   styleUrl: './lunar-reports.css',
 })
-export class LunarReports {
+export class LunarReports implements OnInit {
   view: 'table' | 'chart' = 'table';
   category: FarmProductCategory = 'lapte';
   selectedAnimalId: number;
 
-  // current month/year (simple default)
   private readonly now = new Date();
   private readonly year = this.now.getFullYear();
-  private readonly monthIndex = this.now.getMonth(); // 0-11
+  private readonly monthIndex = this.now.getMonth();
+  
+  private trackingService = inject(UserTrackingService);
 
   constructor(private farm: FarmService) {
     this.selectedAnimalId = this.farm.getAnimals()[0]?.id ?? 1;
+  }
+
+  ngOnInit(): void {
+    // Încărcăm vizualizarea preferată din cookies
+    const savedView = this.trackingService.getPreference('preferred_view');
+    if (savedView === 'chart' || savedView === 'table') {
+      this.view = savedView;
+    }
+
+    // Încărcăm ultima categorie accesată
+    const savedCat = this.trackingService.getPreference('last_category') as FarmProductCategory;
+    if (savedCat) {
+      this.category = savedCat;
+    }
+
+    // Monitorizăm accesarea paginii
+    this.trackingService.logActivity('viewed_lunar_reports');
   }
 
   get animals(): Animal[] {
@@ -35,18 +54,14 @@ export class LunarReports {
     return this.farm.getAnimalById(this.selectedAnimalId);
   }
 
-  private getValueForCategory(entry: { milk: number; eggs: number; wool: number; workHours: number; meat: number }): number {
+  private getValueForCategory(entry: any): number {
     switch (this.category) {
-      case 'lapte':
-        return entry.milk;
-      case 'oua':
-        return entry.eggs;
-      case 'lana':
-        return entry.wool;
-      case 'ore_munca':
-        return entry.workHours;
-      case 'carne':
-        return entry.meat;
+      case 'lapte': return entry.milk;
+      case 'oua': return entry.eggs;
+      case 'lana': return entry.wool;
+      case 'ore_munca': return entry.workHours;
+      case 'carne': return entry.meat;
+      default: return 0;
     }
   }
 
@@ -60,14 +75,13 @@ export class LunarReports {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
-  /** Weeks: 1-7, 8-14, 15-21, 22-end */
   get tableRows(): { label: string; total: number }[] {
     const startIso = this.monthStartIso();
     const endIso = this.monthEndIso();
     const logs = this.farm.getLogsInRange(this.selectedAnimalId, startIso, endIso);
-
     const endDay = new Date(this.year, this.monthIndex + 1, 0).getDate();
-    const buckets: Array<{ from: number; to: number }> = [
+
+    const buckets = [
       { from: 1, to: Math.min(7, endDay) },
       { from: 8, to: Math.min(14, endDay) },
       { from: 15, to: Math.min(21, endDay) },
@@ -75,12 +89,11 @@ export class LunarReports {
     ].filter(b => b.from <= b.to);
 
     const pad = (n: number) => String(n).padStart(2, '0');
-    const month = pad(this.monthIndex + 1);
-    const year = this.year;
+    const monthStr = pad(this.monthIndex + 1);
 
     return buckets.map(b => {
-      const fromIso = `${year}-${month}-${pad(b.from)}`;
-      const toIso = `${year}-${month}-${pad(b.to)}`;
+      const fromIso = `${this.year}-${monthStr}-${pad(b.from)}`;
+      const toIso = `${this.year}-${monthStr}-${pad(b.to)}`;
       const total = logs
         .filter(l => l.date >= fromIso && l.date <= toIso)
         .reduce((sum, l) => sum + this.getValueForCategory(l), 0);
@@ -93,33 +106,19 @@ export class LunarReports {
   }
 
   get unit(): string {
-    switch (this.category) {
-      case 'lapte':
-        return 'L';
-      case 'oua':
-        return 'ouă';
-      case 'lana':
-        return 'kg';
-      case 'ore_munca':
-        return 'ore';
-      case 'carne':
-        return 'kg';
-    }
+    const units: any = { lapte: 'L', oua: 'ouă', lana: 'kg', ore_munca: 'ore', carne: 'kg' };
+    return units[this.category] || '';
   }
 
   get chartData(): ChartConfiguration<'line'>['data'] {
-    const labels = this.tableRows.map(r => r.label);
-    const data = this.tableRows.map(r => r.total);
     return {
-      labels,
-      datasets: [
-        {
-          data,
-          label: `${this.selectedAnimal?.name ?? 'Animal'} • ${this.category}`,
-          tension: 0.35,
-          fill: false,
-        },
-      ],
+      labels: this.tableRows.map(r => r.label),
+      datasets: [{
+        data: this.tableRows.map(r => r.total),
+        label: `${this.selectedAnimal?.name ?? 'Animal'} • ${this.category}`,
+        tension: 0.35,
+        fill: false,
+      }],
     };
   }
 
@@ -130,8 +129,15 @@ export class LunarReports {
   };
 
   onToggleView(event: any): void {
-  // Verificăm dacă evenimentul are un target și dacă target-ul are proprietatea 'checked'
-  const isChecked = event.target?.checked; 
-  this.view = isChecked ? 'chart' : 'table';
+    const isChecked = event.target?.checked; 
+    this.view = isChecked ? 'chart' : 'table';
+    this.trackingService.setPreference('preferred_view', this.view);
+    this.trackingService.logActivity(`switched_view_to_${this.view}`);
+  }
+
+  onCategoryChange(newCategory: FarmProductCategory): void {
+    this.category = newCategory;
+    this.trackingService.setPreference('last_category', newCategory);
+    this.trackingService.logActivity(`changed_category_to_${newCategory}`);
   }
 }

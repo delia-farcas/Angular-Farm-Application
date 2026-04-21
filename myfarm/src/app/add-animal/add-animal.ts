@@ -1,8 +1,9 @@
-import { Component, Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Output, EventEmitter, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common'; // Important pentru [style.display] sau *ngIf
 import { AnimalService } from '../services/animal';
 import { Animal } from '../models/animal';
 import { FormsModule, NgForm } from '@angular/forms'; 
+import { UserTrackingService } from '../services/user-tracking.service';
 
 @Component({
   selector: 'app-add-animal',
@@ -19,6 +20,8 @@ export class AddAnimal implements OnChanges {
   isPickerVisible = false;
   isEditMode = false;
   submitAttempted = false;
+
+  private trackingService = inject(UserTrackingService);
 
   animal: Animal = {
     id: 0,
@@ -87,10 +90,14 @@ export class AddAnimal implements OnChanges {
 
     if (this.isEditMode && trimmed.id) {
       this.animalService.updateAnimal(trimmed);
+      this.trackingService.logActivity('edit_animal');
+      this.trackingService.incrementCounter('animals_edited');
       window.alert('Animal editat cu succes!');
     } else {
       const uniqueId = Date.now() + Math.floor(Math.random() * 1000);
       this.animalService.addAnimal({ ...trimmed, id: uniqueId });
+      this.trackingService.logActivity('add_animal');
+      this.trackingService.incrementCounter('animals_added');
       window.alert('Animal adăugat cu succes!');
     }
     this.goBack.emit();

@@ -1,5 +1,6 @@
 import { Component, Output, EventEmitter, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UserTrackingService } from '../services/user-tracking.service';
 
 @Component({
   selector: 'app-login-page',
@@ -12,6 +13,7 @@ export class LoginPage {
   @Output() goToSignup = new EventEmitter<void>();
   @Output() loginSuccess = new EventEmitter<void>();
   private fb = inject(FormBuilder);
+  private trackingService = inject(UserTrackingService);
 
   loginForm: FormGroup = this.fb.group({
     username: ['', Validators.required],
@@ -25,6 +27,8 @@ export class LoginPage {
     }
     // TODO: handle login logic
     console.log('Login:', this.loginForm.value);
+    this.trackingService.setLastLogin();
+    this.trackingService.logActivity('login');
     this.loginSuccess.emit();
   }
 
