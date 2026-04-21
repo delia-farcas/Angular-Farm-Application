@@ -1,0 +1,15 @@
+<!-- Debug: Always visible -->
+<div style="position: fixed; top: 10px; right: 10px; background: yellow; padding: 5px; z-index: 9999; display: none">
+  Cookie component loaded. showPopup: {{showPopup}}
+</div>
+
+<div class="cookie-consent-overlay" *ngIf="showPopup">
+  <div class="cookie-consent-popup">
+    <h3>Cookie Consent</h3>
+    <p>This website uses cookies to enhance your experience. By accepting, you agree to the use of cookies for tracking and preferences.</p>
+    <div class="buttons">
+      <button class="accept-btn" (click)="acceptCookies()">Accept</button>
+      <button class="decline-btn" (click)="declineCookies()">Decline</button>
+    </div>
+  </div>
+</div>

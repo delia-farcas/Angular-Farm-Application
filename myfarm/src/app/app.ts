@@ -4,11 +4,12 @@ import { RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { filter } from 'rxjs';
 import { UserTrackingService } from './services/user-tracking.service';
+import { CookieConsent } from './cookie-consent/cookie-consent';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, FormsModule],
+  imports: [RouterOutlet, FormsModule, CookieConsent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

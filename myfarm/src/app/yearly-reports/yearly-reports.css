@@ -12,13 +12,12 @@
   color: #2e2f31;
   width: 100%;
   min-height: 100vh;
-  width: 100%;
-  padding: 2rem 1.5rem;
+  padding: 3rem 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2.5rem;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 2rem;
 }
 
 .chart-container {
@@ -35,8 +34,7 @@
 .title {
   font-size: 2rem;
   font-weight: 400;
-  text-align: left;       
-  align-self: flex-start;  
+  text-align: center;
   width: 100%;
 }
 
@@ -148,11 +146,21 @@
   font-weight: 500;
 }
 
+.toggles-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 15px;
+  z-index: 100;
+}
+
 .view-toggle {
   display: flex;
   align-items: center;
   gap: 1rem;
-  align-self: flex-end;
 }
 
 .switch {

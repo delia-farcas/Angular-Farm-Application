@@ -66,7 +66,8 @@
     </div>
   }
 
-  <!-- View Toggle -->
+  <div class="toggles-container">
+    <!-- View Toggle -->
     <div class="view-toggle">
       <span class="label">tabel</span>
       <label class="switch" for="view-switch">
@@ -82,4 +83,20 @@
       </label>
       <span class="label">grafic</span>
     </div>
+    <!-- Generator Toggle -->
+    <div class="view-toggle">
+      <span class="label" style="font-size: 14px; font-weight: normal; color: #555;">Oprește Gen.</span>
+      <label class="switch" for="gen-switch-yr">
+        <input
+          type="checkbox"
+          id="gen-switch-yr"
+          class="switch-input"
+          (change)="toggleGenerator($event)"/>
+        <span class="switch-track">
+          <span class="switch-knob"></span>
+        </span>
+      </label>
+      <span class="label" style="font-size: 14px; font-weight: normal; color: #555;">Pornește Gen.</span>
+    </div>
+  </div>
 </div>

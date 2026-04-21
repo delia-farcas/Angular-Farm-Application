@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChildren, QueryList, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
@@ -19,8 +19,13 @@ export class YearlyReports {
   selectedAnimalId: number;
 
   private readonly year = new Date().getFullYear();
+  private isGenerating = false;
+  private generatorId: any;
+  
 
-  constructor(private farm: FarmService) {
+  @ViewChildren(BaseChartDirective) charts!: QueryList<BaseChartDirective>;
+
+  constructor(private farm: FarmService, private cdr: ChangeDetectorRef) {
     this.selectedAnimalId = this.farm.getAnimals()[0]?.id ?? 1;
   }
 
@@ -31,7 +36,7 @@ export class YearlyReports {
   get selectedAnimal(): Animal | undefined {
     return this.farm.getAnimalById(this.selectedAnimalId);
   }
-
+  
   private getValueForCategory(entry: { milk: number; eggs: number; wool: number; workHours: number; meat: number }): number {
     switch (this.category) {
       case 'lapte':
@@ -121,4 +126,51 @@ export class YearlyReports {
   const isChecked = event.target?.checked; 
   this.view = isChecked ? 'chart' : 'table';
 }
+
+  toggleGenerator(event: any) {
+    this.isGenerating = event.target.checked;
+    if (this.isGenerating) {
+      this.generatorId = setInterval(() => {
+        this.updateCharts();
+      }, 500);
+    } else {
+      this.stopGenerator();
+    }
+  }
+
+  stopGenerator() {
+    if (this.generatorId) {
+      clearInterval(this.generatorId);
+    }
+  }
+
+  updateCharts(): void {
+    const animal = this.selectedAnimal;
+    if (!animal) return;
+
+    const m = Math.floor(Math.random() * 12) + 1;
+    const d = Math.floor(Math.random() * 28) + 1;
+    const dateStr = `${this.year}-${this.pad2(m)}-${this.pad2(d)}`;
+    
+    let existing = animal.logs.find(l => l.date === dateStr);
+    if (!existing) {
+      existing = { date: dateStr, milk: 0, eggs: 0, wool: 0, workHours: 0, meat: 0 };
+      animal.logs.push(existing);
+    }
+    
+    const randomAdd = Math.floor(Math.random() * 20) + 1;
+    switch (this.category) {
+      case 'lapte': existing.milk += randomAdd; break;
+      case 'oua': existing.eggs += randomAdd; break;
+      case 'lana': existing.wool += randomAdd; break;
+      case 'ore_munca': existing.workHours += randomAdd; break;
+      case 'carne': existing.meat += randomAdd; break;
+    }
+    
+    // Explicitly trigger CD and update charts for real time view
+    this.cdr.detectChanges();
+    if (this.charts) {
+      this.charts.forEach(chart => chart.update());
+    }
+  }
 }

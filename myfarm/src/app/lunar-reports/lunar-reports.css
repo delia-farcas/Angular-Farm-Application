@@ -12,20 +12,18 @@
   color: #2e2f31;
   width: 100%;
   min-height: 100vh;
-  width: 100%;
-  padding: 2rem 1.5rem;
+  padding: 3rem 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2.5rem;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 2rem;
 }
 
 .title {
   font-size: 2rem;
   font-weight: 400;
-  text-align: left;       
-  align-self: flex-start;  
+  text-align: center;
   width: 100%;
 }
 
@@ -118,18 +116,20 @@
 
 .data-table {
   width: 100%;
-  max-width: 750px;
+  max-width: 600px; /* Am păstrat o lățime rezonabilă */
   border-collapse: collapse;
   font-family: "Inter", "Poppins", sans-serif;
+  margin: 0 auto;
 }
 
 .data-table th,
 .data-table td {
   border: 1px solid #757575;
-  padding: 0.85rem 1.25rem;
+  /* Reducem padding-ul drastic: 0.2rem sus/jos, 0.5rem stânga/dreapta */
+  padding: 0.25rem 0.5rem; 
   text-align: center;
-  font-size: 1rem;
-  font-weight: 400;
+  font-size: 0.85rem; /* Micșorăm puțin scrisul ca să ocupe mai puțin loc */
+  line-height: 1.2;    /* Forțăm rândurile să fie mai apropiate */
 }
 
 .data-table th {
@@ -140,11 +140,21 @@
   font-weight: 500;
 }
 
+.toggles-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 15px;
+  z-index: 100;
+}
+
 .view-toggle {
   display: flex;
   align-items: center;
   gap: 1rem;
-  align-self: flex-end;
 }
 
 .switch {

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ViewChildren, QueryList, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
@@ -22,10 +22,13 @@ export class LunarReports implements OnInit {
   private readonly now = new Date();
   private readonly year = this.now.getFullYear();
   private readonly monthIndex = this.now.getMonth();
+  private generatorId: any;
   
   private trackingService = inject(UserTrackingService);
 
-  constructor(private farm: FarmService) {
+  @ViewChildren(BaseChartDirective) charts!: QueryList<BaseChartDirective>;
+
+  constructor(private farm: FarmService, private cdr: ChangeDetectorRef) {
     this.selectedAnimalId = this.farm.getAnimals()[0]?.id ?? 1;
   }
 
@@ -118,12 +121,20 @@ export class LunarReports implements OnInit {
         label: `${this.selectedAnimal?.name ?? 'Animal'} • ${this.category}`,
         tension: 0.35,
         fill: false,
+        // --- ADĂUGAT PENTRU CULOARE ---
+        borderColor: '#388333',           // Culoarea liniei
+        pointBackgroundColor: '#388333',  // Culoarea punctelor
+        pointBorderColor: '#fff',         // Conturul punctelor (le face mai vizibile)
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: '#388333',
+        // ------------------------------
       }],
     };
   }
 
   chartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: { legend: { display: true } },
     scales: { y: { beginAtZero: true } },
   };
@@ -139,5 +150,51 @@ export class LunarReports implements OnInit {
     this.category = newCategory;
     this.trackingService.setPreference('last_category', newCategory);
     this.trackingService.logActivity(`changed_category_to_${newCategory}`);
+  }
+
+  toggleGenerator(event: any) {
+    const isGenerating = event.target.checked;
+    if (isGenerating) {
+      this.generatorId = setInterval(() => {
+        this.updateCharts();
+      }, 500);
+    } else {
+      this.stopGenerator();
+    }
+  }
+
+  stopGenerator() {
+    if (this.generatorId) {
+      clearInterval(this.generatorId);
+    }
+  }
+
+  updateCharts(): void {
+    const animal = this.selectedAnimal;
+    if (!animal) return;
+
+    const d = Math.floor(Math.random() * 28) + 1;
+    const dateStr = `${this.year}-${String(this.monthIndex + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    
+    let existing = animal.logs.find(l => l.date === dateStr);
+    if (!existing) {
+      existing = { date: dateStr, milk: 0, eggs: 0, wool: 0, workHours: 0, meat: 0 };
+      animal.logs.push(existing);
+    }
+    
+    const randomAdd = Math.floor(Math.random() * 20) + 1;
+    switch (this.category) {
+      case 'lapte': existing.milk += randomAdd; break;
+      case 'oua': existing.eggs += randomAdd; break;
+      case 'lana': existing.wool += randomAdd; break;
+      case 'ore_munca': existing.workHours += randomAdd; break;
+      case 'carne': existing.meat += randomAdd; break;
+    }
+
+    // Explicitly trigger CD and update charts for real time view
+    this.cdr.detectChanges();
+    if (this.charts) {
+      this.charts.forEach(chart => chart.update());
+    }
   }
 }

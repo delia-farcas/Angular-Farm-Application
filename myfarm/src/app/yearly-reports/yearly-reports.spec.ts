@@ -18,8 +18,8 @@ describe('YearlyReports', () => {
         icon: '🐄',
         count: 1,
         logs: [
-          { date: `${year}-01-10`, milk: 10, eggs: 0, wool: 0, workHours: 0 },
-          { date: `${year}-02-10`, milk: 0, eggs: 4, wool: 0, workHours: 0 },
+          { date: `${year}-01-10`, milk: 10, eggs: 0, wool: 0, workHours: 0, meat: 0 },
+          { date: `${year}-02-10`, milk: 0, eggs: 4, wool: 0, workHours: 0, meat: 0 },
         ],
       },
     ];
