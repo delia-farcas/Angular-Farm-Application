@@ -25,11 +25,18 @@ export class LoginPage {
       this.loginForm.markAllAsTouched();
       return;
     }
-    // TODO: handle login logic
-    console.log('Login:', this.loginForm.value);
-    this.trackingService.setLastLogin();
-    this.trackingService.logActivity('login');
-    this.loginSuccess.emit();
+    
+    const { username, password } = this.loginForm.value;
+    const isValid = this.trackingService.verifyUser(username, password);
+
+    if (isValid) {
+      this.trackingService.setCurrentUser(username);
+      this.trackingService.setLastLogin();
+      this.trackingService.logActivity('login');
+      this.loginSuccess.emit();
+    } else {
+      alert('Username sau parolă incorectă!'); // Simplified error handling for now as requested by user
+    }
   }
 
   onSignupClick(): void {

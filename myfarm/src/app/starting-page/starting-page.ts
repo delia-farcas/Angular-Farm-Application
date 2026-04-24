@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { WelcomePage } from '../welcome-page/welcome-page';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { LoginPage } from '../login-page/login-page';
 import { SignupPage } from '../signup-page/signup-page';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router'; // 1. Importă Router
-
+import { WelcomePage } from '../welcome-page/welcome-page';
+import { UserTrackingService } from '../services/user-tracking.service';
 
 @Component({
   selector: 'app-starting-page',
@@ -14,8 +14,12 @@ import { Router } from '@angular/router'; // 1. Importă Router
   styleUrl: './starting-page.css',
 })
 export class StartingPage {
-  // Starea inițială: arătăm pagina de Welcome
   currentPage: 'welcome' | 'login' | 'signup' = 'welcome';
+
+  constructor(
+    private router: Router,
+    private trackingService: UserTrackingService
+  ) {}
 
   showWelcome() {
     this.currentPage = 'welcome';
@@ -29,11 +33,8 @@ export class StartingPage {
     this.currentPage = 'signup';
   }
 
-  constructor(private router: Router) {}
-
   navigateToDashboard() {
-  console.log('Părintele a primit semnalul! Navigăm spre home...');
-  this.router.navigate(['home']);
- }
-
+    this.trackingService.markCookieConsentPromptPending();
+    this.router.navigate(['home']);
+  }
 }

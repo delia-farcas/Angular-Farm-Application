@@ -103,13 +103,11 @@ export class YearlyReports {
         label: `${this.selectedAnimal?.name ?? 'Animal'} • ${this.category}`,
         tension: 0.35,
         fill: false,
-        // --- ADĂUGAT PENTRU CULOARE ---
-        borderColor: '#388333',           // Culoarea liniei
-        pointBackgroundColor: '#388333',  // Culoarea punctelor
-        pointBorderColor: '#fff',         // Conturul punctelor (le face mai vizibile)
+        borderColor: '#388333',           
+        pointBackgroundColor: '#388333',  
+        pointBorderColor: '#fff',         
         pointHoverBackgroundColor: '#fff',
         pointHoverBorderColor: '#388333',
-        // ------------------------------
       },
     ],
   };

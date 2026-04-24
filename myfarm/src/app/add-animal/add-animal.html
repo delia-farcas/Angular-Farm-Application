@@ -1,131 +1,210 @@
 <div class="add-animal-page">
-  <h1 class="page-title">
-    {{ isEditMode ? 'Editează membrul fermei' : 'Adaugă un membru nou în fermă' }}
-  </h1>
+  <h1 class="page-title">{{ isEditMode ? 'Editează Animal' : 'Adaugă Animal' }}</h1>
 
+  <!-- Picture Section -->
   <div class="picture-section">
-    <div class="profile-picture">
-      <span class="placeholder-icon">{{ selectedEmoji }}</span>
-    </div>
-    
-    <a class="change-picture-link" (click)="togglePicker($event)" style="cursor: pointer;">
-      Schimbă pictograma
-    </a>
+    <div class="profile-picture">{{ selectedEmoji }}</div>
 
-    <div class="icon-picker" [style.display]="isPickerVisible ? 'flex' : 'none'">
-      <div class="icon-option" (click)="selectIcon('🐄')">🐄</div>
-      <div class="icon-option" (click)="selectIcon('🐴')">🐴</div>
-      <div class="icon-option" (click)="selectIcon('🐔')">🐔</div>
-      <div class="icon-option" (click)="selectIcon('🐑')">🐑</div>
-      <div class="icon-option" (click)="selectIcon('🐐')">🐐</div>
+    <span class="change-picture-link" (click)="togglePicker($event)">
+      Schimbă poza
+    </span>
+
+    <div class="icon-picker" *ngIf="isPickerVisible">
+      <div class="icon-option" *ngFor="let icon of ['🐄','🐖','🐑','🐓','🐇','🐴']"
+           (click)="selectIcon(icon)">{{ icon }}</div>
     </div>
   </div>
 
+  <!-- Form -->
   <form #animalForm="ngForm" (ngSubmit)="onSubmit(animalForm)" novalidate>
     <div class="form-grid">
-      <div class="left-column">
-      <div class="id-name-row">
-        <div class="field id-field">
-          <label>id</label>
+
+      <!-- ── LEFT COLUMN ── -->
+      <div class="form-column">
+
+        <!-- ID + Name -->
+        <div class="field id-name-row">
+
+          <div class="id-field field">
+            <label for="animalId">ID</label>
+            <input
+              type="text"
+              id="animalId"
+              name="animalId"
+              [(ngModel)]="animal.id"
+              #animalIdModel="ngModel"
+              placeholder="ex: 101"
+              required
+              pattern="^[0-9]+$"
+            />
+            <small class="field-error-msg" *ngIf="shouldShowError(animalIdModel)">
+              <span *ngIf="animalIdModel.errors?.['required']">ID-ul este obligatoriu.</span>
+              <span *ngIf="animalIdModel.errors?.['pattern']">ID-ul trebuie să fie un număr.</span>
+            </small>
+          </div>
+
+          <div class="name-field field">
+            <label for="animalName">Nume</label>
+            <input
+              type="text"
+              id="animalName"
+              name="animalName"
+              [(ngModel)]="animal.name"
+              #animalNameModel="ngModel"
+              placeholder="ex: Bella"
+              required
+              minlength="2"
+              maxlength="50"
+            />
+            <small class="field-error-msg" *ngIf="shouldShowError(animalNameModel)">
+              <span *ngIf="animalNameModel.errors?.['required']">Numele este obligatoriu.</span>
+              <span *ngIf="animalNameModel.errors?.['minlength']">Numele trebuie să aibă cel puțin 2 caractere.</span>
+              <span *ngIf="animalNameModel.errors?.['maxlength']">Numele poate avea cel mult 50 de caractere.</span>
+            </small>
+          </div>
+
+        </div>
+
+        <!-- Species / Type -->
+        <div class="field">
+          <label for="animalType">Specie</label>
+          <select
+            id="animalType"
+            name="animalType"
+            [(ngModel)]="animal.type"
+            #animalTypeModel="ngModel"
+            required
+          >
+            <option value="">-- Selectează specia --</option>
+            <option value="vaca">Vacă</option>
+            <option value="porc">Porc</option>
+            <option value="oaie">Oaie</option>
+            <option value="gaina">Găină</option>
+            <option value="iepure">Iepure</option>
+            <option value="cal">Cal</option>
+          </select>
+          <small class="field-error-msg" *ngIf="shouldShowError(animalTypeModel)">
+            <span *ngIf="animalTypeModel.errors?.['required']">Specia este obligatorie.</span>
+          </small>
+        </div>
+
+        <!-- Gender -->
+        <div class="field">
+          <label>Sex</label>
+          <div class="gender-options">
+            <label class="radio-option">
+              <input type="radio" name="animalSex" [(ngModel)]="animal.sex" value="femela" required />
+              <span class="custom-radio"></span>
+              Femelă
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="animalSex" [(ngModel)]="animal.sex" value="mascul" required />
+              <span class="custom-radio"></span>
+              Mascul
+            </label>
+          </div>
+        </div>
+
+        <!-- Age -->
+        <div class="field">
+          <label for="animalAge">Vârstă</label>
+          <div class="age-row">
+            <div class="age-input">
+              <input
+                type="text"
+                id="animalAge"
+                name="animalAge"
+                [(ngModel)]="animal.age"
+                #animalAgeModel="ngModel"
+                placeholder="ex: 3"
+                required
+                pattern="^[0-9]+$"
+              />
+            </div>
+            <select class="age-unit" name="ageUnit" ngModel>
+              <option value="luni">Luni</option>
+              <option value="ani" selected>Ani</option>
+            </select>
+          </div>
+          <small class="field-error-msg" *ngIf="shouldShowError(animalAgeModel)">
+            <span *ngIf="animalAgeModel.errors?.['required']">Vârsta este obligatorie.</span>
+            <span *ngIf="animalAgeModel.errors?.['pattern']">Vârsta trebuie să fie un număr întreg.</span>
+          </small>
+        </div>
+
+      </div>
+
+      <!-- ── RIGHT COLUMN ── -->
+      <div class="form-column">
+
+        <!-- Status -->
+        <div class="field">
+          <label for="animalStatus">Status</label>
+          <select
+            id="animalStatus"
+            name="animalStatus"
+            [(ngModel)]="animal.status"
+            #animalStatusModel="ngModel"
+            required
+          >
+            <option value="">-- Selectează statusul --</option>
+            <option value="Sanatoasa">Sănătoasă</option>
+            <option value="Bolnava">Bolnavă</option>
+            <option value="Gestanta">Gestantă</option>
+            <option value="Recuperare">În recuperare</option>
+          </select>
+          <small class="field-error-msg" *ngIf="shouldShowError(animalStatusModel)">
+            <span *ngIf="animalStatusModel.errors?.['required']">Statusul este obligatoriu.</span>
+          </small>
+        </div>
+
+
+        <div class="field">
+          <label for="animalLocation">Locație</label>
           <input
             type="text"
-            [value]="isEditMode ? animal.id : '(auto)'"
-            disabled
+            id="animalLocation"
+            name="animalLocation"
+            [(ngModel)]="animal.location"
+            #animalLocationModel="ngModel"
+            placeholder="ex: Grajd A"
+            required
+            minlength="2"
+            maxlength="100"
           />
+          <small class="field-error-msg" *ngIf="shouldShowError(animalLocationModel)">
+            <span *ngIf="animalLocationModel.errors?.['required']">Locația este obligatorie.</span>
+            <span *ngIf="animalLocationModel.errors?.['minlength']">Locația trebuie să aibă cel puțin 2 caractere.</span>
+            <span *ngIf="animalLocationModel.errors?.['maxlength']">Locația poate avea cel mult 100 de caractere.</span>
+          </small>
         </div>
-        <!-- Name field -->
-        <div class="field name-field">
-          <label>Nume:</label>
-          <input type="text" name="name" [(ngModel)]="animal.name"
-                placeholder="Nume" required #nameField="ngModel">
-          <div class="field-error-msg" *ngIf="nameField.invalid">
-            Numele este obligatoriu
-          </div>
-        </div>
-        
-      </div>
 
+        <!-- Observations -->
+        <div class="field">
+          <label for="animalObservations">Observații</label>
+          <textarea
+            id="animalObservations"
+            name="animalObservations"
+            [(ngModel)]="animal.observations"
+            #animalObservationsModel="ngModel"
+            placeholder="Observații opționale..."
+            maxlength="500"
+          ></textarea>
+          <small class="field-error-msg" *ngIf="shouldShowError(animalObservationsModel)">
+            <span *ngIf="animalObservationsModel.errors?.['maxlength']">Observațiile pot avea cel mult 500 de caractere.</span>
+          </small>
+        </div>
 
-      <div class="field">
-        <label>Rasă/specie</label>
-        <select class="age-unit" name="type" [(ngModel)]="animal.type" required #typeField="ngModel">
-          <option value="">Selectează</option>
-          <option value="vaca">Vacă</option>
-          <option value="porc">Porc</option>
-          <option value="cal">Cal</option>
-          <option value="gaina">Găină</option>
-          <option value="oaie">Oaie</option>
-          <option value="capra">Capră</option>
-        </select>
-        <div class="field-error-msg" *ngIf="typeField.invalid">
-            Selectează o specie
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Sex</label>
-        <div class="gender-options">
-          <label class="radio-option">
-            <input type="radio" name="sex" value="femela" [(ngModel)]="animal.sex" required #sexField="ngModel" />
-            <span class="custom-radio"></span>
-            Feminin
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="sex" value="mascul" [(ngModel)]="animal.sex" required />
-            <span class="custom-radio"></span>
-            Masculin
-          </label>
-        </div>
-        <div class="field-error-msg" *ngIf="sexField.invalid">
-            Selectează sexul
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Vârstă</label>
-        <div class="age-row">
-          <div class="age-input">
-            <input type="number" name="age" [(ngModel)]="animal.age" placeholder="ex: 5" required min="0" #ageField="ngModel">
-          </div>
-          <select class="age-unit">
-            <option>luni</option>
-            <option>ani</option>
-          </select>
-        </div>
-        <div class="field-error-msg" *ngIf="ageField.invalid">
-            Introdu o vârstă validă (0 sau mai mare)
-        </div>
       </div>
     </div>
 
-    <div class="right-column">
-      <div class = "field">
-        <label>Stare de sănătate</label>
-        <select class="age-unit" name="status" [(ngModel)]="animal.status">
-          <option value="Sanatoasa">Sănătos</option>
-          <option value="Cu probleme">Cu probleme</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Localizare</label>
-        <textarea name="location" [(ngModel)]="animal.location" placeholder="ex: Padocul 3" rows="3" required #locationField="ngModel"></textarea>
-        <div class="field-error-msg" *ngIf="locationField.invalid">
-            Localizarea este obligatorie
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Observatii</label>
-        <textarea name="observations" [(ngModel)]="animal.observations" placeholder="ex: Gestantă, luna 5" rows="3"></textarea>
-      </div>
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="onBackClick()">Anulează</button>
+      <button type="submit" class="btn-submit">
+        {{ isEditMode ? 'Salvează modificările' : 'Adaugă animal' }}
+      </button>
     </div>
-  </div>
 
-  <div class="form-actions">
-    <button class="btn-cancel" type="button" (click)="onBackClick()">Anulează</button>
-    <button class="btn-submit" type="submit">
-      {{ isEditMode ? 'Salvează modificările' : 'Adaugă animal' }}
-    </button>
-  </div>
   </form>
 </div>

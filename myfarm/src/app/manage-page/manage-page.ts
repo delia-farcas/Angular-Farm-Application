@@ -1,7 +1,8 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FarmService } from '../services/farm.service';
+import { UserTrackingService } from '../services/user-tracking.service';
 import { Animal } from '../models/farm';
 
 @Component({
@@ -19,8 +20,11 @@ export class ManagePage {
   /** per-animal input for today */
   todaysInput: Record<number, number | null> = {};
   invalidInput: Record<number, boolean> = {};
+  currentUsername: string = 'Delia';
+  private trackingService = inject(UserTrackingService);
 
   constructor(private farm: FarmService) {
+    this.currentUsername = this.trackingService.getCurrentUser();
     for (const a of this.farm.getAnimals()) {
       this.todaysInput[a.id] = null;
       this.invalidInput[a.id] = false;

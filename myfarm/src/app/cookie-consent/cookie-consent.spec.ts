@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { CookieConsent } from './cookie-consent';
 
@@ -9,6 +10,7 @@ describe('CookieConsent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CookieConsent],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CookieConsent);

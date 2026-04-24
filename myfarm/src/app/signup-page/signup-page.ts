@@ -1,5 +1,6 @@
 import { Component, Output, EventEmitter, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { UserTrackingService } from '../services/user-tracking.service';
 
 function passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
@@ -19,6 +20,7 @@ export class SignupPage {
   @Output() signupSuccess = new EventEmitter<void>();
 
   private fb = inject(FormBuilder);
+  private trackingService = inject(UserTrackingService);
 
   signupForm: FormGroup = this.fb.group(
     {
@@ -35,8 +37,12 @@ export class SignupPage {
       this.signupForm.markAllAsTouched();
       return;
     }
-    // TODO: handle signup logic
-    console.log('Signup:', this.signupForm.value);
+    
+    // Save user profile in tracking service local storage
+    const formData = { ...this.signupForm.value };
+    delete formData.confirmPassword; // Avoid saving confirmation
+    this.trackingService.registerUser(formData);
+
     this.signupSuccess.emit();
   }
 

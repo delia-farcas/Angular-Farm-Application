@@ -1,20 +1,14 @@
-/* ============================================
-   Adaugă Animal - Page Styles
-   Ready for Angular integration
-   ============================================ */
-
 /* ---------- Page Container ---------- */
 .add-animal-page {
   background: #F9F7F2;
   border-radius: 20px;
   padding: 40px 48px;
-  /* Adăugăm margin ca să nu fie lipit de sidebar sau marginile ecranului */
-  width: 100%; /* Ajustăm lățimea să țină cont de margin */
+  height: 100%;
+  width: 100%;
   min-height: 580px;
   font-family: 'Poppins', sans-serif;
   color: #2e2f31;
   box-sizing: border-box;
-  /* Prevenim tăierea elementelor */
   overflow: visible;
 }
 
@@ -55,12 +49,15 @@
   text-underline-offset: 4px;
   cursor: pointer;
 }
+
 .icon-picker {
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-wrap: wrap; /* FIX: prevent overflow on small screens */
   animation: fadeIn 0.2s ease-in-out;
 }
+
 .icon-option {
   width: 52px;
   height: 52px;
@@ -74,10 +71,12 @@
   cursor: pointer;
   transition: border-color 0.2s, transform 0.2s;
 }
+
 .icon-option:hover {
   border-color: #388333;
   transform: scale(1.1);
 }
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateX(-10px); }
   to { opacity: 1; transform: translateX(0); }
@@ -159,15 +158,15 @@
 .gender-options {
   display: flex;
   flex-direction: row;
-  gap: 16px; 
+  gap: 16px;
   margin-top: 4px;
-  align-items: center; 
+  align-items: center;
 }
 
 .radio-option {
   display: flex;
   flex-direction: row;
-  align-items: center; 
+  align-items: center;
   gap: 6px;
   font-size: 18px;
   cursor: pointer;
@@ -180,16 +179,14 @@
 }
 
 .custom-radio {
-   width: 16px;
+  width: 16px;
   height: 16px;
   border-radius: 3px;
   background-color: #d9d9d9;
-
-  display: inline-flex;        
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  vertical-align: middle;    
+  vertical-align: middle;
 }
 
 .radio-option input[type="radio"]:checked + .custom-radio {
@@ -211,22 +208,24 @@
   align-items: center;
 }
 
-/* Input vârstă */
 .age-input {
   flex: 0 0 100px;
 }
 
-/* Dropdown luni/ani */
 .age-unit {
   flex: 0 0 110px;
   background-color: #e8e8e8;
   border: 1px solid #757575;
   border-radius: 11px;
   padding: 10px 14px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
   cursor: pointer;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
-/* Input styling */
 .age-input input {
   width: 100%;
   box-sizing: border-box;
@@ -237,28 +236,17 @@
   font-family: 'Poppins', sans-serif;
   font-size: 16px;
   outline: none;
+  transition: border-color 0.2s;
 }
 
-/* focus */
-.age-unit:focus {
+.age-input input:focus {
   border-color: #388333;
 }
-/* ---------- Ajustare pentru Input-ul de Vârstă ---------- */
-.age-input input {
-  width: 100%;
-  background-color: #e8e8e8;
-  border: 1px solid #757575;
-  border-radius: 11px;
-  padding: 10px 14px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 16px;
-  outline: none;
-}
-
 
 .age-unit:focus {
   border-color: #388333;
 }
+
 /* ---------- Form Actions ---------- */
 .form-actions {
   display: flex;
@@ -297,66 +285,7 @@
   background-color: #2e6d2a;
 }
 
-/* ============================================
-   Responsive
-   ============================================ */
-
-@media (max-width: 768px) {
-  .add-animal-page {
-    padding: 24px 16px 32px;
-  }
-
-  .page-title {
-    font-size: 26px;
-    margin-bottom: 28px;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-
-  .id-name-row {
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .id-field {
-    flex: unset;
-    width: 100%;
-  }
-
-  .age-row {
-    flex-direction: column;
-  }
-
-  .age-input {
-    max-width: 100%;
-  }
-
-  .age-unit .species{
-    width: 100%;
-  }
-
-  .form-actions {
-    flex-direction: column-reverse;
-  }
-
-  .btn-cancel,
-  .btn-submit {
-    width: 100%;
-    text-align: center;
-  }
-
-  .picture-section {
-    gap: 16px;
-  }
-
-  .change-picture-link {
-    font-size: 17px;
-  }
-}
-
+/* ---------- Validation ---------- */
 .field-error-msg {
   color: #c0392b;
   font-size: 12px;
@@ -373,7 +302,100 @@
   background-color: #fff0f0;
 }
 
+/* ============================================
+   Responsive — 768px
+   ============================================ */
+@media (max-width: 768px) {
+  .add-animal-page {
+    padding: 24px 16px 32px;
+    border-radius: 12px; /* FIX: softer radius on mobile */
+  }
+
+  .page-title {
+    font-size: 26px;
+    margin-bottom: 20px;
+  }
+
+  /* FIX: picture section wraps instead of overflowing */
+  .picture-section {
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .change-picture-link {
+    font-size: 17px;
+  }
+
+  /* FIX: single-column grid */
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  /* FIX: id-name row stacks vertically */
+  .id-name-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .id-field {
+    flex: unset;
+    width: 100%;
+  }
+
+  .name-field {
+    width: 100%;
+  }
+
+  /* FIX: age row stacks and fills full width */
+  .age-row {
+    flex-direction: column;
+    align-items: stretch; /* FIX: was missing — inputs were misaligned */
+    gap: 8px;
+  }
+
+  .age-input {
+    flex: unset;    /* FIX: release fixed 100px width */
+    width: 100%;
+  }
+
+  .age-input input {
+    width: 100%;
+  }
+
+  .age-unit {
+    flex: unset;    /* FIX: release fixed 110px width */
+    width: 100%;
+  }
+
+  /* FIX: gender options wrap gracefully on narrow screens */
+  .gender-options {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* FIX: buttons stack vertically, full-width, correct order */
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .btn-cancel,
+  .btn-submit {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+}
+
+/* ============================================
+   Responsive — 480px
+   ============================================ */
 @media (max-width: 480px) {
+  .add-animal-page {
+    padding: 16px 12px 24px; /* FIX: tighter padding on very small screens */
+  }
+
   .page-title {
     font-size: 22px;
   }
@@ -382,6 +404,13 @@
     width: 56px;
     height: 56px;
     font-size: 26px;
+  }
+
+  /* FIX: icon picker wraps and icons shrink slightly */
+  .icon-option {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
   }
 
   .field label {
@@ -395,9 +424,24 @@
     padding: 8px 12px;
   }
 
+  .age-input input,
+  .age-unit {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  /* FIX: radio label text scales down */
+  .radio-option {
+    font-size: 15px;
+  }
+
   .btn-cancel,
   .btn-submit {
-    font-size: 16px;
+    font-size: 15px;
     padding: 10px 24px;
+  }
+
+  .change-picture-link {
+    font-size: 15px;
   }
 }

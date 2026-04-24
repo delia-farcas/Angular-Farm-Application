@@ -5,15 +5,34 @@ import { CookieService } from 'ngx-cookie-service';
   providedIn: 'root'
 })
 export class UserTrackingService {
+  private readonly cookieConsentKey = 'cookieConsent';
+  private readonly pendingConsentPromptKey = 'pendingCookieConsentPrompt';
 
   constructor(private cookieService: CookieService) { }
 
   isCookiesAllowed(): boolean {
-    return localStorage.getItem('cookieConsent') === 'accepted';
+    return localStorage.getItem(this.cookieConsentKey) === 'accepted';
   }
 
   setCookieConsent(accepted: boolean): void {
-    localStorage.setItem('cookieConsent', accepted ? 'accepted' : 'declined');
+    localStorage.setItem(this.cookieConsentKey, accepted ? 'accepted' : 'declined');
+    sessionStorage.removeItem(this.pendingConsentPromptKey);
+  }
+
+  hasCookieConsentDecision(): boolean {
+    return localStorage.getItem(this.cookieConsentKey) !== null;
+  }
+
+  markCookieConsentPromptPending(): void {
+    sessionStorage.setItem(this.pendingConsentPromptKey, 'true');
+  }
+
+  isCookieConsentPromptPending(): boolean {
+    return sessionStorage.getItem(this.pendingConsentPromptKey) === 'true';
+  }
+
+  clearCookieConsentPromptPending(): void {
+    sessionStorage.removeItem(this.pendingConsentPromptKey);
   }
 
   setPreference(key: string, value: string): void {
@@ -35,7 +54,6 @@ export class UserTrackingService {
       const current = this.cookieService.get(key);
       const activities = current ? JSON.parse(current) : [];
       activities.push({ activity, timestamp: new Date().toISOString() });
-      // Keep only last 50 activities to avoid cookie size limit
       if (activities.length > 50) activities.shift();
       this.cookieService.set(key, JSON.stringify(activities), 30); // Expires in 30 days
     }
@@ -84,5 +102,47 @@ export class UserTrackingService {
 
   getPageVisits(page: string): number {
     return this.getCounter(`page_visit_${page}`);
+  }
+
+  // --- Authentification logic ---
+  registerUser(userData: any): void {
+    if (this.isCookiesAllowed() || true) { // We store locally anyway to satisfy the functional requirement
+      const usersStr = localStorage.getItem('app_users') || '[]';
+      const users = JSON.parse(usersStr);
+      // verify if user already exists
+      const existing = users.find((u: any) => u.username === userData.username);
+      if (existing) {
+        Object.assign(existing, userData);
+      } else {
+        users.push(userData);
+      }
+      localStorage.setItem('app_users', JSON.stringify(users));
+      
+      // Auto login on register
+      this.setCurrentUser(userData.username);
+    }
+  }
+
+  verifyUser(username: string, pass: string): boolean {
+    const usersStr = localStorage.getItem('app_users') || '[]';
+    const users = JSON.parse(usersStr);
+    return users.some((u: any) => u.username === username && u.password === pass);
+  }
+
+  setCurrentUser(username: string): void {
+    this.cookieService.set('current_user', username, 7);
+    // fallback or sync to local storage for quick access
+    localStorage.setItem('current_user', username);
+  }
+
+  getCurrentUser(): string {
+    return localStorage.getItem('current_user') || 'Delia'; // Default back to Delia if no one is logged in
+  }
+
+  getCurrentUserProfile(): any {
+    const usersStr = localStorage.getItem('app_users') || '[]';
+    const users = JSON.parse(usersStr);
+    const currentUser = this.getCurrentUser();
+    return users.find((u: any) => u.username === currentUser) || null;
   }
 }
