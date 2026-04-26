@@ -47,8 +47,3 @@ export class AppPage {
     this.router.navigate(['raports']);
   }
 }
-
-// Keep this component only if used elsewhere
-export class DashboardComponent {
-  userName = 'Delia';
-}

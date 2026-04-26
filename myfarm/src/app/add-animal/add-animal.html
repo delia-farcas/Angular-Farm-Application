@@ -1,4 +1,23 @@
 <div class="add-animal-page">
+  <nav class="side-nav">
+
+      <div class="logo">
+        <img src = "logo2.svg" alt="Logo">
+      </div>
+
+      <a class="nav-item">Acasa</a>
+      <a class="nav-item" (click)="navigateToBazinga()">Predictor genetic</a>
+      <a class="nav-item" (click)="navigateToRaports()">Rapoarte</a>
+
+      <div class="separator"></div>
+
+      <div class="user-account">
+        <div class="user-pfp">C</div>
+        <span class="user-name">Contul meu</span>
+      </div>
+
+    </nav>
+  <div class ="main-content">
   <h1 class="page-title">{{ isEditMode ? 'Editează Animal' : 'Adaugă Animal' }}</h1>
 
   <!-- Picture Section -->
@@ -207,4 +226,5 @@
     </div>
 
   </form>
+</div>
 </div>
