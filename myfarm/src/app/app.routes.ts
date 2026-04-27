@@ -3,6 +3,8 @@ import { StartingPage } from './starting-page/starting-page';
 import { AppPage } from './app-page/app-page';
 import { BazingaPage } from './bazinga-page/bazinga-page';
 import { RaportsPage } from './raports-page/raports-page';
+import { AddAnimal } from './add-animal/add-animal';
+import { ManagePage } from './manage-page/manage-page';
 
 export const routes: Routes = [
   { 
@@ -20,5 +22,13 @@ export const routes: Routes = [
   {
     path: 'raports',
     component: RaportsPage
+  },
+  {
+    path: 'add',
+    component: AddAnimal,
+  },
+  {
+    path: 'manage',
+    component: ManagePage,
   }
 ];

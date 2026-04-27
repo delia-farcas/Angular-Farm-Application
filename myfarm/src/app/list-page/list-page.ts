@@ -5,6 +5,7 @@ import { AnimalService } from '../services/animal';
 import { Animal } from '../models/animal';
 import { AnimalCardComponent } from '../animal-card/animal-card';
 import { UserTrackingService } from '../services/user-tracking.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-list-page',
@@ -16,12 +17,11 @@ import { UserTrackingService } from '../services/user-tracking.service';
 export class ListPage {
   @Output() goToManage = new EventEmitter<void>();
   @Output() goToAddAnimal = new EventEmitter<void>(); 
-  @Output() editAnimalRequest = new EventEmitter<Animal>();
 
   private trackingService = inject(UserTrackingService);
   currentUsername: string = 'Delia';
   
-  constructor(private animalService: AnimalService) {}
+  constructor(private animalService: AnimalService, private router: Router) {}
   animals: Animal[] = [];
   selectedType: 'toate' | 'vaca' | 'porc' | 'gaina' | 'cal' | 'oaie' | 'capra' = 'toate';
 
@@ -45,14 +45,13 @@ export class ListPage {
   }
 
   editAnimal(animal: Animal) {
-    this.editAnimalRequest.emit(animal);
+    this.router.navigate(['add'], { state: { animalToEdit: animal } });
   }
-  onAddAnimalClick(): void {
-    this.goToAddAnimal.emit();
+  navigatetoAddAnimal(): void {
+    this.router.navigate(['add']);
   }
-  
-  onManageClick(): void{
-    this.goToManage.emit();
+  navigateToManage(): void{
+    this.router.navigate(['manage']);
   }
 }
 

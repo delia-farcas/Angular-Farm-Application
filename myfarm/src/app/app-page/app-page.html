@@ -30,24 +30,6 @@
     </nav>
   </div>
   <div class = "main-content">
-    @if (currentPage === 'home') {
-      <app-list-page 
-        (goToManage)="showManage()"
-        (goToAddAnimal)="showAddAnimal()"
-        (editAnimalRequest)="onEditAnimal($event)">
-      </app-list-page>
-    }
-    @else if (currentPage === 'manage') {
-      <app-manage-page 
-        (goBack)="showHome()"
-        (goToAddAnimal)="showAddAnimal()">
-      </app-manage-page>
-    }
-    @else if (currentPage === 'add') {
-      <app-add-animal 
-        [animalToEdit]="animalBeingEdited"
-        (goBack)="showHome()">
-      </app-add-animal>
-    }
+    <app-list-page></app-list-page>
   </div>
 </div>

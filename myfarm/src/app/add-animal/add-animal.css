@@ -1,3 +1,4 @@
+/* ── Reset & Globale ── */
 * {
   margin: 0;
   padding: 0;
@@ -10,22 +11,30 @@ body {
   background: #F9F7F2;
 }
 
+/* ── Containere Principale ── */
 .app-container {
   display: flex;
-  height: 100vh; 
+  height: 100vh;
   width: 100vw;
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 .main-content {
   flex: 1;
+  margin-left: 280px;
+  padding: 40px 48px;
+  height: 100vh;
+  overflow: hidden;
+  background: #F9F7F2;
+  border-radius: 20px;
 }
 
-/* ── Side Nav ── */
+/* ── Navigație Laterală ── */
 .side-nav {
+  position: fixed;
   top: 0;
   left: 0;
-  width: 270px;
+  width: 250px;
   height: 100vh;
   background: #BC8954;
   display: flex;
@@ -36,21 +45,18 @@ body {
   border-right: #8B653E solid 10px;
 }
 
-/* ── Logo ── */
 .logo {
   display: flex;
   align-items: center;
   margin-bottom: 2.5rem;
 }
 
-
-.logo-icon img{
+.logo-icon img {
   width: 32px;
   height: 32px;
 }
 
-
-/* ── Nav Items ── */
+/* ── Elemente Navigație ── */
 .nav-item {
   font-family: 'Poppins', Helvetica, sans-serif;
   display: block;
@@ -67,7 +73,6 @@ body {
   opacity: 0.8;
 }
 
-/* ── Sub-menu ── */
 .sub-menu {
   margin-left: 1.5rem;
   display: flex;
@@ -91,7 +96,6 @@ body {
   opacity: 0.7;
 }
 
-/* ── Separator ── */
 .separator {
   height: 1px;
   background: rgba(255, 255, 255, 0.35);
@@ -99,7 +103,7 @@ body {
   margin-bottom: 1.25rem;
 }
 
-/* ── User Account ── */
+/* ── Cont Utilizator ── */
 .user-account {
   display: flex;
   align-items: center;
@@ -126,7 +130,7 @@ body {
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* ── Hamburger (mobile) ── */
+/* ── Meniu Mobile ── */
 .hamburger {
   display: none;
   position: fixed;
@@ -154,7 +158,6 @@ body {
   transition: transform 0.3s, opacity 0.3s;
 }
 
-/* ── Overlay ── */
 .overlay {
   display: none;
   position: fixed;
@@ -163,57 +166,20 @@ body {
   z-index: 90;
 }
 
-/* ══════════════════════════
-   RESPONSIVE — below 768px
-   ══════════════════════════ */
-@media (max-width: 768px) {
-  .hamburger {
-    display: flex;
-  }
-
-  .side-nav {
-    transform: translateX(-100%);
-  }
-
-  body.nav-open .side-nav {
-    transform: translateX(0);
-  }
-
-  body.nav-open .overlay {
-    display: block;
-  }
-
-  body.nav-open .hamburger span:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
-  }
-
-  body.nav-open .hamburger span:nth-child(2) {
-    opacity: 0;
-  }
-
-  body.nav-open .hamburger span:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
-  }
-}
-
-
-
-/* ---------- Page Container ---------- */
+/* ── Pagina Adaugare Animal ── */
 .add-animal-page {
   display: flex;
   background: #F9F7F2;
   border-radius: 20px;
-  padding: 40px 48px;
-  height: 100%;
-  width: 100%;
-  min-height: 580px;
+  padding: 20px 28px;
   font-family: 'Poppins', sans-serif;
   color: #2e2f31;
   box-sizing: border-box;
-  overflow: visible;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
-/* ---------- Title ---------- */
 .page-title {
   font-size: 30px;
   font-weight: 400;
@@ -221,7 +187,7 @@ body {
   color: #2e2f31;
 }
 
-/* ---------- Picture Section ---------- */
+/* ── Secțiune Profil / Iconițe ── */
 .picture-section {
   display: flex;
   align-items: center;
@@ -251,11 +217,15 @@ body {
   cursor: pointer;
 }
 
+.change-picture-link:hover {
+  color: #a0723e;
+}
+
 .icon-picker {
   display: flex;
   gap: 12px;
   align-items: center;
-  flex-wrap: wrap; /* FIX: prevent overflow on small screens */
+  flex-wrap: wrap;
   animation: fadeIn 0.2s ease-in-out;
 }
 
@@ -283,11 +253,7 @@ body {
   to { opacity: 1; transform: translateX(0); }
 }
 
-.change-picture-link:hover {
-  color: #a0723e;
-}
-
-/* ---------- Form Grid ---------- */
+/* ── Layout Formular ── */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -295,7 +261,6 @@ body {
   margin-bottom: 20px;
 }
 
-/* ---------- Fields ---------- */
 .field {
   margin-bottom: 10px;
 }
@@ -308,6 +273,7 @@ body {
   margin-bottom: 6px;
 }
 
+/* ── Input-uri și Textarea ── */
 .field input[type="text"],
 .field select,
 .field textarea {
@@ -341,7 +307,7 @@ body {
   max-height: 100px;
 }
 
-/* ---------- ID + Name Row ---------- */
+/* ── Rând ID & Nume ── */
 .id-name-row {
   display: flex;
   gap: 24px;
@@ -355,7 +321,7 @@ body {
   flex: 1;
 }
 
-/* ---------- Gender Options ---------- */
+/* ── Opțiuni Gen (Radio) ── */
 .gender-options {
   display: flex;
   flex-direction: row;
@@ -390,10 +356,6 @@ body {
   vertical-align: middle;
 }
 
-.radio-option input[type="radio"]:checked + .custom-radio {
-  background-color: #d9d9d9;
-}
-
 .radio-option input[type="radio"]:checked + .custom-radio::after {
   content: '';
   width: 8px;
@@ -402,7 +364,7 @@ body {
   border-radius: 2px;
 }
 
-/* ---------- Age Row ---------- */
+/* ── Secțiune Vârstă ── */
 .age-row {
   display: flex;
   gap: 12px;
@@ -440,15 +402,12 @@ body {
   transition: border-color 0.2s;
 }
 
-.age-input input:focus {
-  border-color: #388333;
-}
-
+.age-input input:focus, 
 .age-unit:focus {
   border-color: #388333;
 }
 
-/* ---------- Form Actions ---------- */
+/* ── Acțiuni Formular (Butoane) ── */
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -486,7 +445,7 @@ body {
   background-color: #2e6d2a;
 }
 
-/* ---------- Validation ---------- */
+/* ── Validări Angular ── */
 .field-error-msg {
   color: #c0392b;
   font-size: 12px;
@@ -503,13 +462,39 @@ body {
   background-color: #fff0f0;
 }
 
-/* ============================================
-   Responsive — 768px
-   ============================================ */
+/* ── Responsive Tabletă (768px) ── */
 @media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+
+  .side-nav {
+    transform: translateX(-100%);
+  }
+
+  body.nav-open .side-nav {
+    transform: translateX(0);
+  }
+
+  body.nav-open .overlay {
+    display: block;
+  }
+
+  body.nav-open .hamburger span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  body.nav-open .hamburger span:nth-child(2) {
+    opacity: 0;
+  }
+
+  body.nav-open .hamburger span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
   .add-animal-page {
     padding: 24px 16px 32px;
-    border-radius: 12px; /* FIX: softer radius on mobile */
+    border-radius: 12px;
   }
 
   .page-title {
@@ -517,7 +502,6 @@ body {
     margin-bottom: 20px;
   }
 
-  /* FIX: picture section wraps instead of overflowing */
   .picture-section {
     gap: 16px;
     flex-wrap: wrap;
@@ -527,74 +511,52 @@ body {
     font-size: 17px;
   }
 
-  /* FIX: single-column grid */
   .form-grid {
     grid-template-columns: 1fr;
     gap: 0;
   }
 
-  /* FIX: id-name row stacks vertically */
   .id-name-row {
     flex-direction: column;
     gap: 0;
   }
 
-  .id-field {
+  .id-field, .name-field {
+    width: 100%;
     flex: unset;
-    width: 100%;
   }
 
-  .name-field {
-    width: 100%;
-  }
-
-  /* FIX: age row stacks and fills full width */
   .age-row {
     flex-direction: column;
-    align-items: stretch; /* FIX: was missing — inputs were misaligned */
+    align-items: stretch;
     gap: 8px;
   }
 
-  .age-input {
-    flex: unset;    /* FIX: release fixed 100px width */
+  .age-input, .age-unit {
     width: 100%;
+    flex: unset;
   }
 
-  .age-input input {
-    width: 100%;
-  }
-
-  .age-unit {
-    flex: unset;    /* FIX: release fixed 110px width */
-    width: 100%;
-  }
-
-  /* FIX: gender options wrap gracefully on narrow screens */
   .gender-options {
     flex-wrap: wrap;
     gap: 12px;
   }
 
-  /* FIX: buttons stack vertically, full-width, correct order */
   .form-actions {
     flex-direction: column-reverse;
     gap: 10px;
   }
 
-  .btn-cancel,
-  .btn-submit {
+  .btn-cancel, .btn-submit {
     width: 100%;
     text-align: center;
-    box-sizing: border-box;
   }
 }
 
-/* ============================================
-   Responsive — 480px
-   ============================================ */
+/* ── Responsive Mobile (480px) ── */
 @media (max-width: 480px) {
   .add-animal-page {
-    padding: 16px 12px 24px; /* FIX: tighter padding on very small screens */
+    padding: 16px 12px 24px;
   }
 
   .page-title {
@@ -607,7 +569,6 @@ body {
     font-size: 26px;
   }
 
-  /* FIX: icon picker wraps and icons shrink slightly */
   .icon-option {
     width: 44px;
     height: 44px;
@@ -620,24 +581,18 @@ body {
 
   .field input[type="text"],
   .field select,
-  .field textarea {
-    font-size: 14px;
-    padding: 8px 12px;
-  }
-
+  .field textarea,
   .age-input input,
   .age-unit {
     font-size: 14px;
     padding: 8px 12px;
   }
 
-  /* FIX: radio label text scales down */
   .radio-option {
     font-size: 15px;
   }
 
-  .btn-cancel,
-  .btn-submit {
+  .btn-cancel, .btn-submit {
     font-size: 15px;
     padding: 10px 24px;
   }

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { FarmService } from '../services/farm.service';
 import { UserTrackingService } from '../services/user-tracking.service';
 import { Animal } from '../models/farm';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-manage-page',
@@ -23,7 +24,7 @@ export class ManagePage {
   currentUsername: string = 'Delia';
   private trackingService = inject(UserTrackingService);
 
-  constructor(private farm: FarmService) {
+  constructor(private farm: FarmService, private router: Router) {
     this.currentUsername = this.trackingService.getCurrentUser();
     for (const a of this.farm.getAnimals()) {
       this.todaysInput[a.id] = null;
@@ -129,6 +130,13 @@ export class ManagePage {
 
   onBackClick(): void {
     this.goBack.emit();
+  }
+  navigateToBazinga(): void {
+    this.router.navigate(['bazinga']);
+  }
+
+  navigateToRaports(): void {
+    this.router.navigate(['raports']);
   }
 }
 

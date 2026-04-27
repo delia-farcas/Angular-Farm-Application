@@ -1,9 +1,10 @@
-import { Component, Output, EventEmitter, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
+import { Component, Output, EventEmitter, Input, OnChanges, SimpleChanges, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AnimalService } from '../services/animal';
 import { Animal } from '../models/animal';
 import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { UserTrackingService } from '../services/user-tracking.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-add-animal',
@@ -12,14 +13,14 @@ import { UserTrackingService } from '../services/user-tracking.service';
   templateUrl: './add-animal.html',
   styleUrl: './add-animal.css',
 })
-export class AddAnimal implements OnChanges {
+export class AddAnimal implements OnChanges, OnInit {
   @Output() goBack = new EventEmitter<void>();
   @Input() animalToEdit: Animal | null = null;
 
-  selectedEmoji = '🐄';
+  selectedIcon = '/animals/cow.svg';
   isPickerVisible = false;
   isEditMode = false;
-  formSubmitted = false; // renamed from submitAttempted for consistency with the helper
+  formSubmitted = false; 
 
   private trackingService = inject(UserTrackingService);
 
@@ -34,15 +35,31 @@ export class AddAnimal implements OnChanges {
     observations: ''
   };
 
-  constructor(private animalService: AnimalService) {}
+  constructor(private animalService: AnimalService, private router: Router) {
+  // Extragem datele din router STATE aici!
+  const navigation = this.router.getCurrentNavigation();
+  if (navigation?.extras.state && navigation.extras.state['animalToEdit']) {
+    this.animalToEdit = navigation.extras.state['animalToEdit'];
+  }
+}
 
+ngOnInit(): void {
+  // Acum animalToEdit are valoare (dacă a fost trimisă)
+  if (this.animalToEdit) {
+    this.setupEditMode();
+  }
+}
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['animalToEdit'] && this.animalToEdit) {
+      this.setupEditMode();
+    }
+  }
+
+  private setupEditMode(): void {
+    if (this.animalToEdit) {
       this.isEditMode = true;
       this.animal = { ...this.animalToEdit };
-    } else if (changes['animalToEdit'] && !this.animalToEdit) {
-      this.isEditMode = false;
-      this.resetForm();
+      console.log('Date încărcate în formular:', this.animal);
     }
   }
 
@@ -79,11 +96,11 @@ export class AddAnimal implements OnChanges {
       window.alert('Animal adăugat cu succes!');
     }
 
-    this.goBack.emit();
+    this.router.navigate(['home']);
   }
 
   onBackClick(): void {
-    this.goBack.emit();
+    this.router.navigate(['home']);
   }
 
   togglePicker(event: Event) {
@@ -92,7 +109,7 @@ export class AddAnimal implements OnChanges {
   }
 
   selectIcon(icon: string) {
-    this.selectedEmoji = icon;
+    this.selectedIcon = icon;
     this.isPickerVisible = false;
   }
 
@@ -108,5 +125,13 @@ export class AddAnimal implements OnChanges {
       location: '',
       observations: '',
     };
+  }
+
+  navigateToBazinga(): void {
+    this.router.navigate(['bazinga']);
+  }
+
+  navigateToRaports(): void {
+    this.router.navigate(['raports']);
   }
 }

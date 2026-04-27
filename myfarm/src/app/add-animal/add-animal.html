@@ -1,230 +1,209 @@
 <div class="add-animal-page">
   <nav class="side-nav">
-
-      <div class="logo">
-        <img src = "logo2.svg" alt="Logo">
-      </div>
-
-      <a class="nav-item">Acasa</a>
-      <a class="nav-item" (click)="navigateToBazinga()">Predictor genetic</a>
-      <a class="nav-item" (click)="navigateToRaports()">Rapoarte</a>
-
-      <div class="separator"></div>
-
-      <div class="user-account">
-        <div class="user-pfp">C</div>
-        <span class="user-name">Contul meu</span>
-      </div>
-
-    </nav>
-  <div class ="main-content">
-  <h1 class="page-title">{{ isEditMode ? 'Editează Animal' : 'Adaugă Animal' }}</h1>
-
-  <!-- Picture Section -->
-  <div class="picture-section">
-    <div class="profile-picture">{{ selectedEmoji }}</div>
-
-    <span class="change-picture-link" (click)="togglePicker($event)">
-      Schimbă poza
-    </span>
-
-    <div class="icon-picker" *ngIf="isPickerVisible">
-      <div class="icon-option" *ngFor="let icon of ['🐄','🐖','🐑','🐓','🐇','🐴']"
-           (click)="selectIcon(icon)">{{ icon }}</div>
+    <div class="logo">
+      <img src="logo2.svg" alt="Logo" />
     </div>
-  </div>
 
-  <!-- Form -->
-  <form #animalForm="ngForm" (ngSubmit)="onSubmit(animalForm)" novalidate>
-    <div class="form-grid">
+    <a class="nav-item">Acasa</a>
+    <a class="nav-item" (click)="navigateToBazinga()">Predictor genetic</a>
+    <a class="nav-item" (click)="navigateToRaports()">Rapoarte</a>
 
-      <!-- ── LEFT COLUMN ── -->
-      <div class="form-column">
+    <div class="separator"></div>
 
-        <!-- ID + Name -->
-        <div class="field id-name-row">
+    <div class="user-account">
+      <div class="user-pfp">C</div>
+      <span class="user-name">Contul meu</span>
+    </div>
+  </nav>
 
-          <div class="id-field field">
-            <label for="animalId">ID</label>
-            <input
-              type="text"
-              id="animalId"
-              name="animalId"
-              [(ngModel)]="animal.id"
-              #animalIdModel="ngModel"
-              placeholder="ex: 101"
-              required
-              pattern="^[0-9]+$"
-            />
-            <small class="field-error-msg" *ngIf="shouldShowError(animalIdModel)">
-              <span *ngIf="animalIdModel.errors?.['required']">ID-ul este obligatoriu.</span>
-              <span *ngIf="animalIdModel.errors?.['pattern']">ID-ul trebuie să fie un număr.</span>
-            </small>
-          </div>
+  <div class="main-content">
+    <h1 class="page-title">
+      {{ isEditMode ? 'Editează Animal' : 'Adaugă Animal' }}
+    </h1>
 
-          <div class="name-field field">
-            <label for="animalName">Nume</label>
-            <input
-              type="text"
-              id="animalName"
-              name="animalName"
-              [(ngModel)]="animal.name"
-              #animalNameModel="ngModel"
-              placeholder="ex: Bella"
-              required
-              minlength="2"
-              maxlength="50"
-            />
-            <small class="field-error-msg" *ngIf="shouldShowError(animalNameModel)">
-              <span *ngIf="animalNameModel.errors?.['required']">Numele este obligatoriu.</span>
-              <span *ngIf="animalNameModel.errors?.['minlength']">Numele trebuie să aibă cel puțin 2 caractere.</span>
-              <span *ngIf="animalNameModel.errors?.['maxlength']">Numele poate avea cel mult 50 de caractere.</span>
-            </small>
-          </div>
+    <div class="picture-section">
+      <div class="profile-picture">
+        <img [src]="selectedIcon" alt="Animal Icon" *ngIf="selectedIcon" />
+      </div>
 
+      <span class="change-picture-link" (click)="togglePicker($event)">
+        Schimbă poza
+      </span>
+
+      <div class="icon-picker" *ngIf="isPickerVisible">
+        <div 
+          class="icon-option" 
+          *ngFor="let icon of [
+            '/animals/cow.svg',
+            '/animals/pig.svg',
+            '/animals/sheep.svg', 
+            '/animals/goat.svg',
+            '/animals/chick.svg',
+            '/animals/horse.svg'
+          ]"
+          (click)="selectIcon(icon)"
+        >
+          <img [src]="icon" [alt]="icon" width="40" />
         </div>
+      </div>
+    </div>
 
-        <!-- Species / Type -->
-        <div class="field">
-          <label for="animalType">Specie</label>
-          <select
-            id="animalType"
-            name="animalType"
-            [(ngModel)]="animal.type"
-            #animalTypeModel="ngModel"
-            required
-          >
-            <option value="">-- Selectează specia --</option>
-            <option value="vaca">Vacă</option>
-            <option value="porc">Porc</option>
-            <option value="oaie">Oaie</option>
-            <option value="gaina">Găină</option>
-            <option value="iepure">Iepure</option>
-            <option value="cal">Cal</option>
-          </select>
-          <small class="field-error-msg" *ngIf="shouldShowError(animalTypeModel)">
-            <span *ngIf="animalTypeModel.errors?.['required']">Specia este obligatorie.</span>
-          </small>
-        </div>
-
-        <!-- Gender -->
-        <div class="field">
-          <label>Sex</label>
-          <div class="gender-options">
-            <label class="radio-option">
-              <input type="radio" name="animalSex" [(ngModel)]="animal.sex" value="femela" required />
-              <span class="custom-radio"></span>
-              Femelă
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="animalSex" [(ngModel)]="animal.sex" value="mascul" required />
-              <span class="custom-radio"></span>
-              Mascul
-            </label>
-          </div>
-        </div>
-
-        <!-- Age -->
-        <div class="field">
-          <label for="animalAge">Vârstă</label>
-          <div class="age-row">
-            <div class="age-input">
+    <form #animalForm="ngForm" (ngSubmit)="onSubmit(animalForm)" novalidate>
+      <div class="form-grid">
+        
+        <div class="form-column">
+          <div class="field id-name-row">
+            <div class="id-field field">
+              <label for="animalId">ID</label>
               <input
                 type="text"
-                id="animalAge"
-                name="animalAge"
-                [(ngModel)]="animal.age"
-                #animalAgeModel="ngModel"
-                placeholder="ex: 3"
+                id="animalId"
+                name="animalId"
+                [(ngModel)]="animal.id"
+                #animalIdModel="ngModel"
+                placeholder="ex: 101"
                 required
                 pattern="^[0-9]+$"
               />
+              <small class="field-error-msg" *ngIf="shouldShowError(animalIdModel)">
+                <span *ngIf="animalIdModel.errors?.['required']">ID-ul este obligatoriu.</span>
+                <span *ngIf="animalIdModel.errors?.['pattern']">ID-ul trebuie să fie un număr.</span>
+              </small>
             </div>
-            <select class="age-unit" name="ageUnit" ngModel>
-              <option value="luni">Luni</option>
-              <option value="ani" selected>Ani</option>
+
+            <div class="name-field field">
+              <label for="animalName">Nume</label>
+              <input
+                type="text"
+                id="animalName"
+                name="animalName"
+                [(ngModel)]="animal.name"
+                #animalNameModel="ngModel"
+                placeholder="ex: Bella"
+                required
+                minlength="2"
+                maxlength="50"
+              />
+              <small class="field-error-msg" *ngIf="shouldShowError(animalNameModel)">
+                <span *ngIf="animalNameModel.errors?.['required']">Numele este obligatoriu.</span>
+                <span *ngIf="animalNameModel.errors?.['minlength']">Minim 2 caractere.</span>
+              </small>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="animalType">Specie</label>
+            <select
+              id="animalType"
+              name="animalType"
+              [(ngModel)]="animal.type"
+              #animalTypeModel="ngModel"
+              required
+            >
+              <option value="">-- Selectează specia --</option>
+              <option value="vaca">Vacă</option>
+              <option value="porc">Porc</option>
+              <option value="oaie">Oaie</option>
+              <option value="gaina">Găină</option>
+              <option value="iepure">Iepure</option>
+              <option value="cal">Cal</option>
+            </select>
+            <small class="field-error-msg" *ngIf="shouldShowError(animalTypeModel)">
+              <span *ngIf="animalTypeModel.errors?.['required']">Specia este obligatorie.</span>
+            </small>
+          </div>
+
+          <div class="field">
+            <label>Sex</label>
+            <div class="gender-options">
+              <label class="radio-option">
+                <input type="radio" name="animalSex" [(ngModel)]="animal.sex" value="femela" required />
+                <span class="custom-radio"></span> Femelă
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="animalSex" [(ngModel)]="animal.sex" value="mascul" required />
+                <span class="custom-radio"></span> Mascul
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="animalAge">Vârstă</label>
+            <div class="age-row">
+              <div class="age-input">
+                <input
+                  type="text"
+                  id="animalAge"
+                  name="animalAge"
+                  [(ngModel)]="animal.age"
+                  #animalAgeModel="ngModel"
+                  placeholder="ex: 3"
+                  required
+                  pattern="^[0-9]+$"
+                />
+              </div>
+              <select class="age-unit" name="ageUnit" ngModel>
+                <option value="luni">Luni</option>
+                <option value="ani" selected>Ani</option>
+              </select>
+            </div>
+            <small class="field-error-msg" *ngIf="shouldShowError(animalAgeModel)">
+              <span *ngIf="animalAgeModel.errors?.['required']">Vârsta este obligatorie.</span>
+            </small>
+          </div>
+        </div>
+
+        <div class="form-column">
+          <div class="field">
+            <label for="animalStatus">Status</label>
+            <select
+              id="animalStatus"
+              name="animalStatus"
+              [(ngModel)]="animal.status"
+              #animalStatusModel="ngModel"
+              required
+            >
+              <option value="">-- Selectează statusul --</option>
+              <option value="Sanatoasa">Sănătoasă</option>
+              <option value="Bolnava">Bolnavă</option>
+              <option value="Gestanta">Gestantă</option>
+              <option value="Recuperare">În recuperare</option>
             </select>
           </div>
-          <small class="field-error-msg" *ngIf="shouldShowError(animalAgeModel)">
-            <span *ngIf="animalAgeModel.errors?.['required']">Vârsta este obligatorie.</span>
-            <span *ngIf="animalAgeModel.errors?.['pattern']">Vârsta trebuie să fie un număr întreg.</span>
-          </small>
-        </div>
 
+          <div class="field">
+            <label for="animalLocation">Locație</label>
+            <input
+              type="text"
+              id="animalLocation"
+              name="animalLocation"
+              [(ngModel)]="animal.location"
+              #animalLocationModel="ngModel"
+              placeholder="ex: Grajd A"
+              required
+            />
+          </div>
+
+          <div class="field">
+            <label for="animalObservations">Observații</label>
+            <textarea
+              id="animalObservations"
+              name="animalObservations"
+              [(ngModel)]="animal.observations"
+              #animalObservationsModel="ngModel"
+              placeholder="Observații opționale..."
+              maxlength="500"
+            ></textarea>
+          </div>
+        </div>
       </div>
 
-      <!-- ── RIGHT COLUMN ── -->
-      <div class="form-column">
-
-        <!-- Status -->
-        <div class="field">
-          <label for="animalStatus">Status</label>
-          <select
-            id="animalStatus"
-            name="animalStatus"
-            [(ngModel)]="animal.status"
-            #animalStatusModel="ngModel"
-            required
-          >
-            <option value="">-- Selectează statusul --</option>
-            <option value="Sanatoasa">Sănătoasă</option>
-            <option value="Bolnava">Bolnavă</option>
-            <option value="Gestanta">Gestantă</option>
-            <option value="Recuperare">În recuperare</option>
-          </select>
-          <small class="field-error-msg" *ngIf="shouldShowError(animalStatusModel)">
-            <span *ngIf="animalStatusModel.errors?.['required']">Statusul este obligatoriu.</span>
-          </small>
-        </div>
-
-
-        <div class="field">
-          <label for="animalLocation">Locație</label>
-          <input
-            type="text"
-            id="animalLocation"
-            name="animalLocation"
-            [(ngModel)]="animal.location"
-            #animalLocationModel="ngModel"
-            placeholder="ex: Grajd A"
-            required
-            minlength="2"
-            maxlength="100"
-          />
-          <small class="field-error-msg" *ngIf="shouldShowError(animalLocationModel)">
-            <span *ngIf="animalLocationModel.errors?.['required']">Locația este obligatorie.</span>
-            <span *ngIf="animalLocationModel.errors?.['minlength']">Locația trebuie să aibă cel puțin 2 caractere.</span>
-            <span *ngIf="animalLocationModel.errors?.['maxlength']">Locația poate avea cel mult 100 de caractere.</span>
-          </small>
-        </div>
-
-        <!-- Observations -->
-        <div class="field">
-          <label for="animalObservations">Observații</label>
-          <textarea
-            id="animalObservations"
-            name="animalObservations"
-            [(ngModel)]="animal.observations"
-            #animalObservationsModel="ngModel"
-            placeholder="Observații opționale..."
-            maxlength="500"
-          ></textarea>
-          <small class="field-error-msg" *ngIf="shouldShowError(animalObservationsModel)">
-            <span *ngIf="animalObservationsModel.errors?.['maxlength']">Observațiile pot avea cel mult 500 de caractere.</span>
-          </small>
-        </div>
-
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="onBackClick()">Anulează</button>
+        <button type="submit" class="btn-submit" [disabled]="animalForm.invalid">
+          {{ isEditMode ? 'Salvează modificările' : 'Adaugă animal' }}
+        </button>
       </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="form-actions">
-      <button type="button" class="btn-cancel" (click)="onBackClick()">Anulează</button>
-      <button type="submit" class="btn-submit">
-        {{ isEditMode ? 'Salvează modificările' : 'Adaugă animal' }}
-      </button>
-    </div>
-
-  </form>
-</div>
+    </form>
+  </div>
 </div>
