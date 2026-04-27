@@ -208,6 +208,12 @@ body {
   flex-shrink: 0;
 }
 
+.profile-picture img {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+}
+
 .change-picture-link {
   font-family: 'Poppins', sans-serif;
   font-size: 20px;
@@ -241,6 +247,12 @@ body {
   font-size: 26px;
   cursor: pointer;
   transition: border-color 0.2s, transform 0.2s;
+}
+
+.icon-option img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
 }
 
 .icon-option:hover {

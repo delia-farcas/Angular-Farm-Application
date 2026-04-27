@@ -15,12 +15,12 @@ function emptyLog(date: string): DailyLogEntry {
 @Injectable({ providedIn: 'root' })
 export class FarmService {
   private animals: Animal[] = [
-    { id: 1, name: 'Vaca', icon: '🐄', count: 1, logs: [] },
-    { id: 2, name: 'Cal', icon: '🐴', count: 0, logs: [] },
-    { id: 3, name: 'Porc', icon: '🐖', count: 0, logs: [] },
-    { id: 4, name: 'Gaina', icon: '🐔', count: 0, logs: [] },
-    { id: 5, name: 'Oaie', icon: '🐑', count: 0, logs: [] },
-    { id: 6, name: 'Capra', icon: '🐐', count: 0, logs: [] },
+    { id: 1, name: 'Vaca', icon: '/animals/cow.svg', count: 1, logs: [] },
+    { id: 3, name: 'Porc', icon: '/animals/pig.svg', count: 0, logs: [] },
+    { id: 4, name: 'Gaina', icon: '/animals/chick.svg', count: 0, logs: [] },
+    { id: 5, name: 'Oaie', icon: '/animals/sheep.svg', count: 0, logs: [] },
+    { id: 6, name: 'Capra', icon: '/animals/goat.svg', count: 0, logs: [] },
+    { id: 2, name: 'Cal', icon: '/animals/horse.svg', count: 0, logs: [] },
   ];
 
   getAnimals(): Animal[] {

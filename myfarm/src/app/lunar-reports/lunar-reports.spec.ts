@@ -18,11 +18,11 @@ describe('LunarReports', () => {
       {
         id: 1,
         name: 'Vaca',
-        icon: '🐄',
+        icon: '/animals/cow.svg',
         count: 1,
         logs: [
-          { date: `${y}-${m}-01`, milk: 10, eggs: 0, wool: 0, workHours: 0 },
-          { date: `${y}-${m}-02`, milk: 5, eggs: 2, wool: 0, workHours: 0 },
+          { date: `${y}-${m}-01`, milk: 10, eggs: 0, wool: 0, workHours: 0, meat: 0 },
+          { date: `${y}-${m}-02`, milk: 5, eggs: 2, wool: 0, workHours: 0, meat: 0 },
         ],
       },
     ];

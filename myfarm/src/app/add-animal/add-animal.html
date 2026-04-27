@@ -98,14 +98,15 @@
               name="animalType"
               [(ngModel)]="animal.type"
               #animalTypeModel="ngModel"
+              (ngModelChange)="onTypeChange($event)"
               required
             >
               <option value="">-- Selectează specia --</option>
               <option value="vaca">Vacă</option>
               <option value="porc">Porc</option>
-              <option value="oaie">Oaie</option>
               <option value="gaina">Găină</option>
-              <option value="iepure">Iepure</option>
+              <option value="oaie">Oaie</option>
+              <option value="capra">Capră</option>
               <option value="cal">Cal</option>
             </select>
             <small class="field-error-msg" *ngIf="shouldShowError(animalTypeModel)">

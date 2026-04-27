@@ -16,9 +16,9 @@ describe('ManagePage', () => {
   beforeEach(async () => {
     upsertSpy = vi.fn();
     const animals: Animal[] = [
-      { id: 1, name: 'Vaca', icon: '🐄', count: 2, logs: [] },
-      { id: 4, name: 'Gaina', icon: '🐔', count: 10, logs: [] },
-      { id: 3, name: 'Porc', icon: '🐖', count: 1, logs: [] },
+      { id: 1, name: 'Vaca', icon: '/animals/cow.svg', count: 2, logs: [] },
+      { id: 4, name: 'Gaina', icon: '/animals/chick.svg', count: 10, logs: [] },
+      { id: 3, name: 'Porc', icon: '/animals/pig.svg', count: 1, logs: [] },
     ];
     farm = {
       getAnimals: () => animals,
@@ -59,8 +59,7 @@ describe('ManagePage', () => {
 
     expect(upsertSpy).toHaveBeenCalledWith(1, { milk: 12 });
     expect(upsertSpy).toHaveBeenCalledWith(4, { eggs: 7 });
-    // porc skipped
-    expect(upsertSpy).not.toHaveBeenCalledWith(3, expect.anything());
+    expect(upsertSpy).toHaveBeenCalledWith(3, { meat: 5 });
 
     expect(goBackSpy).toHaveBeenCalledTimes(1);
   });

@@ -15,7 +15,7 @@ describe('YearlyReports', () => {
       {
         id: 1,
         name: 'Vaca',
-        icon: '🐄',
+        icon: '/animals/cow.svg',
         count: 1,
         logs: [
           { date: `${year}-01-10`, milk: 10, eggs: 0, wool: 0, workHours: 0, meat: 0 },

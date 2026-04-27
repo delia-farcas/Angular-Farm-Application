@@ -22,6 +22,24 @@ export class AddAnimal implements OnChanges, OnInit {
   isEditMode = false;
   formSubmitted = false; 
 
+  iconMapping: Record<string, string> = {
+    'vaca': '/animals/cow.svg',
+    'cal': '/animals/horse.svg',
+    'gaina': '/animals/chick.svg',
+    'porc': '/animals/pig.svg',
+    'oaie': '/animals/sheep.svg',
+    'capra': '/animals/goat.svg'
+  };
+
+  reverseIconMapping: Record<string, string> = {
+    '/animals/cow.svg': 'vaca',
+    '/animals/horse.svg': 'cal',
+    '/animals/chick.svg': 'gaina',
+    '/animals/pig.svg': 'porc',
+    '/animals/sheep.svg': 'oaie',
+    '/animals/goat.svg': 'capra'
+  };
+
   private trackingService = inject(UserTrackingService);
 
   animal: Animal = {
@@ -59,6 +77,9 @@ ngOnInit(): void {
     if (this.animalToEdit) {
       this.isEditMode = true;
       this.animal = { ...this.animalToEdit };
+      if (this.iconMapping[this.animal.type]) {
+        this.selectedIcon = this.iconMapping[this.animal.type];
+      }
       console.log('Date încărcate în formular:', this.animal);
     }
   }
@@ -108,8 +129,15 @@ ngOnInit(): void {
     this.isPickerVisible = !this.isPickerVisible;
   }
 
+  onTypeChange(newType: string) {
+    if (this.iconMapping[newType]) {
+      this.selectedIcon = this.iconMapping[newType];
+    }
+  }
+
   selectIcon(icon: string) {
     this.selectedIcon = icon;
+    this.animal.type = this.reverseIconMapping[icon] as Animal['type'];
     this.isPickerVisible = false;
   }
 

@@ -32,4 +32,16 @@ export class AnimalCardComponent {
   onDelete() {
     this.delete.emit(this.animal.id);
   }
+
+  getIconPath(type: string): string {
+    const mapping: Record<string, string> = {
+      'vaca': '/animals/cow.svg',
+      'cal': '/animals/horse.svg',
+      'gaina': '/animals/chick.svg',
+      'porc': '/animals/pig.svg',
+      'oaie': '/animals/sheep.svg',
+      'capra': '/animals/goat.svg'
+    };
+    return mapping[type] || '/animals/cow.svg';
+  }
 }
