@@ -16,15 +16,20 @@ import { Router } from '@angular/router';
 })
 export class ListPage {
   @Output() goToManage = new EventEmitter<void>();
-  @Output() goToAddAnimal = new EventEmitter<void>(); 
+  @Output() goToAddAnimal = new EventEmitter<void>();
 
   private trackingService = inject(UserTrackingService);
   currentUsername: string = 'Delia';
-  
-  constructor(private animalService: AnimalService, private router: Router) {}
+
+  /** Instantiates the component and injects dependencies. */
+  constructor(
+    private animalService: AnimalService,
+    private router: Router,
+  ) {}
   animals: Animal[] = [];
   selectedType: 'toate' | 'vaca' | 'porc' | 'gaina' | 'cal' | 'oaie' | 'capra' = 'toate';
 
+  /** Initializes the component. */
   ngOnInit() {
     this.currentUsername = this.trackingService.getCurrentUser();
     this.animals = this.animalService.getAnimals();
@@ -34,9 +39,10 @@ export class ListPage {
     if (this.selectedType === 'toate') {
       return this.animals;
     }
-    return this.animals.filter(a => a.type === this.selectedType);
+    return this.animals.filter((a) => a.type === this.selectedType);
   }
 
+  /** Handles the Delete animal functionality. */
   deleteAnimal(id: number) {
     const confirmed = window.confirm('Sigur vrei să ștergi animalul?');
     if (!confirmed) return;
@@ -44,16 +50,16 @@ export class ListPage {
     this.animals = this.animalService.getAnimals();
   }
 
+  /** Handles the Edit animal functionality. */
   editAnimal(animal: Animal) {
     this.router.navigate(['add'], { state: { animalToEdit: animal } });
   }
+  /** Navigates to To add animal. */
   navigatetoAddAnimal(): void {
     this.router.navigate(['add']);
   }
-  navigateToManage(): void{
+  /** Navigates to to manage. */
+  navigateToManage(): void {
     this.router.navigate(['manage']);
   }
 }
-
-
-

@@ -1,6 +1,10 @@
 @if (display === 'row') {
   <td>
-    <img [src]="getIconPath(animal.type)" alt="icon" style="width: 30px; height: 30px; vertical-align: middle;">
+    <img
+      [src]="getIconPath(animal.type)"
+      alt="icon"
+      style="width: 30px; height: 30px; vertical-align: middle"
+    />
   </td>
   <td>{{ animal.id }}</td>
   <td>{{ animal.name }}</td>

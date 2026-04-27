@@ -1,4 +1,3 @@
-/* ── Reset & Globale ── */
 * {
   margin: 0;
   padding: 0;
@@ -8,10 +7,9 @@
 body {
   font-family: 'Poppins', Helvetica, sans-serif;
   min-height: 100vh;
-  background: #F9F7F2;
+  background: #f9f7f2;
 }
 
-/* ── Containere Principale ── */
 .app-container {
   display: flex;
   height: 100vh;
@@ -25,24 +23,23 @@ body {
   padding: 40px 48px;
   height: 100vh;
   overflow: hidden;
-  background: #F9F7F2;
+  background: #f9f7f2;
   border-radius: 20px;
 }
 
-/* ── Navigație Laterală ── */
 .side-nav {
   position: fixed;
   top: 0;
   left: 0;
   width: 250px;
   height: 100vh;
-  background: #BC8954;
+  background: #bc8954;
   display: flex;
   flex-direction: column;
   padding: 2rem 1.5rem 1.5rem;
   z-index: 100;
   transition: transform 0.3s ease;
-  border-right: #8B653E solid 10px;
+  border-right: #8b653e solid 10px;
 }
 
 .logo {
@@ -56,7 +53,6 @@ body {
   height: 32px;
 }
 
-/* ── Elemente Navigație ── */
 .nav-item {
   font-family: 'Poppins', Helvetica, sans-serif;
   display: block;
@@ -103,7 +99,6 @@ body {
   margin-bottom: 1.25rem;
 }
 
-/* ── Cont Utilizator ── */
 .user-account {
   display: flex;
   align-items: center;
@@ -130,7 +125,6 @@ body {
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* ── Meniu Mobile ── */
 .hamburger {
   display: none;
   position: fixed;
@@ -139,9 +133,9 @@ body {
   z-index: 200;
   width: 44px;
   height: 44px;
-  border: 1px solid #2E2F31;
+  border: 1px solid #2e2f31;
   border-radius: 10px;
-  background: #BC8954;
+  background: #bc8954;
   cursor: pointer;
   flex-direction: column;
   align-items: center;
@@ -155,7 +149,9 @@ body {
   height: 2px;
   background: #fff;
   border-radius: 2px;
-  transition: transform 0.3s, opacity 0.3s;
+  transition:
+    transform 0.3s,
+    opacity 0.3s;
 }
 
 .overlay {
@@ -166,10 +162,9 @@ body {
   z-index: 90;
 }
 
-/* ── Pagina Adaugare Animal ── */
 .add-animal-page {
   display: flex;
-  background: #F9F7F2;
+  background: #f9f7f2;
   border-radius: 20px;
   padding: 20px 28px;
   font-family: 'Poppins', sans-serif;
@@ -187,7 +182,6 @@ body {
   color: #2e2f31;
 }
 
-/* ── Secțiune Profil / Iconițe ── */
 .picture-section {
   display: flex;
   align-items: center;
@@ -200,7 +194,7 @@ body {
   height: 68px;
   border-radius: 50%;
   border: 2px solid #388333;
-  background: #F9F7F2;
+  background: #f9f7f2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -240,13 +234,15 @@ body {
   height: 52px;
   border-radius: 50%;
   border: 2px solid #d9d9d9;
-  background: #F9F7F2;
+  background: #f9f7f2;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 26px;
   cursor: pointer;
-  transition: border-color 0.2s, transform 0.2s;
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
 }
 
 .icon-option img {
@@ -261,11 +257,16 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateX(-10px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-/* ── Layout Formular ── */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -285,8 +286,7 @@ body {
   margin-bottom: 6px;
 }
 
-/* ── Input-uri și Textarea ── */
-.field input[type="text"],
+.field input[type='text'],
 .field select,
 .field textarea {
   width: 100%;
@@ -302,12 +302,12 @@ body {
   transition: border-color 0.2s;
 }
 
-.field input[type="text"]::placeholder,
+.field input[type='text']::placeholder,
 .field textarea::placeholder {
   color: #757575;
 }
 
-.field input[type="text"]:focus,
+.field input[type='text']:focus,
 .field select:focus,
 .field textarea:focus {
   border-color: #388333;
@@ -319,7 +319,6 @@ body {
   max-height: 100px;
 }
 
-/* ── Rând ID & Nume ── */
 .id-name-row {
   display: flex;
   gap: 24px;
@@ -333,7 +332,6 @@ body {
   flex: 1;
 }
 
-/* ── Opțiuni Gen (Radio) ── */
 .gender-options {
   display: flex;
   flex-direction: row;
@@ -353,7 +351,7 @@ body {
   line-height: 1;
 }
 
-.radio-option input[type="radio"] {
+.radio-option input[type='radio'] {
   display: none;
 }
 
@@ -368,7 +366,7 @@ body {
   vertical-align: middle;
 }
 
-.radio-option input[type="radio"]:checked + .custom-radio::after {
+.radio-option input[type='radio']:checked + .custom-radio::after {
   content: '';
   width: 8px;
   height: 8px;
@@ -376,7 +374,6 @@ body {
   border-radius: 2px;
 }
 
-/* ── Secțiune Vârstă ── */
 .age-row {
   display: flex;
   gap: 12px;
@@ -414,12 +411,11 @@ body {
   transition: border-color 0.2s;
 }
 
-.age-input input:focus, 
+.age-input input:focus,
 .age-unit:focus {
   border-color: #388333;
 }
 
-/* ── Acțiuni Formular (Butoane) ── */
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -444,7 +440,7 @@ body {
 
 .btn-submit {
   background: #398333;
-  color: #F9F7F2;
+  color: #f9f7f2;
   border: none;
   padding: 10px 28px;
   border-radius: 10px;
@@ -457,7 +453,6 @@ body {
   background-color: #2e6d2a;
 }
 
-/* ── Validări Angular ── */
 .field-error-msg {
   color: #c0392b;
   font-size: 12px;
@@ -474,7 +469,6 @@ body {
   background-color: #fff0f0;
 }
 
-/* ── Responsive Tabletă (768px) ── */
 @media (max-width: 768px) {
   .hamburger {
     display: flex;
@@ -533,7 +527,8 @@ body {
     gap: 0;
   }
 
-  .id-field, .name-field {
+  .id-field,
+  .name-field {
     width: 100%;
     flex: unset;
   }
@@ -544,7 +539,8 @@ body {
     gap: 8px;
   }
 
-  .age-input, .age-unit {
+  .age-input,
+  .age-unit {
     width: 100%;
     flex: unset;
   }
@@ -559,13 +555,13 @@ body {
     gap: 10px;
   }
 
-  .btn-cancel, .btn-submit {
+  .btn-cancel,
+  .btn-submit {
     width: 100%;
     text-align: center;
   }
 }
 
-/* ── Responsive Mobile (480px) ── */
 @media (max-width: 480px) {
   .add-animal-page {
     padding: 16px 12px 24px;
@@ -591,7 +587,7 @@ body {
     font-size: 16px;
   }
 
-  .field input[type="text"],
+  .field input[type='text'],
   .field select,
   .field textarea,
   .age-input input,
@@ -604,7 +600,8 @@ body {
     font-size: 15px;
   }
 
-  .btn-cancel, .btn-submit {
+  .btn-cancel,
+  .btn-submit {
     font-size: 15px;
     padding: 10px 24px;
   }

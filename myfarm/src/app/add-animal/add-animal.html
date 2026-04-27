@@ -26,21 +26,21 @@
         <img [src]="selectedIcon" alt="Animal Icon" *ngIf="selectedIcon" />
       </div>
 
-      <span class="change-picture-link" (click)="togglePicker($event)">
-        Schimbă poza
-      </span>
+      <span class="change-picture-link" (click)="togglePicker($event)"> Schimbă poza </span>
 
       <div class="icon-picker" *ngIf="isPickerVisible">
-        <div 
-          class="icon-option" 
-          *ngFor="let icon of [
-            '/animals/cow.svg',
-            '/animals/pig.svg',
-            '/animals/sheep.svg', 
-            '/animals/goat.svg',
-            '/animals/chick.svg',
-            '/animals/horse.svg'
-          ]"
+        <div
+          class="icon-option"
+          *ngFor="
+            let icon of [
+              '/animals/cow.svg',
+              '/animals/pig.svg',
+              '/animals/sheep.svg',
+              '/animals/goat.svg',
+              '/animals/chick.svg',
+              '/animals/horse.svg',
+            ]
+          "
           (click)="selectIcon(icon)"
         >
           <img [src]="icon" [alt]="icon" width="40" />
@@ -50,7 +50,6 @@
 
     <form #animalForm="ngForm" (ngSubmit)="onSubmit(animalForm)" novalidate>
       <div class="form-grid">
-        
         <div class="form-column">
           <div class="field id-name-row">
             <div class="id-field field">
@@ -67,7 +66,9 @@
               />
               <small class="field-error-msg" *ngIf="shouldShowError(animalIdModel)">
                 <span *ngIf="animalIdModel.errors?.['required']">ID-ul este obligatoriu.</span>
-                <span *ngIf="animalIdModel.errors?.['pattern']">ID-ul trebuie să fie un număr.</span>
+                <span *ngIf="animalIdModel.errors?.['pattern']"
+                  >ID-ul trebuie să fie un număr.</span
+                >
               </small>
             </div>
 
@@ -118,11 +119,23 @@
             <label>Sex</label>
             <div class="gender-options">
               <label class="radio-option">
-                <input type="radio" name="animalSex" [(ngModel)]="animal.sex" value="femela" required />
+                <input
+                  type="radio"
+                  name="animalSex"
+                  [(ngModel)]="animal.sex"
+                  value="femela"
+                  required
+                />
                 <span class="custom-radio"></span> Femelă
               </label>
               <label class="radio-option">
-                <input type="radio" name="animalSex" [(ngModel)]="animal.sex" value="mascul" required />
+                <input
+                  type="radio"
+                  name="animalSex"
+                  [(ngModel)]="animal.sex"
+                  value="mascul"
+                  required
+                />
                 <span class="custom-radio"></span> Mascul
               </label>
             </div>

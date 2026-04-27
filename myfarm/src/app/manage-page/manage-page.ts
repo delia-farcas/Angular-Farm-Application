@@ -18,17 +18,26 @@ export class ManagePage {
   @Output() goToAddAnimal = new EventEmitter<void>();
 
   search = '';
-  /** per-animal input for today */
   todaysInput: Record<number, number | null> = {};
   invalidInput: Record<number, boolean> = {};
+
+  todaysMilkInput: Record<number, number | null> = {};
+  invalidMilkInput: Record<number, boolean> = {};
+
   currentUsername: string = 'Delia';
   private trackingService = inject(UserTrackingService);
 
-  constructor(private farm: FarmService, private router: Router) {
+  /** Instantiates the component and injects dependencies. */
+  constructor(
+    private farm: FarmService,
+    private router: Router,
+  ) {
     this.currentUsername = this.trackingService.getCurrentUser();
     for (const a of this.farm.getAnimals()) {
       this.todaysInput[a.id] = null;
       this.invalidInput[a.id] = false;
+      this.todaysMilkInput[a.id] = null;
+      this.invalidMilkInput[a.id] = false;
     }
   }
 
@@ -36,9 +45,10 @@ export class ManagePage {
     const q = this.search.trim().toLowerCase();
     const list = this.farm.getAnimals();
     if (!q) return list;
-    return list.filter(a => a.name.toLowerCase().includes(q));
+    return list.filter((a) => a.name.toLowerCase().includes(q));
   }
 
+  /** Retrieves the gestiune unit. */
   getGestiuneUnit(animal: Animal): string {
     switch (animal.name) {
       case 'Vaca':
@@ -58,6 +68,7 @@ export class ManagePage {
     }
   }
 
+  /** Retrieves the gestiune placeholder. */
   getGestiunePlaceholder(animal: Animal): string {
     switch (animal.name) {
       case 'Vaca':
@@ -71,16 +82,18 @@ export class ManagePage {
       case 'Cal':
         return 'ex: 6';
       case 'Porc':
-         return 'ex: 12';
+        return 'ex: 12';
       default:
         return 'N/A';
     }
   }
 
+  /** Handles the Is gestiune enabled functionality. */
   isGestiuneEnabled(_: Animal): boolean {
     return true;
   }
 
+  /** Handles the Mark validity functionality. */
   markValidity(animalId: number, value: any): void {
     if (value === null || value === undefined || value === '') {
       this.invalidInput[animalId] = false;
@@ -90,51 +103,77 @@ export class ManagePage {
     this.invalidInput[animalId] = !Number.isFinite(num) || num < 0;
   }
 
+  /** Handles the Mark milk validity functionality. */
+  markMilkValidity(animalId: number, value: any): void {
+    if (value === null || value === undefined || value === '') {
+      this.invalidMilkInput[animalId] = false;
+      return;
+    }
+    const num = Number(value);
+    this.invalidMilkInput[animalId] = !Number.isFinite(num) || num < 0;
+  }
+
+  /** Handles the save today event. */
   onSaveToday(): void {
     for (const a of this.farm.getAnimals()) {
       const raw = this.todaysInput[a.id];
-      if (raw === null || raw === undefined) continue;
-      const value = Number(raw);
-      if (!Number.isFinite(value) || value < 0) continue;
+      const rawMilk = this.todaysMilkInput[a.id];
+
+      const value = (raw !== null && raw !== undefined) ? Number(raw) : null;
+      const validValue = (value !== null && Number.isFinite(value) && value >= 0) ? value : null;
+
+      const milkValue = (rawMilk !== null && rawMilk !== undefined) ? Number(rawMilk) : null;
+      const validMilkValue = (milkValue !== null && Number.isFinite(milkValue) && milkValue >= 0) ? milkValue : null;
+
+      if (validValue === null && validMilkValue === null) continue;
 
       switch (a.name) {
         case 'Vaca':
         case 'Capra':
-          this.farm.upsertTodayLog(a.id, { milk: value });
+          if (validValue !== null) this.farm.upsertTodayLog(a.id, { milk: validValue });
           break;
         case 'Gaina':
-          this.farm.upsertTodayLog(a.id, { eggs: value });
+          if (validValue !== null) this.farm.upsertTodayLog(a.id, { eggs: validValue });
           break;
         case 'Oaie':
-          this.farm.upsertTodayLog(a.id, { wool: value });
+          const patch: any = {};
+          if (validValue !== null) patch.wool = validValue;
+          if (validMilkValue !== null) patch.milk = validMilkValue;
+          if (Object.keys(patch).length > 0) this.farm.upsertTodayLog(a.id, patch);
           break;
         case 'Cal':
-          this.farm.upsertTodayLog(a.id, { workHours: value });
+          if (validValue !== null) this.farm.upsertTodayLog(a.id, { workHours: validValue });
           break;
         case 'Porc':
-          this.farm.upsertTodayLog(a.id, { meat: value });
+          if (validValue !== null) this.farm.upsertTodayLog(a.id, { meat: validValue });
           break;
       }
     }
-    
+
     for (const a of this.farm.getAnimals()) {
       this.todaysInput[a.id] = null;
       this.invalidInput[a.id] = false;
+      this.todaysMilkInput[a.id] = null;
+      this.invalidMilkInput[a.id] = false;
     }
     this.goBack.emit();
   }
 
+  /** Handles the add animal click event. */
   onAddAnimalClick(): void {
     this.goToAddAnimal.emit();
   }
 
+  /** Handles the back click event. */
   onBackClick(): void {
     this.goBack.emit();
   }
+  /** Navigates to to bazinga. */
   navigateToBazinga(): void {
     this.router.navigate(['bazinga']);
   }
 
+  /** Navigates to to raports. */
   navigateToRaports(): void {
     this.router.navigate(['raports']);
   }

@@ -11,18 +11,23 @@ import { CookieConsent } from './cookie-consent/cookie-consent';
   standalone: true,
   imports: [RouterOutlet, FormsModule, CookieConsent],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
 export class App implements OnInit {
   protected readonly title = signal('myfarm');
 
-  constructor(private router: Router, private trackingService: UserTrackingService) {}
+  /** Instantiates the component and injects dependencies. */
+  constructor(
+    private router: Router,
+    private trackingService: UserTrackingService,
+  ) {}
 
+  /** Initializes the component. */
   ngOnInit() {
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: NavigationEnd) => {
-      this.trackingService.logPageVisit(event.url);
-    });
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.trackingService.logPageVisit(event.url);
+      });
   }
 }

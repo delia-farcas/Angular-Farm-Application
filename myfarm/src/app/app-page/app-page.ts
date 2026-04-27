@@ -11,17 +11,20 @@ import { Router } from '@angular/router';
   styleUrls: ['./app-page.css'],
 })
 export class AppPage {
-
+  /** Instantiates the component and injects dependencies. */
   constructor(private router: Router) {}
 
+  /** Navigates to To add animal. */
   navigatetoAddAnimal(): void {
     this.router.navigate(['add']);
   }
 
+  /** Navigates to to bazinga. */
   navigateToBazinga(): void {
     this.router.navigate(['bazinga']);
   }
 
+  /** Navigates to to raports. */
   navigateToRaports(): void {
     this.router.navigate(['raports']);
   }

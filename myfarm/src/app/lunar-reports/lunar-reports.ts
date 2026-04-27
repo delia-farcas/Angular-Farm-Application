@@ -1,4 +1,11 @@
-import { Component, inject, OnInit, ViewChildren, QueryList, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  ViewChildren,
+  QueryList,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
@@ -23,29 +30,31 @@ export class LunarReports implements OnInit {
   private readonly year = this.now.getFullYear();
   private readonly monthIndex = this.now.getMonth();
   private generatorId: any;
-  
+
   private trackingService = inject(UserTrackingService);
 
   @ViewChildren(BaseChartDirective) charts!: QueryList<BaseChartDirective>;
 
-  constructor(private farm: FarmService, private cdr: ChangeDetectorRef) {
+  /** Instantiates the component and injects dependencies. */
+  constructor(
+    private farm: FarmService,
+    private cdr: ChangeDetectorRef,
+  ) {
     this.selectedAnimalId = this.farm.getAnimals()[0]?.id ?? 1;
   }
 
+  /** Initializes the component. */
   ngOnInit(): void {
-    // Încărcăm vizualizarea preferată din cookies
     const savedView = this.trackingService.getPreference('preferred_view');
     if (savedView === 'chart' || savedView === 'table') {
       this.view = savedView;
     }
 
-    // Încărcăm ultima categorie accesată
     const savedCat = this.trackingService.getPreference('last_category') as FarmProductCategory;
     if (savedCat) {
       this.category = savedCat;
     }
 
-    // Monitorizăm accesarea paginii
     this.trackingService.logActivity('viewed_lunar_reports');
   }
 
@@ -57,22 +66,31 @@ export class LunarReports implements OnInit {
     return this.farm.getAnimalById(this.selectedAnimalId);
   }
 
+  /** Retrieves the value for category. */
   private getValueForCategory(entry: any): number {
     switch (this.category) {
-      case 'lapte': return entry.milk;
-      case 'oua': return entry.eggs;
-      case 'lana': return entry.wool;
-      case 'ore_munca': return entry.workHours;
-      case 'carne': return entry.meat;
-      default: return 0;
+      case 'lapte':
+        return entry.milk;
+      case 'oua':
+        return entry.eggs;
+      case 'lana':
+        return entry.wool;
+      case 'ore_munca':
+        return entry.workHours;
+      case 'carne':
+        return entry.meat;
+      default:
+        return 0;
     }
   }
 
+  /** Handles the Month start iso functionality. */
   private monthStartIso(): string {
     const d = new Date(this.year, this.monthIndex, 1);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
   }
 
+  /** Handles the Month end iso functionality. */
   private monthEndIso(): string {
     const d = new Date(this.year, this.monthIndex + 1, 0);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -89,16 +107,16 @@ export class LunarReports implements OnInit {
       { from: 8, to: Math.min(14, endDay) },
       { from: 15, to: Math.min(21, endDay) },
       { from: 22, to: endDay },
-    ].filter(b => b.from <= b.to);
+    ].filter((b) => b.from <= b.to);
 
     const pad = (n: number) => String(n).padStart(2, '0');
     const monthStr = pad(this.monthIndex + 1);
 
-    return buckets.map(b => {
+    return buckets.map((b) => {
       const fromIso = `${this.year}-${monthStr}-${pad(b.from)}`;
       const toIso = `${this.year}-${monthStr}-${pad(b.to)}`;
       const total = logs
-        .filter(l => l.date >= fromIso && l.date <= toIso)
+        .filter((l) => l.date >= fromIso && l.date <= toIso)
         .reduce((sum, l) => sum + this.getValueForCategory(l), 0);
       return { label: `${b.from}-${b.to}`, total };
     });
@@ -115,20 +133,21 @@ export class LunarReports implements OnInit {
 
   get chartData(): ChartConfiguration<'line'>['data'] {
     return {
-      labels: this.tableRows.map(r => r.label),
-      datasets: [{
-        data: this.tableRows.map(r => r.total),
-        label: `${this.selectedAnimal?.name ?? 'Animal'} • ${this.category}`,
-        tension: 0.35,
-        fill: false,
-        // --- ADĂUGAT PENTRU CULOARE ---
-        borderColor: '#388333',           // Culoarea liniei
-        pointBackgroundColor: '#388333',  // Culoarea punctelor
-        pointBorderColor: '#fff',         // Conturul punctelor (le face mai vizibile)
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: '#388333',
-        // ------------------------------
-      }],
+      labels: this.tableRows.map((r) => r.label),
+      datasets: [
+        {
+          data: this.tableRows.map((r) => r.total),
+          label: `${this.selectedAnimal?.name ?? 'Animal'} • ${this.category}`,
+          tension: 0.35,
+          fill: false,
+
+          borderColor: '#388333', // Culoarea liniei
+          pointBackgroundColor: '#388333', // Culoarea punctelor
+          pointBorderColor: '#fff', // Conturul punctelor (le face mai vizibile)
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: '#388333',
+        },
+      ],
     };
   }
 
@@ -139,19 +158,22 @@ export class LunarReports implements OnInit {
     scales: { y: { beginAtZero: true } },
   };
 
+  /** Handles the toggle view event. */
   onToggleView(event: any): void {
-    const isChecked = event.target?.checked; 
+    const isChecked = event.target?.checked;
     this.view = isChecked ? 'chart' : 'table';
     this.trackingService.setPreference('preferred_view', this.view);
     this.trackingService.logActivity(`switched_view_to_${this.view}`);
   }
 
+  /** Handles the category change event. */
   onCategoryChange(newCategory: FarmProductCategory): void {
     this.category = newCategory;
     this.trackingService.setPreference('last_category', newCategory);
     this.trackingService.logActivity(`changed_category_to_${newCategory}`);
   }
 
+  /** Handles the Toggle generator functionality. */
   toggleGenerator(event: any) {
     const isGenerating = event.target.checked;
     if (isGenerating) {
@@ -163,38 +185,49 @@ export class LunarReports implements OnInit {
     }
   }
 
+  /** Handles the Stop generator functionality. */
   stopGenerator() {
     if (this.generatorId) {
       clearInterval(this.generatorId);
     }
   }
 
+  /** Handles the Update charts functionality. */
   updateCharts(): void {
     const animal = this.selectedAnimal;
     if (!animal) return;
 
     const d = Math.floor(Math.random() * 28) + 1;
     const dateStr = `${this.year}-${String(this.monthIndex + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    
-    let existing = animal.logs.find(l => l.date === dateStr);
+
+    let existing = animal.logs.find((l) => l.date === dateStr);
     if (!existing) {
       existing = { date: dateStr, milk: 0, eggs: 0, wool: 0, workHours: 0, meat: 0 };
       animal.logs.push(existing);
     }
-    
+
     const randomAdd = Math.floor(Math.random() * 20) + 1;
     switch (this.category) {
-      case 'lapte': existing.milk += randomAdd; break;
-      case 'oua': existing.eggs += randomAdd; break;
-      case 'lana': existing.wool += randomAdd; break;
-      case 'ore_munca': existing.workHours += randomAdd; break;
-      case 'carne': existing.meat += randomAdd; break;
+      case 'lapte':
+        existing.milk += randomAdd;
+        break;
+      case 'oua':
+        existing.eggs += randomAdd;
+        break;
+      case 'lana':
+        existing.wool += randomAdd;
+        break;
+      case 'ore_munca':
+        existing.workHours += randomAdd;
+        break;
+      case 'carne':
+        existing.meat += randomAdd;
+        break;
     }
 
-    // Explicitly trigger CD and update charts for real time view
     this.cdr.detectChanges();
     if (this.charts) {
-      this.charts.forEach(chart => chart.update());
+      this.charts.forEach((chart) => chart.update());
     }
   }
 }

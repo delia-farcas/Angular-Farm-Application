@@ -29,9 +29,9 @@ describe('LunarReports', () => {
 
     const farm = {
       getAnimals: () => animals,
-      getAnimalById: (id: number) => animals.find(a => a.id === id),
+      getAnimalById: (id: number) => animals.find((a) => a.id === id),
       getLogsInRange: (_id: number, start: string, end: string) =>
-        animals[0].logs.filter(l => l.date >= start && l.date <= end),
+        animals[0].logs.filter((l) => l.date >= start && l.date <= end),
     };
 
     await TestBed.configureTestingModule({

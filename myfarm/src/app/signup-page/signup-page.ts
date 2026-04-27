@@ -1,7 +1,15 @@
 import { Component, Output, EventEmitter, inject } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 import { UserTrackingService } from '../services/user-tracking.service';
 
+/** Executes the Password match validator logic. */
 function passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
   const confirm = group.get('confirmPassword')?.value;
@@ -29,16 +37,16 @@ export class SignupPage {
       password: ['', Validators.required],
       confirmPassword: ['', Validators.required],
     },
-    { validators: passwordMatchValidator }
+    { validators: passwordMatchValidator },
   );
 
+  /** Handles the submit event. */
   onSubmit(): void {
     if (this.signupForm.invalid) {
       this.signupForm.markAllAsTouched();
       return;
     }
-    
-    // Save user profile in tracking service local storage
+
     const formData = { ...this.signupForm.value };
     delete formData.confirmPassword; // Avoid saving confirmation
     this.trackingService.registerUser(formData);
@@ -46,6 +54,7 @@ export class SignupPage {
     this.signupSuccess.emit();
   }
 
+  /** Handles the login click event. */
   onLoginClick(): void {
     this.goToLogin.emit();
   }

@@ -7,21 +7,21 @@ import { AddAnimal } from './add-animal/add-animal';
 import { ManagePage } from './manage-page/manage-page';
 
 export const routes: Routes = [
-  { 
-    path: '', 
-    component: StartingPage
+  {
+    path: '',
+    component: StartingPage,
   },
   {
-    path: 'home', 
-    component: AppPage
+    path: 'home',
+    component: AppPage,
   },
   {
     path: 'bazinga',
-    component: BazingaPage
+    component: BazingaPage,
   },
   {
     path: 'raports',
-    component: RaportsPage
+    component: RaportsPage,
   },
   {
     path: 'add',
@@ -30,5 +30,5 @@ export const routes: Routes = [
   {
     path: 'manage',
     component: ManagePage,
-  }
+  },
 ];

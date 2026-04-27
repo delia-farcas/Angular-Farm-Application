@@ -26,48 +26,36 @@
   </div>
 
   @if (view === 'table') {
-    <div class = "table-container">
-    <table class="data-table" id="data-table">
-      <thead>
-        <tr>
-          <th>Lună</th>
-          <th>{{ selectedAnimal?.name }} ({{ unit }})</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let row of tableRows">
-          <td>{{ row.label }}</td>
-          <td>{{ row.total }}</td>
-        </tr>
-        <tr class="total-row">
-          <td>Total Anual</td>
-          <td>{{ total }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <div style="background:#fff; border-radius: 14px; padding: 16px;">
-      <canvas
-        baseChart
-        [type]="'line'"
-        [data]="chartData"
-        [options]="chartOptions">
-      </canvas>
+    <div class="table-container">
+      <table class="data-table" id="data-table">
+        <thead>
+          <tr>
+            <th>Lună</th>
+            <th>{{ selectedAnimal?.name }} ({{ unit }})</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of tableRows">
+            <td>{{ row.label }}</td>
+            <td>{{ row.total }}</td>
+          </tr>
+          <tr class="total-row">
+            <td>Total Anual</td>
+            <td>{{ total }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="background: #fff; border-radius: 14px; padding: 16px">
+        <canvas baseChart [type]="'line'" [data]="chartData" [options]="chartOptions"> </canvas>
+      </div>
     </div>
-    </div>
-  }
-  @else {
-    <div class = "chart-container">
-      <canvas
-        baseChart
-        [type]="'line'"
-        [data]="chartData"
-        [options]="chartOptions">
-      </canvas>
+  } @else {
+    <div class="chart-container">
+      <canvas baseChart [type]="'line'" [data]="chartData" [options]="chartOptions"> </canvas>
     </div>
   }
 
   <div class="toggles-container">
-    <!-- View Toggle -->
     <div class="view-toggle">
       <span class="label">tabel</span>
       <label class="switch" for="view-switch">
@@ -76,27 +64,33 @@
           id="view-switch"
           class="switch-input"
           [checked]="view === 'chart'"
-          (change)="onToggleView($event)"/>
+          (change)="onToggleView($event)"
+        />
         <span class="switch-track">
           <span class="switch-knob"></span>
         </span>
       </label>
       <span class="label">grafic</span>
     </div>
-    <!-- Generator Toggle -->
+
     <div class="view-toggle">
-      <span class="label" style="font-size: 14px; font-weight: normal; color: #555;">Oprește Gen.</span>
+      <span class="label" style="font-size: 14px; font-weight: normal; color: #555"
+        >Oprește Gen.</span
+      >
       <label class="switch" for="gen-switch-yr">
         <input
           type="checkbox"
           id="gen-switch-yr"
           class="switch-input"
-          (change)="toggleGenerator($event)"/>
+          (change)="toggleGenerator($event)"
+        />
         <span class="switch-track">
           <span class="switch-knob"></span>
         </span>
       </label>
-      <span class="label" style="font-size: 14px; font-weight: normal; color: #555;">Pornește Gen.</span>
+      <span class="label" style="font-size: 14px; font-weight: normal; color: #555"
+        >Pornește Gen.</span
+      >
     </div>
   </div>
 </div>

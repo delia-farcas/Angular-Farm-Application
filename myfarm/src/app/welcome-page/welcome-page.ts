@@ -1,5 +1,4 @@
-import { Component, Output, EventEmitter} from '@angular/core';
-
+import { Component, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-welcome-page',
@@ -11,7 +10,7 @@ import { Component, Output, EventEmitter} from '@angular/core';
 export class WelcomePage {
   @Output() goToAuthenticate = new EventEmitter<void>();
 
-
+  /** Handles the authenticate click event. */
   onAuthenticateClick() {
     this.goToAuthenticate.emit();
   }

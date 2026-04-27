@@ -1,6 +1,5 @@
 <div class="page auth-page">
   <div class="auth-container">
-    <!-- Form Side (Left) -->
     <div class="auth-form-side">
       <h2 class="auth-heading">Accesează contul</h2>
       <form class="auth-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
@@ -8,26 +7,34 @@
           <label for="username">Username sau email:</label>
           <input type="text" id="username" formControlName="username" placeholder="Username" />
           <span class="error-msg">
-            {{ loginForm.get('username')?.touched && loginForm.get('username')?.hasError('required') ? 'Câmpul este obligatoriu.' : '' }}
+            {{
+              loginForm.get('username')?.touched && loginForm.get('username')?.hasError('required')
+                ? 'Câmpul este obligatoriu.'
+                : ''
+            }}
           </span>
         </div>
         <div class="form-group">
           <label for="password">Parola:</label>
           <input type="password" id="password" formControlName="password" placeholder="Parola" />
           <span class="error-msg">
-            {{ loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required') ? 'Câmpul este obligatoriu.' : '' }}
+            {{
+              loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')
+                ? 'Câmpul este obligatoriu.'
+                : ''
+            }}
           </span>
         </div>
         <button type="submit" class="btn btn-primary btn-auth">Conectare</button>
       </form>
     </div>
-    <!-- Brand Side (Right) -->
+
     <div class="auth-brand-side">
-      <img src="logo2.svg" alt="Logo Ferma Mea" class="brand-logo">
-      <div class = "brand-texts">
-      <p class="brand-welcome">Bine ai revenit!</p>
-      <p class="brand-subtitle">Vrei să te alături fermei?</p>
-      <a class="link-underline" (click)="onSignupClick()">Creează cont</a>
+      <img src="logo2.svg" alt="Logo Ferma Mea" class="brand-logo" />
+      <div class="brand-texts">
+        <p class="brand-welcome">Bine ai revenit!</p>
+        <p class="brand-subtitle">Vrei să te alături fermei?</p>
+        <a class="link-underline" (click)="onSignupClick()">Creează cont</a>
       </div>
     </div>
   </div>

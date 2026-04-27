@@ -1,35 +1,32 @@
-  <div class="page">
-    <h1 class="title">Raport Lunar</h1>
+<div class="page">
+  <h1 class="title">Raport Lunar</h1>
 
-    <!-- Filters -->
-    <div class="filters">
-      <!-- Product Category -->
-      <div class="filter-group">
-        <span class="label">categorii de produse</span>
-        <div class="dropdown-wrapper">
-          <select id="select-category" class="dropdown" [(ngModel)]="category">
-            <option value="lapte">lapte</option>
-            <option value="oua">ouă</option>
-            <option value="lana">lână</option>
-            <option value="ore_munca">ore muncă</option>
-            <option value="carne">carne</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Animal Selection -->
-      <div class="filter-group">
-        <span class="label">animal</span>
-        <div class="dropdown-wrapper">
-          <select class="dropdown" [(ngModel)]="selectedAnimalId">
-            <option *ngFor="let a of animals" [ngValue]="a.id">{{ a.icon }} {{ a.name }}</option>
-          </select>
-        </div>
+  <div class="filters">
+    <div class="filter-group">
+      <span class="label">categorii de produse</span>
+      <div class="dropdown-wrapper">
+        <select id="select-category" class="dropdown" [(ngModel)]="category">
+          <option value="lapte">lapte</option>
+          <option value="oua">ouă</option>
+          <option value="lana">lână</option>
+          <option value="ore_munca">ore muncă</option>
+          <option value="carne">carne</option>
+        </select>
       </div>
     </div>
 
-    @if (view === 'table') {
-    <div class = "table-container">
+    <div class="filter-group">
+      <span class="label">animal</span>
+      <div class="dropdown-wrapper">
+        <select class="dropdown" [(ngModel)]="selectedAnimalId">
+          <option *ngFor="let a of animals" [ngValue]="a.id">{{ a.icon }} {{ a.name }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  @if (view === 'table') {
+    <div class="table-container">
       <table class="data-table" id="data-table">
         <thead>
           <tr>
@@ -49,29 +46,17 @@
         </tbody>
       </table>
 
-      <div style="background:#fff; border-radius: 14px; padding: 16px;">
-        <canvas
-          baseChart
-          [type]="'line'"
-          [data]="chartData"
-          [options]="chartOptions">
-        </canvas>
+      <div style="background: #fff; border-radius: 14px; padding: 16px">
+        <canvas baseChart [type]="'line'" [data]="chartData" [options]="chartOptions"> </canvas>
       </div>
     </div>
-    }
-    @else {
-      <div style="background:#fff; border-radius: 14px; padding: 16px;">
-        <canvas
-          baseChart
-          [type]="'line'"
-          [data]="chartData"
-          [options]="chartOptions">
-        </canvas>
-      </div>
-    }
+  } @else {
+    <div style="background: #fff; border-radius: 14px; padding: 16px">
+      <canvas baseChart [type]="'line'" [data]="chartData" [options]="chartOptions"> </canvas>
+    </div>
+  }
 
   <div class="toggles-container">
-    <!-- View Toggle -->
     <div class="view-toggle">
       <span class="label">tabel</span>
       <label class="switch" for="view-switch">
@@ -80,7 +65,8 @@
           id="view-switch"
           class="switch-input"
           [checked]="view === 'chart'"
-          (change)="onToggleView($event)"/>
+          (change)="onToggleView($event)"
+        />
         <span class="switch-track">
           <span class="switch-knob"></span>
         </span>
@@ -88,20 +74,24 @@
       <span class="label">grafic</span>
     </div>
 
-    <!-- Generator Toggle -->
     <div class="view-toggle">
-      <span class="label" style="font-size: 14px; font-weight: normal; color: #555;">Oprește Gen.</span>
+      <span class="label" style="font-size: 14px; font-weight: normal; color: #555"
+        >Oprește Gen.</span
+      >
       <label class="switch" for="gen-switch-lun">
         <input
           type="checkbox"
           id="gen-switch-lun"
           class="switch-input"
-          (change)="toggleGenerator($event)"/>
+          (change)="toggleGenerator($event)"
+        />
         <span class="switch-track">
           <span class="switch-knob"></span>
         </span>
       </label>
-      <span class="label" style="font-size: 14px; font-weight: normal; color: #555;">Pornește Gen.</span>
+      <span class="label" style="font-size: 14px; font-weight: normal; color: #555"
+        >Pornește Gen.</span
+      >
     </div>
   </div>
-  </div>
+</div>

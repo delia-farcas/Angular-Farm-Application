@@ -17,4 +17,3 @@ export interface Animal {
   count: number;
   logs: DailyLogEntry[];
 }
-

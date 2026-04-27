@@ -1,61 +1,57 @@
-/* Structura principală a paginii (centrare pe ecran) */
-.page { 
-    min-height: 100vh; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Fundalul și spațierea specifică paginii de prezentare */
 .presentation-page {
-    flex-direction: column;
-    gap: 32px;
-    padding: 30px 24px;
-    text-align: center;
+  flex-direction: column;
+  gap: 32px;
+  padding: 30px 24px;
+  text-align: center;
 }
 
-/* Stilul pentru Logo - Responsiv și centrat */
-.logo { 
-    max-width: 466px; 
-    width: 90%;      
-    height: auto;    
-    display: block;  /* Schimbat din flex în block pentru că e o imagine singură */
-    margin: 0 auto;  
+.logo {
+  max-width: 466px;
+  width: 90%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
 }
 
-/* Stilul pentru textul de descriere */
 .description {
-    max-width: 900px;
-    font-size: 22px;
-    font-family: 'Poppins', Helvetica, sans-serif;
-    line-height: 1.5;
-    padding: 0 16px;
-    color: #2e2f31; /* Am adăugat culoarea din fișierul anterior pentru vizibilitate */
+  max-width: 900px;
+  font-size: 22px;
+  font-family: 'Poppins', Helvetica, sans-serif;
+  line-height: 1.5;
+  padding: 0 16px;
+  color: #2e2f31;
 }
 
-/* Stilul de bază pentru buton */
 .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    cursor: pointer;
-    font-family: 'Poppins', Helvetica, sans-serif;
-    font-weight: 500;
-    text-decoration: none;
-    transition: opacity 0.2s, transform 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  font-family: 'Poppins', Helvetica, sans-serif;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    opacity 0.2s,
+    transform 0.15s;
 }
 
-.btn:hover { 
-    opacity: 0.9; 
-    transform: translateY(-1px); 
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
-/* Culoarea și dimensiunea specifică butonului principal */
 .btn-primary {
-    background-color: #388333;
-    color: #dfdfdf;
-    font-size: 24px;
-    padding: 14px 48px;
-    border-radius: 13px;
+  background-color: #388333;
+  color: #dfdfdf;
+  font-size: 24px;
+  padding: 14px 48px;
+  border-radius: 13px;
 }

@@ -20,12 +20,13 @@ export class LoginPage {
     password: ['', Validators.required],
   });
 
+  /** Handles the submit event. */
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
     }
-    
+
     const { username, password } = this.loginForm.value;
     const isValid = this.trackingService.verifyUser(username, password);
 
@@ -39,8 +40,8 @@ export class LoginPage {
     }
   }
 
+  /** Handles the signup click event. */
   onSignupClick(): void {
     this.goToSignup.emit();
   }
-
 }

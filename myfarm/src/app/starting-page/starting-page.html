@@ -1,19 +1,11 @@
 <div class="full-page-bg">
   @if (currentPage === 'welcome') {
     <app-welcome-page (goToAuthenticate)="showLogin()"></app-welcome-page>
-  } 
-  
-  @else if (currentPage === 'login') {
-    <app-login-page 
-      (goToSignup)="showSignup()" 
-      (loginSuccess)="navigateToDashboard()">
+  } @else if (currentPage === 'login') {
+    <app-login-page (goToSignup)="showSignup()" (loginSuccess)="navigateToDashboard()">
     </app-login-page>
-  } 
-  
-  @else if (currentPage === 'signup') {
-    <app-signup-page 
-      (goToLogin)="showLogin()"
-      (signupSuccess)="navigateToDashboard()">
+  } @else if (currentPage === 'signup') {
+    <app-signup-page (goToLogin)="showLogin()" (signupSuccess)="navigateToDashboard()">
     </app-signup-page>
   }
 </div>

@@ -1,27 +1,26 @@
-.frame{
-    display:flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
+.frame {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
 .action-buttons-container {
-    display: flex;
-    gap: 30px;
-}
-
-.icon-button{
-    cursor: pointer;
-
+  display: flex;
+  gap: 30px;
 }
 
 .icon-button {
-  background: none;      
-  border: none;          
-  padding: 0;            
-  outline: none;        
-  cursor: pointer;       
-  display: flex;         
+  cursor: pointer;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  padding: 0;
+  outline: none;
+  cursor: pointer;
+  display: flex;
   align-items: center;
   justify-content: center;
 }

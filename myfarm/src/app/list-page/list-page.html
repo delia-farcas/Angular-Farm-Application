@@ -1,59 +1,68 @@
 <div class="content-panel">
-    <!-- Header row -->
-    <div class="header-row">
-      <h1 class="greeting">Salut, {{ currentUsername }}!</h1>
-      <div class="header-actions">
-        <div class="search-bar">
-          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-          </svg>
-          <input type="text" placeholder="caută" />
-        </div>
-        <div class="filter-select">
-          <select [(ngModel)]="selectedType">
-            <option value="toate">Filtrează: Toate</option>
-            <option value="vaca">Vacă</option>
-            <option value="porc">Porc</option>
-            <option value="gaina">Găină</option>
-            <option value="oaie">Oaie</option>
-            <option value="capra">Capră</option>
-            <option value="cal">Cal</option>
-          </select>
-        </div>
+  <div class="header-row">
+    <h1 class="greeting">Salut, {{ currentUsername }}!</h1>
+    <div class="header-actions">
+      <div class="search-bar">
+        <svg
+          class="search-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+        <input type="text" placeholder="caută" />
+      </div>
+      <div class="filter-select">
+        <select [(ngModel)]="selectedType">
+          <option value="toate">Filtrează: Toate</option>
+          <option value="vaca">Vacă</option>
+          <option value="porc">Porc</option>
+          <option value="gaina">Găină</option>
+          <option value="oaie">Oaie</option>
+          <option value="capra">Capră</option>
+          <option value="cal">Cal</option>
+        </select>
       </div>
     </div>
-
-    <!-- Add button row -->
-    <div class="add-row">
-      <button class="btn-add" (click)="navigatetoAddAnimal()">Adaugă animal</button>
-    </div>
-
-    <!-- Table -->
-    <table class="animal-table">
-      <thead>
-        <tr>
-          <th>animal</th>
-          <th>id</th>
-          <th>nume</th>
-          <th>sănătate</th>
-          <th>localizare</th>
-          <th>acțiuni</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr app-animal-row 
-          *ngFor="let animal of filteredAnimals" 
-          [animal]="animal"
-          [display]="'row'"
-          (edit)="editAnimal($event)"
-          (delete)="deleteAnimal($event)">
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Manage button -->
-    <div class="manage-row">
-      <button class="btn-manage" (click)="navigateToManage()">Gestionează</button>
-    </div>
   </div>
+
+  <div class="add-row">
+    <button class="btn-add" (click)="navigatetoAddAnimal()">Adaugă animal</button>
+  </div>
+
+  <table class="animal-table">
+    <thead>
+      <tr>
+        <th>animal</th>
+        <th>id</th>
+        <th>nume</th>
+        <th>sănătate</th>
+        <th>localizare</th>
+        <th>acțiuni</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr
+        app-animal-row
+        *ngFor="let animal of filteredAnimals"
+        [animal]="animal"
+        [display]="'row'"
+        (edit)="editAnimal($event)"
+        (delete)="deleteAnimal($event)"
+      ></tr>
+    </tbody>
+  </table>
+
+  <div class="manage-row">
+    <button class="btn-manage" (click)="navigateToManage()">Gestionează</button>
+  </div>
+</div>

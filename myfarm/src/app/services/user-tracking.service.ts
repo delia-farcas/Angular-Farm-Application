@@ -2,45 +2,54 @@ import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserTrackingService {
   private readonly cookieConsentKey = 'cookieConsent';
   private readonly pendingConsentPromptKey = 'pendingCookieConsentPrompt';
 
-  constructor(private cookieService: CookieService) { }
+  /** Instantiates the component and injects dependencies. */
+  constructor(private cookieService: CookieService) {}
 
+  /** Handles the Is cookies allowed functionality. */
   isCookiesAllowed(): boolean {
     return localStorage.getItem(this.cookieConsentKey) === 'accepted';
   }
 
+  /** Sets the cookie consent. */
   setCookieConsent(accepted: boolean): void {
     localStorage.setItem(this.cookieConsentKey, accepted ? 'accepted' : 'declined');
     sessionStorage.removeItem(this.pendingConsentPromptKey);
   }
 
+  /** Handles the Has cookie consent decision functionality. */
   hasCookieConsentDecision(): boolean {
     return localStorage.getItem(this.cookieConsentKey) !== null;
   }
 
+  /** Handles the Mark cookie consent prompt pending functionality. */
   markCookieConsentPromptPending(): void {
     sessionStorage.setItem(this.pendingConsentPromptKey, 'true');
   }
 
+  /** Handles the Is cookie consent prompt pending functionality. */
   isCookieConsentPromptPending(): boolean {
     return sessionStorage.getItem(this.pendingConsentPromptKey) === 'true';
   }
 
+  /** Handles the Clear cookie consent prompt pending functionality. */
   clearCookieConsentPromptPending(): void {
     sessionStorage.removeItem(this.pendingConsentPromptKey);
   }
 
+  /** Sets the preference. */
   setPreference(key: string, value: string): void {
     if (this.isCookiesAllowed()) {
       this.cookieService.set(key, value, 365, '/', '', true, 'Strict');
     }
   }
 
+  /** Retrieves the preference. */
   getPreference(key: string): string {
     if (this.isCookiesAllowed()) {
       return this.cookieService.get(key) || '';
@@ -48,6 +57,7 @@ export class UserTrackingService {
     return '';
   }
 
+  /** Handles the Log activity functionality. */
   logActivity(activity: string): void {
     if (this.isCookiesAllowed()) {
       const key = 'user_activities';
@@ -59,6 +69,7 @@ export class UserTrackingService {
     }
   }
 
+  /** Retrieves the activities. */
   getActivities(): any[] {
     if (this.isCookiesAllowed()) {
       const current = this.cookieService.get('user_activities');
@@ -67,7 +78,7 @@ export class UserTrackingService {
     return [];
   }
 
-  
+  /** Handles the Increment counter functionality. */
   incrementCounter(key: string): void {
     if (this.isCookiesAllowed()) {
       const current = parseInt(this.cookieService.get(key) || '0');
@@ -75,19 +86,22 @@ export class UserTrackingService {
     }
   }
 
+  /** Retrieves the counter. */
   getCounter(key: string): number {
     if (this.isCookiesAllowed()) {
       return parseInt(this.cookieService.get(key) || '0');
     }
     return 0;
   }
-  
+
+  /** Sets the last login. */
   setLastLogin(): void {
     if (this.isCookiesAllowed()) {
       this.cookieService.set('last_login', new Date().toISOString(), 365);
     }
   }
 
+  /** Retrieves the last login. */
   getLastLogin(): string {
     if (this.isCookiesAllowed()) {
       return this.cookieService.get('last_login');
@@ -95,21 +109,22 @@ export class UserTrackingService {
     return '';
   }
 
-  // Page visits
+  /** Handles the Log page visit functionality. */
   logPageVisit(page: string): void {
     this.incrementCounter(`page_visit_${page}`);
   }
 
+  /** Retrieves the page visits. */
   getPageVisits(page: string): number {
     return this.getCounter(`page_visit_${page}`);
   }
 
-  // --- Authentification logic ---
+  /** Handles the Register user functionality. */
   registerUser(userData: any): void {
-    if (this.isCookiesAllowed() || true) { // We store locally anyway to satisfy the functional requirement
+    if (this.isCookiesAllowed() || true) {
       const usersStr = localStorage.getItem('app_users') || '[]';
       const users = JSON.parse(usersStr);
-      // verify if user already exists
+
       const existing = users.find((u: any) => u.username === userData.username);
       if (existing) {
         Object.assign(existing, userData);
@@ -117,28 +132,31 @@ export class UserTrackingService {
         users.push(userData);
       }
       localStorage.setItem('app_users', JSON.stringify(users));
-      
-      // Auto login on register
+
       this.setCurrentUser(userData.username);
     }
   }
 
+  /** Handles the Verify user functionality. */
   verifyUser(username: string, pass: string): boolean {
     const usersStr = localStorage.getItem('app_users') || '[]';
     const users = JSON.parse(usersStr);
     return users.some((u: any) => u.username === username && u.password === pass);
   }
 
+  /** Sets the current user. */
   setCurrentUser(username: string): void {
     this.cookieService.set('current_user', username, 7);
-    // fallback or sync to local storage for quick access
+
     localStorage.setItem('current_user', username);
   }
 
+  /** Retrieves the current user. */
   getCurrentUser(): string {
     return localStorage.getItem('current_user') || 'Delia'; // Default back to Delia if no one is logged in
   }
 
+  /** Retrieves the current user profile. */
   getCurrentUserProfile(): any {
     const usersStr = localStorage.getItem('app_users') || '[]';
     const users = JSON.parse(usersStr);

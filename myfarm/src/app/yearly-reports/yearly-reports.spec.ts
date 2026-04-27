@@ -26,9 +26,9 @@ describe('YearlyReports', () => {
 
     const farm = {
       getAnimals: () => animals,
-      getAnimalById: (id: number) => animals.find(a => a.id === id),
+      getAnimalById: (id: number) => animals.find((a) => a.id === id),
       getLogsInRange: (_id: number, start: string, end: string) =>
-        animals[0].logs.filter(l => l.date >= start && l.date <= end),
+        animals[0].logs.filter((l) => l.date >= start && l.date <= end),
     };
 
     await TestBed.configureTestingModule({
@@ -53,11 +53,11 @@ describe('YearlyReports', () => {
     component.selectedAnimalId = 1;
 
     component.category = 'lapte';
-    const milkTotals = component.tableRows.map(r => r.total);
-    expect(milkTotals.some(v => v > 0)).toBe(true);
+    const milkTotals = component.tableRows.map((r) => r.total);
+    expect(milkTotals.some((v) => v > 0)).toBe(true);
 
     component.category = 'oua';
-    const eggTotals = component.tableRows.map(r => r.total);
-    expect(eggTotals.some(v => v > 0)).toBe(true);
+    const eggTotals = component.tableRows.map((r) => r.total);
+    expect(eggTotals.some((v) => v > 0)).toBe(true);
   });
 });

@@ -7,7 +7,7 @@
 }
 
 .page {
-  font-family: "Poppins", sans-serif;
+  font-family: 'Poppins', sans-serif;
   background-color: #f5f3ee;
   color: #2e2f31;
   width: 100%;
@@ -21,13 +21,13 @@
 }
 
 .chart-container {
-  height: 350px; 
+  height: 350px;
   width: 100%;
-  background-color: #f5f3ee;   
+  background-color: #f5f3ee;
 }
 
-.table-container{
-  display:flex;
+.table-container {
+  display: flex;
   gap: 2rem;
 }
 
@@ -65,7 +65,7 @@
 .dropdown {
   appearance: none;
   -webkit-appearance: none;
-  font-family: "Poppins", sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-size: 0.95rem;
   color: #2e2f31;
   background-color: #d9d9d9;
@@ -102,7 +102,11 @@
   border-radius: 50%;
   background: none;
   cursor: pointer;
-  transition: transform 0.15s, border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+  transition:
+    transform 0.15s,
+    border-color 0.15s,
+    background-color 0.15s,
+    box-shadow 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -122,20 +126,20 @@
 
 .data-table {
   width: 100%;
-  max-width: 600px; /* Am păstrat o lățime rezonabilă */
+  max-width: 600px;
   border-collapse: collapse;
-  font-family: "Inter", "Poppins", sans-serif;
+  font-family: 'Inter', 'Poppins', sans-serif;
   margin: 0 auto;
 }
 
 .data-table th,
 .data-table td {
   border: 1px solid #757575;
-  /* Reducem padding-ul drastic: 0.2rem sus/jos, 0.5rem stânga/dreapta */
-  padding: 0.25rem 0.5rem; 
+
+  padding: 0.25rem 0.5rem;
   text-align: center;
-  font-size: 0.85rem; /* Micșorăm puțin scrisul ca să ocupe mai puțin loc */
-  line-height: 1.2;    /* Forțăm rândurile să fie mai apropiate */
+  font-size: 0.85rem;
+  line-height: 1.2;
 }
 
 .data-table th {

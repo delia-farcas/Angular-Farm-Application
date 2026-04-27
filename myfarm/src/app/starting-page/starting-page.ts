@@ -16,23 +16,28 @@ import { UserTrackingService } from '../services/user-tracking.service';
 export class StartingPage {
   currentPage: 'welcome' | 'login' | 'signup' = 'welcome';
 
+  /** Instantiates the component and injects dependencies. */
   constructor(
     private router: Router,
-    private trackingService: UserTrackingService
+    private trackingService: UserTrackingService,
   ) {}
 
+  /** Handles the Show welcome functionality. */
   showWelcome() {
     this.currentPage = 'welcome';
   }
 
+  /** Handles the Show login functionality. */
   showLogin() {
     this.currentPage = 'login';
   }
 
+  /** Handles the Show signup functionality. */
   showSignup() {
     this.currentPage = 'signup';
   }
 
+  /** Navigates to to dashboard. */
   navigateToDashboard() {
     this.trackingService.markCookieConsentPromptPending();
     this.router.navigate(['home']);

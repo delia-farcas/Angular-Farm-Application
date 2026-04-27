@@ -1,15 +1,14 @@
 <div class="page auth-page">
   <div class="auth-container">
-    <!-- Brand Side (Left) -->
     <div class="auth-brand-side">
-      <img src="logo2.svg" alt="Logo Ferma Mea" class="brand-logo">
-      <div class = "brand-texts">
+      <img src="logo2.svg" alt="Logo Ferma Mea" class="brand-logo" />
+      <div class="brand-texts">
         <p class="brand-welcome">Ne bucurăm să te cunoaștem!</p>
         <p class="brand-subtitle">Ai deja un cont?</p>
         <a class="link-underline" (click)="onLoginClick()">Accesează contul</a>
       </div>
     </div>
-    <!-- Form Side (Right) -->
+
     <div class="auth-form-side">
       <h2 class="auth-heading">Creează contul</h2>
       <form class="auth-form" [formGroup]="signupForm" (ngSubmit)="onSubmit()">
@@ -17,29 +16,63 @@
           <label for="email">Email:</label>
           <input type="email" id="email" formControlName="email" placeholder="Email" />
           <span class="error-msg">
-            {{ signupForm.get('email')?.touched && signupForm.get('email')?.hasError('required') ? 'Câmpul este obligatoriu.' :
-               signupForm.get('email')?.touched && signupForm.get('email')?.hasError('email') ? 'Email invalid.' : '' }}
+            {{
+              signupForm.get('email')?.touched && signupForm.get('email')?.hasError('required')
+                ? 'Câmpul este obligatoriu.'
+                : signupForm.get('email')?.touched && signupForm.get('email')?.hasError('email')
+                  ? 'Email invalid.'
+                  : ''
+            }}
           </span>
         </div>
         <div class="form-group">
           <label for="signup-username">Username:</label>
-          <input type="text" id="signup-username" formControlName="username" placeholder="Username" />
+          <input
+            type="text"
+            id="signup-username"
+            formControlName="username"
+            placeholder="Username"
+          />
           <span class="error-msg">
-            {{ signupForm.get('username')?.touched && signupForm.get('username')?.hasError('required') ? 'Câmpul este obligatoriu.' : '' }}
+            {{
+              signupForm.get('username')?.touched &&
+              signupForm.get('username')?.hasError('required')
+                ? 'Câmpul este obligatoriu.'
+                : ''
+            }}
           </span>
         </div>
         <div class="form-group">
           <label for="signup-password">Parola:</label>
-          <input type="password" id="signup-password" formControlName="password" placeholder="Parola" />
+          <input
+            type="password"
+            id="signup-password"
+            formControlName="password"
+            placeholder="Parola"
+          />
           <span class="error-msg">
-            {{ signupForm.get('password')?.touched && signupForm.get('password')?.hasError('required') ? 'Câmpul este obligatoriu.' : '' }}
+            {{
+              signupForm.get('password')?.touched &&
+              signupForm.get('password')?.hasError('required')
+                ? 'Câmpul este obligatoriu.'
+                : ''
+            }}
           </span>
         </div>
         <div class="form-group">
           <label for="confirm-password">Re-scrie parola:</label>
-          <input type="password" id="confirm-password" formControlName="confirmPassword" placeholder="Parola" />
+          <input
+            type="password"
+            id="confirm-password"
+            formControlName="confirmPassword"
+            placeholder="Parola"
+          />
           <span class="error-msg">
-            {{ signupForm.get('confirmPassword')?.touched && signupForm.hasError('passwordMismatch') ? 'Parolele nu coincid.' : '' }}
+            {{
+              signupForm.get('confirmPassword')?.touched && signupForm.hasError('passwordMismatch')
+                ? 'Parolele nu coincid.'
+                : ''
+            }}
           </span>
         </div>
         <button type="submit" class="btn btn-primary btn-auth">Înregistrare</button>

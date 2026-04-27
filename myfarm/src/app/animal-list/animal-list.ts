@@ -12,23 +12,22 @@ import { AnimalService } from '../services/animal'; // 1. Importă Service-ul
   styleUrl: './animal-list.css',
 })
 export class AnimalList implements OnInit {
-  // Lista începe goală, o vom popula din Service
   animals: Animal[] = [];
 
-  // 2. Injectăm Service-ul în constructor
+  /** Instantiates the component and injects dependencies. */
   constructor(private animalService: AnimalService) {}
 
-  // 3. ngOnInit se execută automat când apare componenta pe ecran
+  /** Initializes the component. */
   ngOnInit() {
     this.refreshList();
   }
 
-  // Funcție utilitară ca să nu repetăm codul de citire a listei
+  /** Handles the Refresh list functionality. */
   refreshList() {
     this.animals = this.animalService.getAnimals();
   }
 
-  // ➕ ADAUGARE
+  /** Handles the Add animal functionality. */
   addAnimal() {
     const newAnimal: Animal = {
       id: Date.now(),
@@ -38,33 +37,35 @@ export class AnimalList implements OnInit {
       type: 'vaca',
       sex: 'femela', // Adăugat pentru a respecta noul model din Service
       age: 1,
-      observations: ''
+      observations: '',
     };
 
     this.animalService.addAnimal(newAnimal);
     this.refreshList(); // Actualizăm ce vede utilizatorul
   }
 
-  // ❌ STERGERE
+  /** Handles the Delete animal functionality. */
   deleteAnimal(id: number) {
     this.animalService.deleteAnimal(id);
     this.refreshList(); // Actualizăm lista după ștergere
   }
 
-  // ✏️ EDITARE
+  /** Handles the Edit animal functionality. */
   editAnimal(animal: Animal) {
-    // Acum putem folosi updateAnimal din service
     const updatedAnimal = { ...animal, status: 'In tratament' };
     this.animalService.updateAnimal(updatedAnimal);
     this.refreshList();
   }
 
-  // 🖼️ Imaginile pot rămâne aici (țin de design/afisare)
+  /** Retrieves the images. */
   getImages(type: string): string[] {
     switch (type) {
-      case 'vaca': return ['assets/vaca/vector.svg', 'assets/vaca/vector-2.svg'];
-      case 'gaina': return ['assets/gaina/vector.svg'];
-      default: return [];
+      case 'vaca':
+        return ['assets/vaca/vector.svg', 'assets/vaca/vector-2.svg'];
+      case 'gaina':
+        return ['assets/gaina/vector.svg'];
+      default:
+        return [];
     }
   }
 }
