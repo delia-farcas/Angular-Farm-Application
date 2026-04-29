@@ -4,7 +4,9 @@ import lombok.*;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor @AllArgsConstructor
 public class ProductionLog {
     private Long id;
 

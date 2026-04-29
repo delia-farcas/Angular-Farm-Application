@@ -88,7 +88,7 @@ export class YearlyReports {
       const endDate = new Date(this.year, idx + 1, 0).getDate();
       const end = `${this.year}-${this.pad2(idx + 1)}-${this.pad2(endDate)}`;
       const logs = this.farm.getLogsInRange(this.selectedAnimalId, start, end);
-      const total = logs.reduce((sum, l) => sum + this.getValueForCategory(l), 0);
+      const total = (Array.isArray(logs) ? logs : []).reduce((sum: number, l: { milk: number; eggs: number; wool: number; workHours: number; meat: number; }) => sum + this.getValueForCategory(l), 0);
       return { label, total };
     });
   }

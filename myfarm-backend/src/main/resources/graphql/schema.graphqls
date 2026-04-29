@@ -1,0 +1,53 @@
+type Animal {
+    id: ID
+    name: String
+    type: String
+    ownerId: ID
+}
+
+type User {
+    id: ID
+    username: String
+    email: String
+}
+
+type ProductionLog {
+    id: ID
+    reportDate: String
+    milkLitersCow: Float
+    milkLitersSheep: Float
+    meatKg: Float
+    eggsCount: Int
+    woolKg: Float
+    workHours: Float
+    userId: ID
+}
+
+type ReportEntry {
+    label: String
+    value: Float
+}
+
+input ProductionLogInput {
+    reportDate: String!
+    milkLitersCow: Float
+    milkLitersSheep: Float
+    meatKg: Float
+    eggsCount: Int
+    woolKg: Float
+    workHours: Float
+    userId: ID!
+}
+
+type Query {
+    getAnimalsByOwner(ownerId: ID!, page: Int!, size: Int!): [Animal]
+    getUserByEmail(email: String!): User
+    getProductionReport(userId: ID!, year: Int!, month: Int, resourceField: String!): [ReportEntry]
+}
+
+type Mutation {
+    addAnimal(name: String!, type: String!, ownerId: ID!): Animal
+    deleteAnimal(id: ID!): Boolean
+    registerUser(username: String!, email: String!, password: String!): User
+    saveProductionLog(input: ProductionLogInput!): ProductionLog
+}

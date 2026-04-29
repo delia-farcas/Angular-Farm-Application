@@ -38,6 +38,7 @@
     <button class="btn-add" (click)="navigatetoAddAnimal()">Adaugă animal</button>
   </div>
 
+  <div class="table-container"> 
   <table class="animal-table">
     <thead>
       <tr>
@@ -49,7 +50,6 @@
         <th>acțiuni</th>
       </tr>
     </thead>
-
     <tbody>
       <tr
         app-animal-row
@@ -61,7 +61,9 @@
       ></tr>
     </tbody>
   </table>
-
+</div>
+  <div *ngIf="isLoading" class="loading-text">Se încarcă animale...</div>
+  </div>
   <div class="manage-row">
     <button class="btn-manage" (click)="navigateToManage()">Gestionează</button>
   </div>

@@ -7,5 +7,6 @@ export interface Animal {
   status: string;
   location: string;
   observations: string;
+  ownerId: number; 
 }
 

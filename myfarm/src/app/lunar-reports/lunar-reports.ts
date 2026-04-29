@@ -99,7 +99,7 @@ export class LunarReports implements OnInit {
   get tableRows(): { label: string; total: number }[] {
     const startIso = this.monthStartIso();
     const endIso = this.monthEndIso();
-    const logs = this.farm.getLogsInRange(this.selectedAnimalId, startIso, endIso);
+    const logs = this.farm.getLogsInRange(this.selectedAnimalId, startIso, endIso) as any[];
     const endDay = new Date(this.year, this.monthIndex + 1, 0).getDate();
 
     const buckets = [
@@ -116,8 +116,8 @@ export class LunarReports implements OnInit {
       const fromIso = `${this.year}-${monthStr}-${pad(b.from)}`;
       const toIso = `${this.year}-${monthStr}-${pad(b.to)}`;
       const total = logs
-        .filter((l) => l.date >= fromIso && l.date <= toIso)
-        .reduce((sum, l) => sum + this.getValueForCategory(l), 0);
+        .filter((l: { date: string; }) => l.date >= fromIso && l.date <= toIso)
+        .reduce((sum: number, l: any) => sum + this.getValueForCategory(l), 0);
       return { label: `${b.from}-${b.to}`, total };
     });
   }

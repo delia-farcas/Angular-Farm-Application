@@ -96,6 +96,17 @@
   background: #569b51;
 }
 
+
+.table-container {
+    width: 100%;
+    height: 440px; 
+    overflow-y: auto; 
+    border: 1px solid #c5d9b2;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+
 .animal-table {
   width: 100%;
   border-collapse: collapse;
@@ -103,12 +114,16 @@
 }
 
 .animal-table thead th {
-  text-align: left;
-  font-weight: 400;
-  font-size: 0.95rem;
-  color: #2e2f31;
-  padding: 8px 12px;
-  border-bottom: 2px solid #398333;
+  position: sticky;
+    top: 0;
+    background: #f9f7f2;
+    z-index: 10;
+    text-align: left;
+    font-weight: 400;
+    font-size: 0.95rem;
+    color: #2e2f31;
+    padding: 8px 12px;
+    border-bottom: 2px solid #398333;
 }
 
 .animal-table tbody td {
@@ -125,7 +140,7 @@
 .manage-row {
   display: flex;
   justify-content: flex-end;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .btn-manage {

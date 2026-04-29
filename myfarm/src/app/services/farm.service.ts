@@ -1,23 +1,15 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
 import { Animal, DailyLogEntry } from '../models/farm';
-
-/** Executes the Iso date only logic. */
-function isoDateOnly(d: Date): string {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-/** Executes the Empty log logic. */
-function emptyLog(date: string): DailyLogEntry {
-  return { date, milk: 0, eggs: 0, wool: 0, workHours: 0, meat: 0 };
-}
 
 @Injectable({ providedIn: 'root' })
 export class FarmService {
+  private http = inject(HttpClient);
+  private apiUrl = 'http://localhost:8080/api/logs';
+
   private animals: Animal[] = [
-    { id: 1, name: 'Vaca', icon: '/animals/cow.svg', count: 1, logs: [] },
+    { id: 1, name: 'Vaca', icon: '/animals/cow.svg', count: 0, logs: [] },
     { id: 3, name: 'Porc', icon: '/animals/pig.svg', count: 0, logs: [] },
     { id: 4, name: 'Gaina', icon: '/animals/chick.svg', count: 0, logs: [] },
     { id: 5, name: 'Oaie', icon: '/animals/sheep.svg', count: 0, logs: [] },
@@ -25,64 +17,62 @@ export class FarmService {
     { id: 2, name: 'Cal', icon: '/animals/horse.svg', count: 0, logs: [] },
   ];
 
-  /** Retrieves the animals. */
   getAnimals(): Animal[] {
     return this.animals;
   }
 
-  /** Retrieves the animal by id. */
   getAnimalById(id: number): Animal | undefined {
     return this.animals.find((a) => a.id === id);
   }
 
-  /** Handles the Sync counts functionality. */
-  syncCounts(
-    countsByType: Partial<Record<'vaca' | 'cal' | 'porc' | 'gaina' | 'oaie' | 'capra', number>>,
-  ): void {
-    const typeToId: Record<'vaca' | 'cal' | 'porc' | 'gaina' | 'oaie' | 'capra', number> = {
-      vaca: 1,
-      cal: 2,
-      porc: 3,
-      gaina: 4,
-      oaie: 5,
-      capra: 6,
+  syncCounts(countsByType: Partial<Record<string, number>>): void {
+    const typeToId: Record<string, number> = {
+      vaca: 1, cal: 2, porc: 3, gaina: 4, oaie: 5, capra: 6,
     };
 
-    for (const [type, id] of Object.entries(typeToId) as Array<[keyof typeof typeToId, number]>) {
+    for (const [type, id] of Object.entries(typeToId)) {
       const animal = this.getAnimalById(id);
-      if (!animal) continue;
-      animal.count = countsByType[type] ?? 0;
+      if (animal) {
+        animal.count = countsByType[type] ?? 0;
+      }
     }
   }
 
-  /** Sets the count. */
-  setCount(id: number, count: number): void {
-    const animal = this.getAnimalById(id);
-    if (!animal) return;
-    animal.count = Math.max(0, Math.floor(count));
+  upsertLog(logData: any): Observable<any> {
+    return this.http.post(this.apiUrl, logData);
   }
 
-  /** Handles the Upsert today log functionality. */
-  upsertTodayLog(animalId: number, patch: Partial<Omit<DailyLogEntry, 'date'>>): void {
-    const animal = this.getAnimalById(animalId);
-    if (!animal) return;
+  getProductionReport(userId: number, year: number, month: number | null, resource: string): Observable<any[]> {
+    let params = new HttpParams()
+      .set('userId', userId.toString())
+      .set('year', year.toString())
+      .set('resourceField', resource);
 
-    const today = isoDateOnly(new Date());
-    const existing = animal.logs.find((l) => l.date === today);
-    if (!existing) {
-      animal.logs.push({ ...emptyLog(today), ...patch });
-      return;
-    }
-    Object.assign(existing, patch);
+    if (month) params = params.set('month', month.toString());
+
+    return this.http.get<Record<string, number>>(`${this.apiUrl}/report`, { params }).pipe(
+      map(data => Object.entries(data).map(([label, value]) => ({ label, value })))
+    );
   }
 
-  /** Retrieves the logs in range. */
-  getLogsInRange(animalId: number, startIso: string, endIso: string): DailyLogEntry[] {
-    const animal = this.getAnimalById(animalId);
-    if (!animal) return [];
-    return animal.logs
-      .filter((l) => l.date >= startIso && l.date <= endIso)
-      .slice()
-      .sort((a, b) => a.date.localeCompare(b.date));
-  }
+  upsertTodayLog(animalId: number, patch: Partial<Omit<DailyLogEntry, 'date'>>): Observable<any> {
+  const logData = {
+    reportDate: new Date().toISOString().split('T')[0], 
+    milkLitersCow: patch.milk || 0,
+    eggsCount: patch.eggs || 0,
+    woolKg: patch.wool || 0,
+    meatKg: patch.meat || 0,
+    workHours: patch.workHours || 0,
+    userId: 100 
+  };
+  return this.http.post(this.apiUrl, logData);
+}
+
+  getLogsInRange(animalId: number, startIso: string, endIso: string): Observable<DailyLogEntry[]> {
+  const params = new HttpParams()
+    .set('startDate', startIso)
+    .set('endDate', endIso);
+
+  return this.http.get<DailyLogEntry[]>(`${this.apiUrl}/history/${animalId}`, { params });
+}
 }

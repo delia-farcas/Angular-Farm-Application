@@ -14,25 +14,61 @@ import { Router } from '@angular/router';
   templateUrl: './list-page.html',
   styleUrl: './list-page.css',
 })
-export class ListPage {
+export class ListPage implements OnInit {
   @Output() goToManage = new EventEmitter<void>();
   @Output() goToAddAnimal = new EventEmitter<void>();
 
   private trackingService = inject(UserTrackingService);
-  currentUsername: string = 'Delia';
+  private animalService = inject(AnimalService);
+  private router = inject(Router);
 
-  /** Instantiates the component and injects dependencies. */
-  constructor(
-    private animalService: AnimalService,
-    private router: Router,
-  ) {}
+  currentUsername: string = 'Delia';
   animals: Animal[] = [];
   selectedType: 'toate' | 'vaca' | 'porc' | 'gaina' | 'cal' | 'oaie' | 'capra' = 'toate';
 
-  /** Initializes the component. */
+  // Parametri pentru paginare
+  currentPage = 0;
+  pageSize = 15;
+  isLoading = false;
+  hasMoreData = true; // Ne asigurăm că nu mai cerem date dacă backend-ul e gol
+
   ngOnInit() {
     this.currentUsername = this.trackingService.getCurrentUser();
-    this.animals = this.animalService.getAnimals();
+    this.loadAnimals(); // Încărcăm prima pagină
+  }
+
+  loadAnimals() {
+    if (this.isLoading || !this.hasMoreData) return;
+
+    this.isLoading = true;
+    // Folosim un ID de owner simulat (ex: 1)
+    this.animalService.getAnimalsPaginated(1, this.currentPage, this.pageSize).subscribe({
+      next: (newAnimals) => {
+        if (newAnimals.length < this.pageSize) {
+          this.hasMoreData = false; // Backend-ul a returnat mai puțin decât am cerut, deci e gata
+        }
+        this.animals = [...this.animals, ...newAnimals];
+        this.currentPage++;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Eroare la încărcarea animalelor', err);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  // Detectează scroll-ul în container
+  onTableScroll(event: any) {
+    const element = event.target;
+    // Dacă am ajuns la 90% din fundul containerului, încărcăm pagina următoare
+    const threshold = 100; 
+    const position = element.scrollHeight - element.scrollTop;
+    const offset = element.clientHeight + threshold;
+
+    if (position <= offset && !this.isLoading) {
+      this.loadAnimals();
+    }
   }
 
   get filteredAnimals(): Animal[] {
@@ -42,23 +78,27 @@ export class ListPage {
     return this.animals.filter((a) => a.type === this.selectedType);
   }
 
-  /** Handles the Delete animal functionality. */
   deleteAnimal(id: number) {
     const confirmed = window.confirm('Sigur vrei să ștergi animalul?');
     if (!confirmed) return;
-    this.animalService.deleteAnimal(id);
-    this.animals = this.animalService.getAnimals();
+
+    this.animalService.deleteAnimal(id).subscribe(() => {
+      // După ștergere, resetăm lista și reîncărcăm pentru a păstra consistența paginării
+      this.animals = [];
+      this.currentPage = 0;
+      this.hasMoreData = true;
+      this.loadAnimals();
+    });
   }
 
-  /** Handles the Edit animal functionality. */
   editAnimal(animal: Animal) {
     this.router.navigate(['add'], { state: { animalToEdit: animal } });
   }
-  /** Navigates to To add animal. */
+
   navigatetoAddAnimal(): void {
     this.router.navigate(['add']);
   }
-  /** Navigates to to manage. */
+
   navigateToManage(): void {
     this.router.navigate(['manage']);
   }

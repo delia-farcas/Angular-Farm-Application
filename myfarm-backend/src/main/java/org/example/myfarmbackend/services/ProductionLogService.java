@@ -83,7 +83,7 @@ public class ProductionLogService implements IProductionLogService {
         }
         return report;
     }
-    
+
 
     private double sumForRange(List<ProductionLog> logs, int start, int end, String field) {
         return logs.stream()

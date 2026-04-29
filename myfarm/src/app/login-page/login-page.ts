@@ -1,6 +1,8 @@
 import { Component, Output, EventEmitter, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UserTrackingService } from '../services/user-tracking.service';
+import { UserService } from '../services/user.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login-page',
@@ -11,12 +13,15 @@ import { UserTrackingService } from '../services/user-tracking.service';
 })
 export class LoginPage {
   @Output() goToSignup = new EventEmitter<void>();
-  @Output() loginSuccess = new EventEmitter<void>();
+  
+  private userService = inject(UserService);
   private fb = inject(FormBuilder);
   private trackingService = inject(UserTrackingService);
+  private router = inject(Router);
 
+  // Folosim email pentru login, deoarece așa am configurat backend-ul Java
   loginForm: FormGroup = this.fb.group({
-    username: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
   });
 
@@ -27,17 +32,29 @@ export class LoginPage {
       return;
     }
 
-    const { username, password } = this.loginForm.value;
-    const isValid = this.trackingService.verifyUser(username, password);
+    const { email } = this.loginForm.value;
 
-    if (isValid) {
-      this.trackingService.setCurrentUser(username);
-      this.trackingService.setLastLogin();
-      this.trackingService.logActivity('login');
-      this.loginSuccess.emit();
-    } else {
-      alert('Username sau parolă incorectă!'); // Simplified error handling for now as requested by user
-    }
+    // Apelăm serverul Java prin UserService
+    this.userService.login(email).subscribe({
+      next: (user) => {
+        if (user) {
+          console.log('Login reușit!', user);
+          
+          // Actualizăm tracking-ul local cu datele venite de la server
+          this.trackingService.setCurrentUser(user.username);
+          this.trackingService.setLastLogin();
+          this.trackingService.logActivity('login');
+          
+          // Navigăm către lista de animale
+          this.router.navigate(['/list']);
+        }
+      },
+      error: (err) => {
+        // Dacă serverul Java returnează 401 Unauthorized sau 404
+        alert('Email incorect sau utilizator inexistent!');
+        console.error('Login error:', err);
+      }
+    });
   }
 
   /** Handles the signup click event. */

@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Animal } from '../models/animal';
 import { AnimalCardComponent } from '../animal-card/animal-card';
-import { AnimalService } from '../services/animal'; // 1. Importă Service-ul
+import { AnimalService } from '../services/animal';
+import { UserTrackingService } from '../services/user-tracking.service'; // Importă Tracking Service
 
 @Component({
   selector: 'app-animal-list',
@@ -13,59 +14,76 @@ import { AnimalService } from '../services/animal'; // 1. Importă Service-ul
 })
 export class AnimalList implements OnInit {
   animals: Animal[] = [];
+  
+  // Injectăm serviciile folosind metoda modernă 'inject'
+  private animalService = inject(AnimalService);
+  private trackingService = inject(UserTrackingService);
 
-  /** Instantiates the component and injects dependencies. */
-  constructor(private animalService: AnimalService) {}
+  // Parametri pentru paginare
+  currentPage = 0;
+  pageSize = 10;
 
-  /** Initializes the component. */
   ngOnInit() {
     this.refreshList();
   }
 
-  /** Handles the Refresh list functionality. */
+  /** Obține user-ul curent și încarcă lista de la server */
   refreshList() {
-    this.animals = this.animalService.getAnimals();
+    // În mod normal, aici ar trebui să ai un ID numeric de la backend. 
+    // Dacă trackingService returnează doar username-ul, folosim un ID simulat (ex: 1) 
+    // sau modificăm backend-ul să accepte username.
+    const userId = 1; 
+
+    this.animalService.getAnimalsPaginated(userId, this.currentPage, this.pageSize)
+      .subscribe({
+        next: (data) => {
+          this.animals = data;
+        },
+        error: (err) => console.error('Eroare la încărcarea animalelor:', err)
+      });
   }
 
-  /** Handles the Add animal functionality. */
+  /** Adaugă un animal trimițând datele la backend */
   addAnimal() {
     const newAnimal: Animal = {
-      id: Date.now(),
+      id: 0,
       name: 'Animal nou',
       status: 'Sanatoasa',
       location: 'Hambar',
       type: 'vaca',
-      sex: 'femela', // Adăugat pentru a respecta noul model din Service
+      sex: 'femela',
       age: 1,
       observations: '',
+      ownerId: 1 
     };
 
-    this.animalService.addAnimal(newAnimal);
-    this.refreshList(); // Actualizăm ce vede utilizatorul
+    this.animalService.addAnimal(newAnimal).subscribe(() => {
+      this.refreshList(); // Reîncărcăm din backend după salvare
+    });
   }
 
-  /** Handles the Delete animal functionality. */
+  /** Șterge animal apelând serverul */
   deleteAnimal(id: number) {
-    this.animalService.deleteAnimal(id);
-    this.refreshList(); // Actualizăm lista după ștergere
+    if (confirm('Sigur vrei să ștergi?')) {
+      this.animalService.deleteAnimal(id).subscribe(() => {
+        this.refreshList();
+      });
+    }
   }
 
-  /** Handles the Edit animal functionality. */
+  /** Editează animal apelând serverul (PUT) */
   editAnimal(animal: Animal) {
     const updatedAnimal = { ...animal, status: 'In tratament' };
-    this.animalService.updateAnimal(updatedAnimal);
-    this.refreshList();
+    this.animalService.updateAnimal(updatedAnimal).subscribe(() => {
+      this.refreshList();
+    });
   }
 
-  /** Retrieves the images. */
   getImages(type: string): string[] {
-    switch (type) {
-      case 'vaca':
-        return ['assets/vaca/vector.svg', 'assets/vaca/vector-2.svg'];
-      case 'gaina':
-        return ['assets/gaina/vector.svg'];
-      default:
-        return [];
-    }
+    const images: Record<string, string[]> = {
+      'vaca': ['assets/vaca/vector.svg', 'assets/vaca/vector-2.svg'],
+      'gaina': ['assets/gaina/vector.svg']
+    };
+    return images[type] || [];
   }
 }
