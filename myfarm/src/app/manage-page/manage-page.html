@@ -135,5 +135,21 @@
       <button class="btn-cancel" type="button" (click)="onBackClick()">Anulează</button>
       <button class="btn-submit" type="button" (click)="onSaveToday()">Salvează</button>
     </div>
+
+    <div
+      *ngIf="saveMessage"
+      style="
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        border: 1px solid;
+      "
+      [style.borderColor]="saveMessageType === 'success' ? '#2e7d32' : '#c0392b'"
+      [style.background]="saveMessageType === 'success' ? '#e8f5e9' : '#fdecea'"
+      [style.color]="saveMessageType === 'success' ? '#2e7d32' : '#c0392b'"
+    >
+      {{ saveMessage }}
+    </div>
   </div>
 </div>

@@ -5,6 +5,8 @@ import { FarmService } from '../services/farm.service';
 import { UserTrackingService } from '../services/user-tracking.service';
 import { Animal } from '../models/farm';
 import { Router } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-manage-page',
@@ -26,6 +28,9 @@ export class ManagePage {
 
   currentUsername: string = 'Delia';
   private trackingService = inject(UserTrackingService);
+
+  saveMessage: string | null = null;
+  saveMessageType: 'success' | 'warning' | null = null;
 
   /** Instantiates the component and injects dependencies. */
   constructor(
@@ -115,6 +120,11 @@ export class ManagePage {
 
   /** Handles the save today event. */
   onSaveToday(): void {
+    this.saveMessage = null;
+    this.saveMessageType = null;
+
+    const requests = [];
+
     for (const a of this.farm.getAnimals()) {
       const raw = this.todaysInput[a.id];
       const rawMilk = this.todaysMilkInput[a.id];
@@ -131,33 +141,93 @@ export class ManagePage {
       switch (a.name) {
         case 'Vaca':
         case 'Capra':
-          if (validValue !== null) this.farm.upsertTodayLog(a.id, { milk: validValue });
+          if (validValue !== null) {
+            requests.push(
+              this.farm.upsertTodayLog(a.id, { milk: validValue }).pipe(
+                map(() => ({ ok: true as const })),
+                catchError((err) => of({ ok: false as const, err })),
+              ),
+            );
+          }
           break;
         case 'Gaina':
-          if (validValue !== null) this.farm.upsertTodayLog(a.id, { eggs: validValue });
+          if (validValue !== null) {
+            requests.push(
+              this.farm.upsertTodayLog(a.id, { eggs: validValue }).pipe(
+                map(() => ({ ok: true as const })),
+                catchError((err) => of({ ok: false as const, err })),
+              ),
+            );
+          }
           break;
         case 'Oaie':
           const patch: any = {};
           if (validValue !== null) patch.wool = validValue;
           if (validMilkValue !== null) patch.milk = validMilkValue;
-          if (Object.keys(patch).length > 0) this.farm.upsertTodayLog(a.id, patch);
+          if (Object.keys(patch).length > 0) {
+            requests.push(
+              this.farm.upsertTodayLog(a.id, patch).pipe(
+                map(() => ({ ok: true as const })),
+                catchError((err) => of({ ok: false as const, err })),
+              ),
+            );
+          }
           break;
         case 'Cal':
-          if (validValue !== null) this.farm.upsertTodayLog(a.id, { workHours: validValue });
+          if (validValue !== null) {
+            requests.push(
+              this.farm.upsertTodayLog(a.id, { workHours: validValue }).pipe(
+                map(() => ({ ok: true as const })),
+                catchError((err) => of({ ok: false as const, err })),
+              ),
+            );
+          }
           break;
         case 'Porc':
-          if (validValue !== null) this.farm.upsertTodayLog(a.id, { meat: validValue });
+          if (validValue !== null) {
+            requests.push(
+              this.farm.upsertTodayLog(a.id, { meat: validValue }).pipe(
+                map(() => ({ ok: true as const })),
+                catchError((err) => of({ ok: false as const, err })),
+              ),
+            );
+          }
           break;
       }
     }
 
-    for (const a of this.farm.getAnimals()) {
-      this.todaysInput[a.id] = null;
-      this.invalidInput[a.id] = false;
-      this.todaysMilkInput[a.id] = null;
-      this.invalidMilkInput[a.id] = false;
+    if (requests.length === 0) {
+      this.saveMessageType = 'warning';
+      this.saveMessage = 'Nu ai introdus valori pentru gestiunea de azi.';
+      return;
     }
-    this.goBack.emit();
+
+    forkJoin(requests).subscribe((results) => {
+      const failed = results.find((r) => !r.ok) as any;
+      if (failed) {
+        const msg =
+          failed?.err?.error?.error ||
+          failed?.err?.error?.date ||
+          failed?.err?.message ||
+          'Nu s-a putut salva gestiunea.';
+        this.saveMessageType = 'warning';
+        this.saveMessage = msg;
+        return;
+      }
+
+      for (const a of this.farm.getAnimals()) {
+        this.todaysInput[a.id] = null;
+        this.invalidInput[a.id] = false;
+        this.todaysMilkInput[a.id] = null;
+        this.invalidMilkInput[a.id] = false;
+      }
+
+      this.saveMessageType = 'success';
+      this.saveMessage = 'Gestiunea a fost salvată cu succes.';
+
+      // Keep the success visible briefly, then go back.
+      setTimeout(() => this.goBack.emit(), 600);
+    });
   }
 
   /** Handles the add animal click event. */

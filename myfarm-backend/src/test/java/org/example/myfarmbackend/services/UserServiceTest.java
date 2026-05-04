@@ -94,9 +94,38 @@ class UserServiceTest {
     }
 
     @Test
+    void updateUser_ShouldThrow_WhenEmailUsedByAnotherUser() {
+        User existingOther = User.builder().userId(2L).email("dup@farm.ro").username("Other").password("x").build();
+        User updatedData = User.builder().userId(1L).email("dup@farm.ro").username("NewName").password("pass").build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail("dup@farm.ro")).thenReturn(Optional.of(existingOther));
+
+        assertThrows(RuntimeException.class, () -> userService.updateUser(1L, updatedData));
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void updateUser_ShouldReturnEmpty_WhenUserNotFound() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Optional<User> result = userService.updateUser(1L, testUser);
+
+        assertTrue(result.isEmpty());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
     void deleteUser_ShouldReturnTrue_WhenExists() {
         when(userRepository.delete(1L)).thenReturn(true);
         boolean result = userService.deleteUser(1L);
         assertTrue(result);
+    }
+
+    @Test
+    void deleteUser_ShouldReturnFalse_WhenMissing() {
+        when(userRepository.delete(1L)).thenReturn(false);
+        boolean result = userService.deleteUser(1L);
+        assertFalse(result);
     }
 }

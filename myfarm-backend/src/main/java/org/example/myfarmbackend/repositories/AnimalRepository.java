@@ -21,7 +21,7 @@ public class AnimalRepository implements IAnimalRepository {
         for (int i = 0; i < 50; i++) {
             Animal a = new Animal();
             a.setId(idGenerator.getAndIncrement());
-            a.setOwnerId(1L); // Setăm ownerId 1 pentru a fi vizibile după login
+            a.setOwnerId(2L); // Setăm ownerId 1 pentru a fi vizibile după login
             a.setName("Animal " + a.getId());
             a.setType(types[i % types.length]);
             a.setSex(i % 2 == 0 ? "mascul" : "femela");
@@ -50,10 +50,6 @@ public class AnimalRepository implements IAnimalRepository {
                 allAnimals.add(animal);
             }
         }
-
-        System.out.println("Salvat/Actualizat animalul: " + animal.getName() +
-                " cu ID: " + animal.getId() +
-                " pentru OwnerID: " + animal.getOwnerId());
 
         return animal;
     }
@@ -84,7 +80,7 @@ public class AnimalRepository implements IAnimalRepository {
         int start = page * size;
         int end = Math.min((start + size), userAnimals.size());
 
-        if (start > userAnimals.size()) {
+        if (start >= userAnimals.size()) {
             return new ArrayList<>();
         }
 
@@ -97,6 +93,18 @@ public class AnimalRepository implements IAnimalRepository {
                 .filter(animal -> animal.getOwnerId().equals(ownerId))
                 .toList();
         return userAnimals.size();
+    }
+
+    @Override
+    public long countByOwnerIdAndType(long ownerId, String type) {
+        if (type == null) {
+            return 0;
+        }
+        String t = type.trim().toLowerCase();
+        return allAnimals.stream()
+                .filter(animal -> animal.getOwnerId().equals(ownerId))
+                .filter(animal -> animal.getType() != null && animal.getType().trim().toLowerCase().equals(t))
+                .count();
     }
 
     @Override

@@ -25,6 +25,9 @@ public interface IAnimalRepository {
     /** Returns the total number of animals for a specific owner (for pagination metadata). */
     long countByOwnerId(long ownerId);
 
+    /** Returns the number of animals for a specific owner and type (e.g. "vaca"). */
+    long countByOwnerIdAndType(long ownerId, String type);
+
     /** Returns the total number of animals in the system. */
     long count();
 

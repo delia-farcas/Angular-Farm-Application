@@ -74,9 +74,14 @@ export class FarmService {
 
   /** Handles the Upsert today log functionality. */
   upsertTodayLog(animalId: number, patch: Partial<Omit<DailyLogEntry, 'date'>>): Observable<any> {
+    // Backend distinguishes cow milk vs sheep/goat milk.
+    const milkLitersCow = animalId === 1 ? patch.milk || 0 : 0;
+    const milkLitersSheep = animalId === 5 || animalId === 6 ? patch.milk || 0 : 0;
+
     const logData = {
       reportDate: new Date().toISOString().split('T')[0],
-      milkLitersCow: patch.milk || 0,
+      milkLitersCow,
+      milkLitersSheep,
       eggsCount: patch.eggs || 0,
       woolKg: patch.wool || 0,
       meatKg: patch.meat || 0,

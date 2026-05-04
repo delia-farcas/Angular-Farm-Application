@@ -3,17 +3,19 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ManagePage } from './manage-page';
 import { FarmService } from '../services/farm.service';
 import type { Animal } from '../models/farm';
+import { of } from 'rxjs';
 
 describe('ManagePage', () => {
   let component: ManagePage;
   let fixture: ComponentFixture<ManagePage>;
   let farm: {
     getAnimals: () => Animal[];
-    upsertTodayLog: (id: number, patch: any) => void;
+    upsertTodayLog: (id: number, patch: any) => any;
   };
   let upsertSpy: any;
 
   beforeEach(async () => {
+    vi.useFakeTimers();
     upsertSpy = vi.fn();
     const animals: Animal[] = [
       { id: 1, name: 'Vaca', icon: '/animals/cow.svg', count: 2, logs: [] },
@@ -36,6 +38,10 @@ describe('ManagePage', () => {
     await fixture.whenStable();
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -52,6 +58,8 @@ describe('ManagePage', () => {
     const goBackSpy = vi.fn();
     component.goBack.subscribe(goBackSpy);
 
+    upsertSpy.mockReturnValue(of({}));
+
     component.todaysInput[1] = 12; // Vaca => milk
     component.todaysInput[4] = 7; // Gaina => eggs
     component.todaysInput[3] = 5; // Porc disabled => ignored
@@ -61,6 +69,8 @@ describe('ManagePage', () => {
     expect(upsertSpy).toHaveBeenCalledWith(4, { eggs: 7 });
     expect(upsertSpy).toHaveBeenCalledWith(3, { meat: 5 });
 
+    // goBack is emitted after a short timeout when save succeeded
+    vi.runAllTimers();
     expect(goBackSpy).toHaveBeenCalledTimes(1);
   });
 });

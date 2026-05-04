@@ -28,10 +28,21 @@ public class ProductionLogRepository implements IProductionLogRepository {
 
     @Override
     public ProductionLog save(ProductionLog report) {
-        if (report.getId() == null) {
+        if (report.getId() == null || report.getId() == 0) {
             report.setId(idGenerator.getAndIncrement());
             reports.add(report);
+            return report;
         }
+
+        // Update existing by id if present, otherwise treat as new (frontend-provided id).
+        for (int i = 0; i < reports.size(); i++) {
+            if (reports.get(i).getId().equals(report.getId())) {
+                reports.set(i, report);
+                return report;
+            }
+        }
+
+        reports.add(report);
         return report;
     }
 

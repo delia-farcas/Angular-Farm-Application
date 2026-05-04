@@ -1,6 +1,7 @@
 package org.example.myfarmbackend.services;
 
 import org.example.myfarmbackend.models.ProductionLog;
+import org.example.myfarmbackend.repositories.IAnimalRepository;
 import org.example.myfarmbackend.repositories.IProductionLogRepository;
 import org.springframework.stereotype.Service;
 
@@ -11,16 +12,51 @@ import java.util.*;
 public class ProductionLogService implements IProductionLogService {
 
     private final IProductionLogRepository logRepository;
+    private final IAnimalRepository animalRepository;
 
-    public ProductionLogService(IProductionLogRepository logRepository) {
+    public ProductionLogService(IProductionLogRepository logRepository, IAnimalRepository animalRepository) {
         this.logRepository = logRepository;
+        this.animalRepository = animalRepository;
     }
 
     @Override
     public ProductionLog saveOrUpdateLog(ProductionLog newLog) {
+        validateLogAgainstAnimals(newLog);
         return logRepository.findByDateAndUserId(newLog.getReportDate(), newLog.getUserId())
                 .map(existing -> updateExistingLog(existing, newLog))
                 .orElseGet(() -> logRepository.save(newLog));
+    }
+
+    private void validateLogAgainstAnimals(ProductionLog log) {
+        Long userId = log.getUserId();
+        if (userId == null) {
+            throw new RuntimeException("UserId is required.");
+        }
+
+        if (log.getMilkLitersCow() > 0 && animalRepository.countByOwnerIdAndType(userId, "vaca") <= 0) {
+            throw new RuntimeException("Nu poți salva lapte de vacă fără cel puțin o vacă în fermă.");
+        }
+
+        // Sheep+goat milk is stored in milkLitersSheep in this backend.
+        if (log.getMilkLitersSheep() > 0) {
+            long sheep = animalRepository.countByOwnerIdAndType(userId, "oaie");
+            long goat = animalRepository.countByOwnerIdAndType(userId, "capra");
+            if (sheep + goat <= 0) {
+                throw new RuntimeException("Nu poți salva lapte (oaie/capră) fără cel puțin o oaie sau o capră în fermă.");
+            }
+        }
+
+        if (log.getEggsCount() > 0 && animalRepository.countByOwnerIdAndType(userId, "gaina") <= 0) {
+            throw new RuntimeException("Nu poți salva ouă fără cel puțin o găină în fermă.");
+        }
+
+        if (log.getWoolKg() > 0 && animalRepository.countByOwnerIdAndType(userId, "oaie") <= 0) {
+            throw new RuntimeException("Nu poți salva lână fără cel puțin o oaie în fermă.");
+        }
+
+        if (log.getMeatKg() > 0 && animalRepository.countByOwnerIdAndType(userId, "porc") <= 0) {
+            throw new RuntimeException("Nu poți salva carne fără cel puțin un porc în fermă.");
+        }
     }
 
     private ProductionLog updateExistingLog(ProductionLog existing, ProductionLog newLog) {

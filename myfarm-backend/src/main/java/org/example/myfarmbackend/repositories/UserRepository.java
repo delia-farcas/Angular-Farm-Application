@@ -14,7 +14,7 @@ public class UserRepository implements IUserRepository {
 
     public UserRepository() {
         User defaultUser = new User();
-        defaultUser.setUserId(idGenerator.getAndIncrement()); // ID 1
+        defaultUser.setUserId(idGenerator.getAndIncrement());
         defaultUser.setEmail("default@example.com");
         defaultUser.setUsername("Default User");
         defaultUser.setPassword("password");
@@ -23,7 +23,7 @@ public class UserRepository implements IUserRepository {
 
     @Override
     public List<User> findAll() {
-        return users;
+        return new ArrayList<>(users);
     }
 
     @Override
