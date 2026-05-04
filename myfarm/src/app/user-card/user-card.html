@@ -1,0 +1,23 @@
+@if (display === 'row') {
+  <td>{{ userRow.username }}</td>
+  <td>{{ userRow.email }}</td>
+  <td>{{ userRow.animalCount }}</td>
+  <td>
+    <div class="action-buttons-container">
+      <button type="button" class="icon-button" (click)="onDelete()" aria-label="Șterge utilizatorul">
+        <img [src]="deleteIcon" alt="" />
+      </button>
+    </div>
+  </td>
+} @else {
+  <div class="user-card-frame">
+    <div class="user-card-line"><strong>{{ userRow.username }}</strong></div>
+    <div class="user-card-line">{{ userRow.email }}</div>
+    <div class="user-card-line">Animale: {{ userRow.animalCount }}</div>
+    <div class="action-buttons-container">
+      <button type="button" class="icon-button" (click)="onDelete()" aria-label="Șterge utilizatorul">
+        <img [src]="deleteIcon" alt="" />
+      </button>
+    </div>
+  </div>
+}

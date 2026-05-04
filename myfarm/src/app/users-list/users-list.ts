@@ -1,0 +1,39 @@
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { UserTrackingService } from '../services/user-tracking.service';
+import { UserList } from '../user-list/user-list';
+
+@Component({
+  selector: 'app-users-list',
+  standalone: true,
+  imports: [CommonModule, UserList],
+  templateUrl: './users-list.html',
+  styleUrl: './users-list.css',
+})
+export class UsersList {
+  private router = inject(Router);
+  private trackingService = inject(UserTrackingService);
+
+  currentUsername = this.trackingService.getCurrentUser();
+
+  navigateToBazinga(): void {
+    this.router.navigate(['bazinga']);
+  }
+
+  navigateToRaports(): void {
+    this.router.navigate(['raports']);
+  }
+
+  navigateHome(): void {
+    this.router.navigate(['home']);
+  }
+
+  toggleNav(): void {
+    document.body.classList.toggle('nav-open');
+  }
+
+  closeNav(): void {
+    document.body.classList.remove('nav-open');
+  }
+}

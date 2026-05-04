@@ -1,12 +1,15 @@
 package org.example.myfarmbackend.services;
 
 import org.example.myfarmbackend.dto.UserDTO;
+import org.example.myfarmbackend.dto.UserListItemDTO;
 import org.example.myfarmbackend.models.User;
+import org.example.myfarmbackend.repositories.AnimalRepository;
 import org.example.myfarmbackend.repositories.UserRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,9 +18,11 @@ import java.util.Optional;
 public class UserService implements IUserService {
 
     private final UserRepository userRepository;
+    private final AnimalRepository animalRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, AnimalRepository animalRepository) {
         this.userRepository = userRepository;
+        this.animalRepository = animalRepository;
     }
 
     @Override
@@ -59,6 +64,17 @@ public class UserService implements IUserService {
     @Override
     public List<User> getAllUsersPaginated(int page, int size) {
         return userRepository.findAll(PageRequest.of(page, size)).getContent();
+    }
+
+    @Override
+    public List<UserListItemDTO> getUsersWithAnimalCounts(int page, int size) {
+        List<User> users = userRepository.findAll(PageRequest.of(page, size)).getContent();
+        List<UserListItemDTO> rows = new ArrayList<>(users.size());
+        for (User u : users) {
+            long count = animalRepository.countByOwnerUserId(u.getUserId());
+            rows.add(new UserListItemDTO(u.getUserId(), u.getUsername(), u.getEmail(), count));
+        }
+        return rows;
     }
 
     @Override

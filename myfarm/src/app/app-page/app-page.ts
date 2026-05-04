@@ -28,4 +28,8 @@ export class AppPage {
   navigateToRaports(): void {
     this.router.navigate(['raports']);
   }
+
+  navigateToUsers(): void {
+    this.router.navigate(['users']);
+  }
 }

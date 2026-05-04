@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { User } from '../models/user';
+import type { UserListRow } from '../models/user-list-row';
 import { UserTrackingService } from './user-tracking.service';
 
 @Injectable({ providedIn: 'root' })
@@ -33,4 +34,15 @@ export class UserService {
         }),
       );
   }
+
+  /** Paginated users with animal counts (admin list). */
+  listUsersWithSummary(page: number, size: number): Observable<UserListRow[]> {
+    const params = new HttpParams().set('page', String(page)).set('size', String(size));
+    return this.http.get<UserListRow[]>(`${this.apiUrl}/summary`, { params });
+  }
+
+  deleteUser(userId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${userId}`);
+  }
 }
+

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.example.myfarmbackend.dto.LoginRequest;
 import org.example.myfarmbackend.dto.UserDTO;
+import org.example.myfarmbackend.dto.UserListItemDTO;
 import org.example.myfarmbackend.models.User;
 import org.example.myfarmbackend.services.IUserService;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,13 @@ public class UserRestController {
                 .map(this::toPublicUserDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    @GetMapping("/summary")
+    public ResponseEntity<List<UserListItemDTO>> listUsersWithAnimalCounts(
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "15") @Min(1) int size) {
+        return ResponseEntity.ok(userService.getUsersWithAnimalCounts(page, size));
     }
 
     @GetMapping("/{id}")

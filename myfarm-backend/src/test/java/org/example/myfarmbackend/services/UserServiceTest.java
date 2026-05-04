@@ -2,6 +2,7 @@ package org.example.myfarmbackend.services;
 
 import org.example.myfarmbackend.dto.UserDTO;
 import org.example.myfarmbackend.models.User;
+import org.example.myfarmbackend.repositories.AnimalRepository;
 import org.example.myfarmbackend.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,9 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private AnimalRepository animalRepository;
 
     @InjectMocks
     private UserService userService;

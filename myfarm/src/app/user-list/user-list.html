@@ -1,0 +1,42 @@
+<div class="user-list-toolbar">
+  <div class="search-bar">
+    <svg
+      class="search-icon"
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
+    <input type="text" placeholder="Caută după nume sau email" [(ngModel)]="searchQuery" />
+  </div>
+</div>
+
+<div class="table-container" (scroll)="onTableScroll($event)">
+  <table class="users-table">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Animale</th>
+        <th>Acțiuni</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (u of filteredUsers; track u.userId) {
+        <tr app-user-row [userRow]="u" [display]="'row'" (delete)="deleteUser($event)"></tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (isLoading) {
+  <div class="loading-text">Se încarcă utilizatorii...</div>
+}

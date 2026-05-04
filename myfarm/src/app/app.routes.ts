@@ -5,6 +5,7 @@ import { BazingaPage } from './bazinga-page/bazinga-page';
 import { RaportsPage } from './raports-page/raports-page';
 import { AddAnimal } from './add-animal/add-animal';
 import { ManagePage } from './manage-page/manage-page';
+import { UsersList } from './users-list/users-list';
 
 export const routes: Routes = [
   {
@@ -31,4 +32,7 @@ export const routes: Routes = [
     path: 'manage',
     component: ManagePage,
   },
+  {path: 'users',
+    component: UsersList,
+  }
 ];

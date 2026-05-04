@@ -1,6 +1,7 @@
 package org.example.myfarmbackend.services;
 
 import org.example.myfarmbackend.dto.UserDTO;
+import org.example.myfarmbackend.dto.UserListItemDTO;
 import org.example.myfarmbackend.models.User;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,9 @@ public interface IUserService {
     Optional<User> authenticate(String email, String password);
 
     List<User> getAllUsersPaginated(int page, int size);
+
+    /** Paginated users with how many animals each user owns. */
+    List<UserListItemDTO> getUsersWithAnimalCounts(int page, int size);
 
     /** Retrieves a user by their unique ID. */
     Optional<User> getUserById(long id);
