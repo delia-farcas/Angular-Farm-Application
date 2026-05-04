@@ -60,6 +60,7 @@ export class AddAnimal implements OnChanges, OnInit {
     age: 0,
     location: '',
     observations: '',
+    ownerId: this.trackingService.getCurrentUserId(),
   };
 
   /** Instantiates the component and injects dependencies. */
@@ -112,34 +113,42 @@ export class AddAnimal implements OnChanges, OnInit {
 
   /** Handles the submit event. */
   onSubmit(form: NgForm) {
-    this.formSubmitted = true;
+  this.formSubmitted = true;
 
-    if (form.invalid) {
-      form.form.markAllAsTouched();
-      return;
-    }
-
-    const trimmed: Animal = {
-      ...this.animal,
-      name: this.animal.name.trim(),
-      location: this.animal.location.trim(),
-    };
-
-    if (this.isEditMode && trimmed.id) {
-      this.animalService.updateAnimal(trimmed);
-      this.trackingService.logActivity('edit_animal');
-      this.trackingService.incrementCounter('animals_edited');
-      window.alert('Animal editat cu succes!');
-    } else {
-      const uniqueId = Date.now() + Math.floor(Math.random() * 1000);
-      this.animalService.addAnimal({ ...trimmed, id: uniqueId });
-      this.trackingService.logActivity('add_animal');
-      this.trackingService.incrementCounter('animals_added');
-      window.alert('Animal adăugat cu succes!');
-    }
-
-    this.router.navigate(['home']);
+  if (form.invalid) {
+    form.form.markAllAsTouched();
+    return;
   }
+
+  const trimmed: Animal = {
+    ...this.animal,
+    name: this.animal.name.trim(),
+    location: this.animal.location.trim(),
+    ownerId: this.trackingService.getCurrentUserId(),
+  };
+
+  if (this.isEditMode && trimmed.id) {
+    this.animalService.updateAnimal(trimmed).subscribe({
+      next: () => {
+        this.trackingService.logActivity('edit_animal');
+        this.trackingService.incrementCounter('animals_edited');
+        window.alert('Animal editat cu succes!');
+        this.router.navigate(['home']);
+      },
+      error: (err) => console.error('Eroare la editare:', err)
+    });
+  } else {
+    this.animalService.addAnimal(trimmed).subscribe({
+      next: () => {
+        this.trackingService.logActivity('add_animal');
+        this.trackingService.incrementCounter('animals_added');
+        window.alert('Animal adăugat cu succes!');
+        this.router.navigate(['home']);
+      },
+      error: (err) => console.error('Eroare la adăugare:', err)
+    });
+  }
+}
 
   /** Handles the back click event. */
   onBackClick(): void {
@@ -178,6 +187,7 @@ export class AddAnimal implements OnChanges, OnInit {
       status: 'Sanatoasa',
       location: '',
       observations: '',
+      ownerId: this.trackingService.getCurrentUserId(),
     };
   }
 

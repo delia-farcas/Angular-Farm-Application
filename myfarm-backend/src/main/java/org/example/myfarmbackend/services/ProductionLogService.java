@@ -94,12 +94,18 @@ public class ProductionLogService implements IProductionLogService {
 
     private double getValueByField(ProductionLog log, String field) {
         return switch (field.toLowerCase()) {
-            case "lapte" -> log.getMilkLitersCow();
+            case "lapte" -> log.getMilkLitersCow() + log.getMilkLitersSheep();
             case "carne" -> log.getMeatKg();
             case "ouă" -> log.getEggsCount();
             case "lână" -> log.getWoolKg();
             case "ore" -> log.getWorkHours();
             default -> 0.0;
         };
+    }
+
+    public List<ProductionLog> getLogsByUserAndDateRange(Long userId, String startDate, String endDate) {
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+        return logRepository.findByUserAndPeriod(userId, start, end);
     }
 }

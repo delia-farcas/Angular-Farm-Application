@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
 
 import { YearlyReports } from './yearly-reports';
 import { FarmService } from '../services/farm.service';
@@ -28,7 +29,7 @@ describe('YearlyReports', () => {
       getAnimals: () => animals,
       getAnimalById: (id: number) => animals.find((a) => a.id === id),
       getLogsInRange: (_id: number, start: string, end: string) =>
-        animals[0].logs.filter((l) => l.date >= start && l.date <= end),
+        of(animals[0].logs.filter((l) => l.date >= start && l.date <= end)),
     };
 
     await TestBed.configureTestingModule({

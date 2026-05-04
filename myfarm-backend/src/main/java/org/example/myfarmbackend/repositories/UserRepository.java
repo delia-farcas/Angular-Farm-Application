@@ -5,10 +5,21 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
 public class UserRepository implements IUserRepository {
     private final List<User> users = new ArrayList<>();
+    private final AtomicLong idGenerator = new AtomicLong(1);
+
+    public UserRepository() {
+        User defaultUser = new User();
+        defaultUser.setUserId(idGenerator.getAndIncrement()); // ID 1
+        defaultUser.setEmail("default@example.com");
+        defaultUser.setUsername("Default User");
+        defaultUser.setPassword("password");
+        users.add(defaultUser);
+    }
 
     @Override
     public List<User> findAll() {
@@ -25,9 +36,18 @@ public class UserRepository implements IUserRepository {
         return users.stream().filter(u -> u.getUserId() == id).findFirst();
     }
 
+
+
+
     @Override
     public User save(User user) {
-        users.add(user);
+        if (user.getUserId() == 0) {
+            user.setUserId(idGenerator.getAndIncrement());
+            users.add(user);
+        } else {
+            users.removeIf(u -> u.getUserId() == user.getUserId());
+            users.add(user);
+        }
         return user;
     }
 

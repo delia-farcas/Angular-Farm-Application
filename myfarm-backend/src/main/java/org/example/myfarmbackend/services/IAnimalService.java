@@ -13,7 +13,7 @@ public interface IAnimalService {
     Animal addAnimal(Animal animal);
 
     /** Updates an existing animal's details. */
-    Optional<Animal> updateAnimal(long id, Animal animalData);
+    Animal updateAnimal(long id, Animal animalData);
 
     /** Removes an animal by ID and returns success status. */
     boolean deleteAnimal(long id);

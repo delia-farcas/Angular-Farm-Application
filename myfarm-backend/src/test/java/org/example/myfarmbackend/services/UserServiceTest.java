@@ -9,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,14 +39,11 @@ class UserServiceTest {
 
     @Test
     void registerUser_ShouldSucceed_WhenEmailIsUnique() {
-        // Arrange
         when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.empty());
         when(userRepository.save(testUser)).thenReturn(testUser);
 
-        // Act
         User result = userService.registerUser(testUser);
 
-        // Assert
         assertNotNull(result);
         assertEquals("george@farm.ro", result.getEmail());
         verify(userRepository, times(1)).save(testUser);
@@ -52,11 +51,52 @@ class UserServiceTest {
 
     @Test
     void registerUser_ShouldThrowException_WhenEmailAlreadyExists() {
-        // Arrange (Testăm validarea server-side pentru date unice)
         when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.of(testUser));
 
-        // Act & Assert
         assertThrows(RuntimeException.class, () -> userService.registerUser(testUser));
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void getUserByEmail_ShouldReturnUser_WhenExists() {
+        when(userRepository.findByEmail("george@farm.ro")).thenReturn(Optional.of(testUser));
+        Optional<User> result = userService.getUserByEmail("george@farm.ro");
+        assertTrue(result.isPresent());
+        assertEquals("GeorgeP", result.get().getUsername());
+    }
+
+    @Test
+    void getUserById_ShouldReturnUser_WhenExists() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        Optional<User> result = userService.getUserById(1L);
+        assertTrue(result.isPresent());
+        assertEquals(1L, result.get().getUserId());
+    }
+
+    @Test
+    void getAllUsers_ShouldReturnList() {
+        when(userRepository.findAll()).thenReturn(Arrays.asList(testUser));
+        List<User> result = userService.getAllUsers();
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void updateUser_ShouldSucceed_WhenValid() {
+        User updatedData = User.builder().userId(1L).email("new@farm.ro").username("NewName").password("pass").build();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail("new@farm.ro")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenReturn(updatedData);
+
+        Optional<User> result = userService.updateUser(1L, updatedData);
+
+        assertTrue(result.isPresent());
+        assertEquals("NewName", result.get().getUsername());
+    }
+
+    @Test
+    void deleteUser_ShouldReturnTrue_WhenExists() {
+        when(userRepository.delete(1L)).thenReturn(true);
+        boolean result = userService.deleteUser(1L);
+        assertTrue(result);
     }
 }

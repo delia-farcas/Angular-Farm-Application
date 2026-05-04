@@ -98,8 +98,10 @@
               Introdu o valoare validă (număr ≥ 0).
             </div>
 
-            <!-- Second Input for Sheep Milk -->
-            <div *ngIf="animal.name === 'Oaie'" style="display: flex; align-items: center; gap: 8px; margin-top: 8px">
+            <div
+              *ngIf="animal.name === 'Oaie'"
+              style="display: flex; align-items: center; gap: 8px; margin-top: 8px"
+            >
               <input
                 type="number"
                 min="0"

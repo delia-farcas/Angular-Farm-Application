@@ -119,11 +119,12 @@ export class ManagePage {
       const raw = this.todaysInput[a.id];
       const rawMilk = this.todaysMilkInput[a.id];
 
-      const value = (raw !== null && raw !== undefined) ? Number(raw) : null;
-      const validValue = (value !== null && Number.isFinite(value) && value >= 0) ? value : null;
+      const value = raw !== null && raw !== undefined ? Number(raw) : null;
+      const validValue = value !== null && Number.isFinite(value) && value >= 0 ? value : null;
 
-      const milkValue = (rawMilk !== null && rawMilk !== undefined) ? Number(rawMilk) : null;
-      const validMilkValue = (milkValue !== null && Number.isFinite(milkValue) && milkValue >= 0) ? milkValue : null;
+      const milkValue = rawMilk !== null && rawMilk !== undefined ? Number(rawMilk) : null;
+      const validMilkValue =
+        milkValue !== null && Number.isFinite(milkValue) && milkValue >= 0 ? milkValue : null;
 
       if (validValue === null && validMilkValue === null) continue;
 

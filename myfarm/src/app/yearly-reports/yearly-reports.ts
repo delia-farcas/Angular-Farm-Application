@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import type { ChartConfiguration } from 'chart.js';
 import { FarmService } from '../services/farm.service';
-import { Animal, FarmProductCategory } from '../models/farm';
+import { Animal, FarmProductCategory, DailyLogEntry } from '../models/farm';
+import { UserTrackingService } from '../services/user-tracking.service';
+import { inject } from '@angular/core';
 
 @Component({
   selector: 'app-yearly-reports',
@@ -22,6 +24,12 @@ export class YearlyReports {
   private isGenerating = false;
   private generatorId: any;
 
+  currentLogs: DailyLogEntry[] = [];
+  processedRows: { label: string; total: number }[] = [];
+  grandTotal = 0;
+
+  private trackingService = inject(UserTrackingService);
+
   @ViewChildren(BaseChartDirective) charts!: QueryList<BaseChartDirective>;
 
   /** Instantiates the component and injects dependencies. */
@@ -32,6 +40,11 @@ export class YearlyReports {
     this.selectedAnimalId = this.farm.getAnimals()[0]?.id ?? 1;
   }
 
+  /** Initializes the component. */
+  ngOnInit() {
+    this.refreshData();
+  }
+
   get animals(): Animal[] {
     return this.farm.getAnimals();
   }
@@ -40,34 +53,19 @@ export class YearlyReports {
     return this.farm.getAnimalById(this.selectedAnimalId);
   }
 
-  /** Retrieves the value for category. */
-  private getValueForCategory(entry: {
-    milk: number;
-    eggs: number;
-    wool: number;
-    workHours: number;
-    meat: number;
-  }): number {
-    switch (this.category) {
-      case 'lapte':
-        return entry.milk;
-      case 'oua':
-        return entry.eggs;
-      case 'lana':
-        return entry.wool;
-      case 'ore_munca':
-        return entry.workHours;
-      case 'carne':
-        return entry.meat;
-    }
+  /** Handles the Refresh data functionality. */
+  refreshData(): void {
+    const start = `${this.year}-01-01`;
+    const end = `${this.year}-12-31`;
+    this.farm.getLogsInRange(this.trackingService.getCurrentUserId(), start, end).subscribe((logs) => {
+      this.currentLogs = logs || [];
+      this.processLogsIntoTable();
+      this.cdr.detectChanges();
+    });
   }
 
-  /** Handles the Pad2 functionality. */
-  private pad2(n: number): string {
-    return String(n).padStart(2, '0');
-  }
-
-  get tableRows(): { label: string; total: number }[] {
+  /** Handles the Process logs into table functionality. */
+  private processLogsIntoTable(): void {
     const months = [
       'Ianuarie',
       'Februarie',
@@ -83,18 +81,51 @@ export class YearlyReports {
       'Decembrie',
     ];
 
-    return months.map((label, idx) => {
-      const start = `${this.year}-${this.pad2(idx + 1)}-01`;
+    this.processedRows = months.map((label, idx) => {
+      const startIso = `${this.year}-${this.pad2(idx + 1)}-01`;
       const endDate = new Date(this.year, idx + 1, 0).getDate();
-      const end = `${this.year}-${this.pad2(idx + 1)}-${this.pad2(endDate)}`;
-      const logs = this.farm.getLogsInRange(this.selectedAnimalId, start, end);
-      const total = (Array.isArray(logs) ? logs : []).reduce((sum: number, l: { milk: number; eggs: number; wool: number; workHours: number; meat: number; }) => sum + this.getValueForCategory(l), 0);
+      const endIso = `${this.year}-${this.pad2(idx + 1)}-${this.pad2(endDate)}`;
+
+      const total = this.currentLogs
+        .filter((l) => l.date >= startIso && l.date <= endIso)
+        .reduce((sum, l) => sum + this.getValueForCategory(l), 0);
       return { label, total };
     });
+
+    this.grandTotal = this.processedRows.reduce((s, r) => s + r.total, 0);
+
+    if (this.charts) {
+      this.charts.forEach((c) => c.update());
+    }
+  }
+
+  /** Retrieves the value for category. */
+  private getValueForCategory(entry: DailyLogEntry): number {
+    switch (this.category) {
+      case 'lapte':
+        return entry.milk || 0;
+      case 'oua':
+        return entry.eggs || 0;
+      case 'lana':
+        return entry.wool || 0;
+      case 'ore_munca':
+        return entry.workHours || 0;
+      case 'carne':
+        return entry.meat || 0;
+    }
+  }
+
+  /** Handles the Pad2 functionality. */
+  private pad2(n: number): string {
+    return String(n).padStart(2, '0');
+  }
+
+  get tableRows(): { label: string; total: number }[] {
+    return this.processedRows;
   }
 
   get total(): number {
-    return this.tableRows.reduce((s, r) => s + r.total, 0);
+    return this.grandTotal;
   }
 
   get unit(): string {
@@ -113,8 +144,8 @@ export class YearlyReports {
   }
 
   get chartData(): ChartConfiguration<'line'>['data'] {
-    const labels = this.tableRows.map((r) => r.label);
-    const data = this.tableRows.map((r) => r.total);
+    const labels = this.processedRows.map((r) => r.label);
+    const data = this.processedRows.map((r) => r.total);
 
     return {
       labels,

@@ -28,18 +28,19 @@ public class AnimalService implements IAnimalService {
     }
 
     @Override
-    public Optional<Animal> updateAnimal(long id, Animal animalData) {
-        return animalRepository.findById(id).map(existingAnimal -> {
-            existingAnimal.setName(animalData.getName());
-            existingAnimal.setType(animalData.getType());
-            existingAnimal.setSex(animalData.getSex());
-            existingAnimal.setAge(animalData.getAge());
-            existingAnimal.setStatus(animalData.getStatus());
-            existingAnimal.setLocation(animalData.getLocation());
-            existingAnimal.setObservations(animalData.getObservations());
+    public Animal updateAnimal(long id, Animal animalData) {
+        return animalRepository.findById(id)
+                .map(existingAnimal -> {
+                        existingAnimal.setName(animalData.getName());
+                        existingAnimal.setType(animalData.getType());
+                        existingAnimal.setSex(animalData.getSex());
+                        existingAnimal.setAge(animalData.getAge());
+                        existingAnimal.setStatus(animalData.getStatus());
+                        existingAnimal.setLocation(animalData.getLocation());
+                        existingAnimal.setObservations(animalData.getObservations());
 
             return animalRepository.save(existingAnimal);
-        });
+        }).orElse(null);
     }
 
     @Override

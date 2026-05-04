@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
 
 import { LunarReports } from './lunar-reports';
 import { FarmService } from '../services/farm.service';
@@ -31,7 +32,7 @@ describe('LunarReports', () => {
       getAnimals: () => animals,
       getAnimalById: (id: number) => animals.find((a) => a.id === id),
       getLogsInRange: (_id: number, start: string, end: string) =>
-        animals[0].logs.filter((l) => l.date >= start && l.date <= end),
+        of(animals[0].logs.filter((l) => l.date >= start && l.date <= end)),
     };
 
     await TestBed.configureTestingModule({
@@ -55,10 +56,10 @@ describe('LunarReports', () => {
   it('should change totals when category changes', () => {
     component.selectedAnimalId = 1;
 
-    component.category = 'lapte';
+    component.onCategoryChange('lapte');
     const milkTotal = component.total;
 
-    component.category = 'oua';
+    component.onCategoryChange('oua');
     const eggsTotal = component.total;
 
     expect(milkTotal).toBeGreaterThan(0);

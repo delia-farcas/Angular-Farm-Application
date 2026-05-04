@@ -11,7 +11,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/logs")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:4200")
 public class ProductionLogRestController {
 
     private final ProductionLogService logService;
@@ -20,14 +20,11 @@ public class ProductionLogRestController {
         this.logService = logService;
     }
 
-    // Folosim saveOrUpdateLog conform implementării tale
     @PostMapping
     public ResponseEntity<ProductionLog> createOrUpdateLog(@Valid @RequestBody ProductionLog log) {
         ProductionLog savedLog = logService.saveOrUpdateLog(log);
         return new ResponseEntity<>(savedLog, HttpStatus.CREATED);
     }
-
-    // Endpoint REST pentru raport (oglindit cu cel de GraphQL)
     @GetMapping("/report")
     public ResponseEntity<Map<String, Double>> getReport(
             @RequestParam long userId,
@@ -37,5 +34,15 @@ public class ProductionLogRestController {
 
         Map<String, Double> report = logService.getReport(userId, year, month, resourceField);
         return ResponseEntity.ok(report);
+    }
+
+    @GetMapping("/history/{userId}")
+    public ResponseEntity<?> getHistory(
+            @PathVariable Long userId,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        var history = logService.getLogsByUserAndDateRange(userId, startDate, endDate);
+
+        return ResponseEntity.ok(history);
     }
 }

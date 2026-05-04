@@ -40,6 +40,13 @@ public class ProductionLogGraphQLController {
         // În GraphQL, input-ul va trebui mapat corect în schema.graphqls
         return logService.saveOrUpdateLog(input);
     }
+    @QueryMapping
+    public List<ProductionLog> getLogsHistory(
+            @Argument Long userId,
+            @Argument String startDate,
+            @Argument String endDate) {
+        return logService.getLogsByUserAndDateRange(userId, startDate, endDate);
+    }
 }
 
 // Record pentru a structura răspunsul în GraphQL

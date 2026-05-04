@@ -56,4 +56,30 @@ class ProductionLogServiceTest {
         assertEquals(50.0, report.get("Februarie"));
         assertEquals(0.0, report.get("Martie"));
     }
+
+    @Test
+    void saveOrUpdateLog_ShouldSave_WhenNotExists() {
+        ProductionLog newLog = new ProductionLog(1L, LocalDate.of(2024, 5, 2), 10.0, 0, 0, 0, 0, 0, 100L);
+        doReturn(java.util.Optional.empty()).when(logRepository).findByDateAndUserId(newLog.getReportDate(), 100L);
+        doReturn(newLog).when(logRepository).save(newLog);
+
+        ProductionLog saved = productionLogService.saveOrUpdateLog(newLog);
+
+        assertNotNull(saved);
+        assertEquals(10.0, saved.getMilkLitersCow());
+    }
+
+    @Test
+    void saveOrUpdateLog_ShouldUpdate_WhenExists() {
+        ProductionLog existing = new ProductionLog(1L, LocalDate.of(2024, 5, 2), 10.0, 0, 0, 0, 0, 0, 100L);
+        ProductionLog newLog = new ProductionLog(2L, LocalDate.of(2024, 5, 2), 5.0, 0, 0, 0, 0, 0, 100L);
+
+        doReturn(java.util.Optional.of(existing)).when(logRepository).findByDateAndUserId(newLog.getReportDate(), 100L);
+        doReturn(existing).when(logRepository).save(existing);
+
+        ProductionLog updated = productionLogService.saveOrUpdateLog(newLog);
+
+        assertNotNull(updated);
+        assertEquals(15.0, updated.getMilkLitersCow());
+    }
 }

@@ -38,32 +38,32 @@
     <button class="btn-add" (click)="navigatetoAddAnimal()">Adaugă animal</button>
   </div>
 
-  <div class="table-container"> 
-  <table class="animal-table">
-    <thead>
-      <tr>
-        <th>animal</th>
-        <th>id</th>
-        <th>nume</th>
-        <th>sănătate</th>
-        <th>localizare</th>
-        <th>acțiuni</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        app-animal-row
-        *ngFor="let animal of filteredAnimals"
-        [animal]="animal"
-        [display]="'row'"
-        (edit)="editAnimal($event)"
-        (delete)="deleteAnimal($event)"
-      ></tr>
-    </tbody>
-  </table>
-</div>
-  <div *ngIf="isLoading" class="loading-text">Se încarcă animale...</div>
+  <div class="table-container" (scroll)="onTableScroll($event)">
+    <table class="animal-table">
+      <thead>
+        <tr>
+          <th>animal</th>
+          <th>id</th>
+          <th>nume</th>
+          <th>sănătate</th>
+          <th>localizare</th>
+          <th>acțiuni</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+            *ngFor="let animal of filteredAnimals"
+            app-animal-row
+            [animal]="animal"
+            [display]="'row'"
+            (edit)="editAnimal($event)"
+            (delete)="deleteAnimal($event)"
+          ></tr>
+      </tbody>
+    </table>
   </div>
+  <div *ngIf="isLoading" class="loading-text">Se încarcă animale...</div>
+
   <div class="manage-row">
     <button class="btn-manage" (click)="navigateToManage()">Gestionează</button>
   </div>

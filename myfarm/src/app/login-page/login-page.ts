@@ -13,13 +13,12 @@ import { Router } from '@angular/router';
 })
 export class LoginPage {
   @Output() goToSignup = new EventEmitter<void>();
-  
+
   private userService = inject(UserService);
   private fb = inject(FormBuilder);
   private trackingService = inject(UserTrackingService);
   private router = inject(Router);
 
-  // Folosim email pentru login, deoarece așa am configurat backend-ul Java
   loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
@@ -34,26 +33,22 @@ export class LoginPage {
 
     const { email } = this.loginForm.value;
 
-    // Apelăm serverul Java prin UserService
     this.userService.login(email).subscribe({
       next: (user) => {
         if (user) {
           console.log('Login reușit!', user);
-          
-          // Actualizăm tracking-ul local cu datele venite de la server
-          this.trackingService.setCurrentUser(user.username);
+
+          this.trackingService.setCurrentUser(user.username, user.userId);
           this.trackingService.setLastLogin();
           this.trackingService.logActivity('login');
-          
-          // Navigăm către lista de animale
-          this.router.navigate(['/list']);
+
+          this.router.navigate(['/home']);
         }
       },
       error: (err) => {
-        // Dacă serverul Java returnează 401 Unauthorized sau 404
         alert('Email incorect sau utilizator inexistent!');
         console.error('Login error:', err);
-      }
+      },
     });
   }
 

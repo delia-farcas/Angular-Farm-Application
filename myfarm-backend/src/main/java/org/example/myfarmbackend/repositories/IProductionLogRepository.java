@@ -24,5 +24,5 @@ public interface IProductionLogRepository {
     /** * Filters logs between two dates.
      * Essential for generating Gold Challenge statistics (Weekly/Monthly reports).
      */
-    List<ProductionLog> findByPeriod(LocalDate start, LocalDate end);
+    List<ProductionLog> findByUserAndPeriod(Long userId, LocalDate start, LocalDate end);
 }

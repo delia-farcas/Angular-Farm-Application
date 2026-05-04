@@ -19,23 +19,22 @@ describe('LoginPage (spec stub)', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should not emit loginSuccess when invalid', () => {
-    const spy = vi.fn();
-    component.loginSuccess.subscribe(spy);
+  it('should not call login when invalid', () => {
+    const userServiceSpy = vi.spyOn(component['userService'], 'login').mockImplementation((() => {}) as any);
 
-    component.loginForm.setValue({ username: '', password: '' });
+    component.loginForm.setValue({ email: '', password: '' });
     component.onSubmit();
 
-    expect(spy).not.toHaveBeenCalled();
+    expect(userServiceSpy).not.toHaveBeenCalled();
   });
 
-  it('should emit loginSuccess when valid', () => {
-    const spy = vi.fn();
-    component.loginSuccess.subscribe(spy);
+  it('should call login when valid', () => {
+    const userServiceSpy = vi.spyOn(component['userService'], 'login').mockReturnValue({ subscribe: () => {} } as any);
 
-    component.loginForm.setValue({ username: 'user', password: 'pass' });
+    component.loginForm.setValue({ email: 'test@test.com', password: 'pass' });
     component.onSubmit();
 
-    expect(spy).toHaveBeenCalledTimes(1);
+    expect(userServiceSpy).toHaveBeenCalledTimes(1);
+    expect(userServiceSpy).toHaveBeenCalledWith('test@test.com');
   });
 });

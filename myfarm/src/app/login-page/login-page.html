@@ -4,8 +4,8 @@
       <h2 class="auth-heading">Accesează contul</h2>
       <form class="auth-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
-          <label for="username">Username sau email:</label>
-          <input type="text" id="username" formControlName="username" placeholder="Username" />
+          <label for="email">Email:</label>
+          <input type="email" id="email" formControlName="email" placeholder="Email" />
           <span class="error-msg">
             {{
               loginForm.get('username')?.touched && loginForm.get('username')?.hasError('required')

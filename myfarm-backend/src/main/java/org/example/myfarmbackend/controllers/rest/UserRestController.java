@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:4200")
 public class UserRestController {
 
     private final UserService userService;
@@ -18,14 +18,12 @@ public class UserRestController {
         this.userService = userService;
     }
 
-    // Oglindește procesul de înregistrare
     @PostMapping("/register")
     public ResponseEntity<User> register(@Valid @RequestBody User user) {
         User savedUser = userService.registerUser(user);
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
 
-    // Oglindește procesul de login (simplificat)
     @GetMapping("/login")
     public ResponseEntity<User> login(@RequestParam String email) {
         return userService.getUserByEmail(email)

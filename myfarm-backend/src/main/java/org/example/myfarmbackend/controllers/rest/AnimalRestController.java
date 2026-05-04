@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/animals")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:4200")
 public class AnimalRestController {
 
     private final AnimalService animalService;
@@ -24,14 +24,21 @@ public class AnimalRestController {
             @PathVariable Long ownerId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        // Implementăm paginarea server-side cerută
         return animalService.getUserAnimals(ownerId, page, size);
     }
 
     @PostMapping
     public ResponseEntity<Animal> addAnimal(@Valid @RequestBody Animal animal) {
-        // @Valid asigură Server-side validation
         return ResponseEntity.ok(animalService.addAnimal(animal));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Animal> updateAnimal(@PathVariable Long id, @Valid @RequestBody Animal animal) {
+        Animal updated = animalService.updateAnimal(id, animal);
+        if (updated != null) {
+            return ResponseEntity.ok(updated);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")

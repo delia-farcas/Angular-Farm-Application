@@ -36,8 +36,9 @@ public class ProductionLogRepository implements IProductionLogRepository {
     }
 
     @Override
-    public List<ProductionLog> findByPeriod(LocalDate start, LocalDate end) {
+    public List<ProductionLog> findByUserAndPeriod(Long userId, LocalDate start, LocalDate end) {
         return reports.stream()
+                .filter(r -> r.getUserId().equals(userId))
                 .filter(r -> !r.getReportDate().isBefore(start) && !r.getReportDate().isAfter(end))
                 .toList();
     }
