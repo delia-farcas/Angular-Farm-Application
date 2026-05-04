@@ -5,7 +5,7 @@
     <div class="filter-group">
       <span class="label">categorii de produse</span>
       <div class="dropdown-wrapper">
-        <select id="select-category" class="dropdown" [(ngModel)]="category">
+        <select [ngModel]="category" class="dropdown" (ngModelChange)="onCategoryChange($event)">
           <option value="lapte">lapte</option>
           <option value="oua">ouă</option>
           <option value="lana">lână</option>
@@ -72,26 +72,6 @@
         </span>
       </label>
       <span class="label">grafic</span>
-    </div>
-
-    <div class="view-toggle">
-      <span class="label" style="font-size: 14px; font-weight: normal; color: #555"
-        >Oprește Gen.</span
-      >
-      <label class="switch" for="gen-switch-lun">
-        <input
-          type="checkbox"
-          id="gen-switch-lun"
-          class="switch-input"
-          (change)="toggleGenerator($event)"
-        />
-        <span class="switch-track">
-          <span class="switch-knob"></span>
-        </span>
-      </label>
-      <span class="label" style="font-size: 14px; font-weight: normal; color: #555"
-        >Pornește Gen.</span
-      >
     </div>
   </div>
 </div>

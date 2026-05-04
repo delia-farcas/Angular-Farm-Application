@@ -1,7 +1,11 @@
 package org.example.myfarmbackend.repositories;
 
 import org.example.myfarmbackend.models.ProductionLog;
+import org.example.myfarmbackend.models.User;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -9,110 +13,66 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 class ProductionLogRepositoryTest {
 
-    @Test
-    void save_ShouldAssignId_WhenIdIsNull() {
-        ProductionLogRepository repo = new ProductionLogRepository();
-        ProductionLog log = new ProductionLog(null, LocalDate.of(2024, 1, 1), 1.0, 0, 0, 0, 0, 0, 10L);
+    @Autowired
+    private ProductionLogRepository productionLogRepository;
 
-        ProductionLog saved = repo.save(log);
+    @Autowired
+    private UserRepository userRepository;
 
-        assertNotNull(saved.getId());
-        assertTrue(saved.getId() > 0);
-        assertEquals(1, repo.findAll().size());
+    private User persistUser(String email) {
+        User u = new User();
+        u.setEmail(email);
+        u.setUsername("u-" + email);
+        u.setPassword("secret");
+        return userRepository.save(u);
     }
 
     @Test
-    void save_ShouldAssignId_WhenIdIsZero() {
-        ProductionLogRepository repo = new ProductionLogRepository();
-        ProductionLog log = new ProductionLog(0L, LocalDate.of(2024, 1, 1), 1.0, 0, 0, 0, 0, 0, 10L);
-
-        ProductionLog saved = repo.save(log);
-
-        assertNotNull(saved.getId());
-        assertNotEquals(0L, saved.getId());
-        assertEquals(1, repo.findAll().size());
-    }
-
-    @Test
-    void save_ShouldUpdateExisting_WhenIdMatches() {
-        ProductionLogRepository repo = new ProductionLogRepository();
-        ProductionLog first = new ProductionLog(null, LocalDate.of(2024, 1, 1), 1.0, 0, 0, 0, 0, 0, 10L);
-        repo.save(first);
-
-        Long id = repo.findAll().get(0).getId();
-        ProductionLog updated = new ProductionLog(id, LocalDate.of(2024, 1, 1), 5.0, 0, 0, 0, 0, 0, 10L);
-
-        repo.save(updated);
-
-        List<ProductionLog> all = repo.findAll();
-        assertEquals(1, all.size());
-        assertEquals(5.0, all.get(0).getMilkLitersCow());
-    }
-
-    @Test
-    void save_ShouldAddNew_WhenIdNotFound() {
-        ProductionLogRepository repo = new ProductionLogRepository();
-        repo.save(new ProductionLog(null, LocalDate.of(2024, 1, 1), 1.0, 0, 0, 0, 0, 0, 10L));
-
-        repo.save(new ProductionLog(999L, LocalDate.of(2024, 1, 2), 2.0, 0, 0, 0, 0, 0, 10L));
-
-        assertEquals(2, repo.findAll().size());
-    }
-
-    @Test
-    void findByDateAndUserId_ShouldFindMatchingLog() {
-        ProductionLogRepository repo = new ProductionLogRepository();
+    void findByReportDateAndUserUserId_findsSavedLog() {
+        User u = persistUser("owner1@farm.test");
         LocalDate date = LocalDate.of(2024, 2, 2);
-        repo.save(new ProductionLog(null, date, 1.0, 0, 0, 0, 0, 0, 10L));
 
-        Optional<ProductionLog> found = repo.findByDateAndUserId(date, 10L);
+        ProductionLog log = new ProductionLog();
+        log.setReportDate(date);
+        log.setMilkLitersCow(1.0);
+        log.setUser(u);
+        productionLogRepository.save(log);
+
+        Optional<ProductionLog> found =
+                productionLogRepository.findByReportDateAndUserUserId(date, u.getUserId());
 
         assertTrue(found.isPresent());
         assertEquals(date, found.get().getReportDate());
-        assertEquals(10L, found.get().getUserId());
+        assertEquals(1.0, found.get().getMilkLitersCow());
     }
 
     @Test
-    void findByDateAndUserId_ShouldReturnEmpty_WhenNoMatch() {
-        ProductionLogRepository repo = new ProductionLogRepository();
-        repo.save(new ProductionLog(null, LocalDate.of(2024, 2, 2), 1.0, 0, 0, 0, 0, 0, 10L));
+    void findByUserUserIdAndReportDateBetween_filtersByRange() {
+        User u10 = persistUser("u10@farm.test");
+        User u99 = persistUser("u99@farm.test");
 
-        Optional<ProductionLog> found = repo.findByDateAndUserId(LocalDate.of(2024, 2, 3), 10L);
+        productionLogRepository.save(buildLog(u10, LocalDate.of(2024, 1, 1), 1.0));
+        productionLogRepository.save(buildLog(u10, LocalDate.of(2024, 1, 15), 2.0));
+        productionLogRepository.save(buildLog(u10, LocalDate.of(2024, 2, 1), 3.0));
+        productionLogRepository.save(buildLog(u99, LocalDate.of(2024, 1, 10), 9.0));
 
-        assertTrue(found.isEmpty());
-    }
-
-    @Test
-    void findByUserAndPeriod_ShouldFilterByUserAndDateInclusive() {
-        ProductionLogRepository repo = new ProductionLogRepository();
-        repo.save(new ProductionLog(null, LocalDate.of(2024, 1, 1), 1.0, 0, 0, 0, 0, 0, 10L));
-        repo.save(new ProductionLog(null, LocalDate.of(2024, 1, 15), 2.0, 0, 0, 0, 0, 0, 10L));
-        repo.save(new ProductionLog(null, LocalDate.of(2024, 2, 1), 3.0, 0, 0, 0, 0, 0, 10L));
-        repo.save(new ProductionLog(null, LocalDate.of(2024, 1, 10), 4.0, 0, 0, 0, 0, 0, 99L));
-
-        List<ProductionLog> result = repo.findByUserAndPeriod(
-                10L,
-                LocalDate.of(2024, 1, 1),
-                LocalDate.of(2024, 1, 31)
-        );
+        List<ProductionLog> result =
+                productionLogRepository.findByUserUserIdAndReportDateBetween(
+                        u10.getUserId(), LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31));
 
         assertEquals(2, result.size());
-        assertTrue(result.stream().allMatch(l -> l.getUserId().equals(10L)));
-        assertTrue(result.stream().allMatch(l -> !l.getReportDate().isBefore(LocalDate.of(2024, 1, 1))));
-        assertTrue(result.stream().allMatch(l -> !l.getReportDate().isAfter(LocalDate.of(2024, 1, 31))));
+        assertTrue(result.stream().allMatch(l -> l.getUser().getUserId().equals(u10.getUserId())));
     }
 
-    @Test
-    void findAll_ShouldReturnCopy_NotBackedByInternalList() {
-        ProductionLogRepository repo = new ProductionLogRepository();
-        repo.save(new ProductionLog(null, LocalDate.of(2024, 1, 1), 1.0, 0, 0, 0, 0, 0, 10L));
-
-        List<ProductionLog> all = repo.findAll();
-        all.clear();
-
-        assertEquals(1, repo.findAll().size());
+    private ProductionLog buildLog(User owner, LocalDate date, double milkCow) {
+        ProductionLog log = new ProductionLog();
+        log.setReportDate(date);
+        log.setMilkLitersCow(milkCow);
+        log.setUser(owner);
+        return log;
     }
 }
-

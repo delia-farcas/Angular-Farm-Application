@@ -1,8 +1,12 @@
 package org.example.myfarmbackend.services;
 
+import jakarta.transaction.Transactional;
+import org.example.myfarmbackend.dto.ProductionLogDTO;
 import org.example.myfarmbackend.models.ProductionLog;
-import org.example.myfarmbackend.repositories.IAnimalRepository;
-import org.example.myfarmbackend.repositories.IProductionLogRepository;
+import org.example.myfarmbackend.models.User;
+import org.example.myfarmbackend.repositories.AnimalRepository;
+import org.example.myfarmbackend.repositories.ProductionLogRepository;
+import org.example.myfarmbackend.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -11,50 +15,74 @@ import java.util.*;
 @Service
 public class ProductionLogService implements IProductionLogService {
 
-    private final IProductionLogRepository logRepository;
-    private final IAnimalRepository animalRepository;
+    private final ProductionLogRepository logRepository;
+    private final AnimalRepository animalRepository;
+    private final UserRepository userRepository;
 
-    public ProductionLogService(IProductionLogRepository logRepository, IAnimalRepository animalRepository) {
+    public ProductionLogService(ProductionLogRepository logRepository, AnimalRepository animalRepository, UserRepository userRepository) {
         this.logRepository = logRepository;
         this.animalRepository = animalRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
-    public ProductionLog saveOrUpdateLog(ProductionLog newLog) {
-        validateLogAgainstAnimals(newLog);
-        return logRepository.findByDateAndUserId(newLog.getReportDate(), newLog.getUserId())
-                .map(existing -> updateExistingLog(existing, newLog))
-                .orElseGet(() -> logRepository.save(newLog));
+    @Transactional
+    public ProductionLog saveOrUpdateLog(ProductionLogDTO dto) {
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + dto.getUserId()));
+
+        return logRepository.findByReportDateAndUserUserId(dto.getReportDate(), dto.getUserId())
+                .map(existingLog -> {
+                    updateLogFields(existingLog, dto);
+                    return logRepository.save(existingLog);
+                })
+                .orElseGet(() -> {
+                    ProductionLog newLog = new ProductionLog();
+                    newLog.setUser(user);
+                    updateLogFields(newLog, dto);
+                    return logRepository.save(newLog);
+                });
+    }
+
+    private void updateLogFields(ProductionLog log, ProductionLogDTO dto) {
+        log.setReportDate(dto.getReportDate());
+        log.setMilkLitersCow(dto.getMilkLitersCow());
+        log.setMeatKg(dto.getMeatKg());
+        log.setEggsCount(dto.getEggsCount());
+        log.setMilkLitersSheep(dto.getMilkLitersSheep());
+        log.setWoolKg(dto.getWoolKg());
+        log.setMilkLitersGoat(dto.getMilkLitersGoat());
+        log.setWorkHours(dto.getWorkHours());
     }
 
     private void validateLogAgainstAnimals(ProductionLog log) {
-        Long userId = log.getUserId();
+        Long userId = log.getUser().getUserId();
         if (userId == null) {
             throw new RuntimeException("UserId is required.");
         }
 
-        if (log.getMilkLitersCow() > 0 && animalRepository.countByOwnerIdAndType(userId, "vaca") <= 0) {
+        if (log.getMilkLitersCow() > 0 && animalRepository.countByOwnerUserIdAndTypeIgnoreCase(userId, "vaca") <= 0) {
             throw new RuntimeException("Nu poți salva lapte de vacă fără cel puțin o vacă în fermă.");
         }
 
         // Sheep+goat milk is stored in milkLitersSheep in this backend.
         if (log.getMilkLitersSheep() > 0) {
-            long sheep = animalRepository.countByOwnerIdAndType(userId, "oaie");
-            long goat = animalRepository.countByOwnerIdAndType(userId, "capra");
+            long sheep = animalRepository.countByOwnerUserIdAndTypeIgnoreCase(userId, "oaie");
+            long goat = animalRepository.countByOwnerUserIdAndTypeIgnoreCase(userId, "capra");
             if (sheep + goat <= 0) {
                 throw new RuntimeException("Nu poți salva lapte (oaie/capră) fără cel puțin o oaie sau o capră în fermă.");
             }
         }
 
-        if (log.getEggsCount() > 0 && animalRepository.countByOwnerIdAndType(userId, "gaina") <= 0) {
+        if (log.getEggsCount() > 0 && animalRepository.countByOwnerUserIdAndTypeIgnoreCase(userId, "gaina") <= 0) {
             throw new RuntimeException("Nu poți salva ouă fără cel puțin o găină în fermă.");
         }
 
-        if (log.getWoolKg() > 0 && animalRepository.countByOwnerIdAndType(userId, "oaie") <= 0) {
+        if (log.getWoolKg() > 0 && animalRepository.countByOwnerUserIdAndTypeIgnoreCase(userId, "oaie") <= 0) {
             throw new RuntimeException("Nu poți salva lână fără cel puțin o oaie în fermă.");
         }
 
-        if (log.getMeatKg() > 0 && animalRepository.countByOwnerIdAndType(userId, "porc") <= 0) {
+        if (log.getMeatKg() > 0 && animalRepository.countByOwnerUserIdAndTypeIgnoreCase(userId, "porc") <= 0) {
             throw new RuntimeException("Nu poți salva carne fără cel puțin un porc în fermă.");
         }
     }
@@ -82,7 +110,7 @@ public class ProductionLogService implements IProductionLogService {
 
     private List<ProductionLog> getFilteredLogs(long userId, int year) {
         return logRepository.findAll().stream()
-                .filter(l -> l.getUserId().equals(userId))
+                .filter(l -> l.getUser().getUserId() == userId)
                 .filter(l -> l.getReportDate().getYear() == year)
                 .toList();
     }
@@ -130,7 +158,7 @@ public class ProductionLogService implements IProductionLogService {
 
     private double getValueByField(ProductionLog log, String field) {
         return switch (field.toLowerCase()) {
-            case "lapte" -> log.getMilkLitersCow() + log.getMilkLitersSheep();
+            case "lapte" -> log.getMilkLitersCow() + log.getMilkLitersSheep() + log.getMilkLitersGoat();
             case "carne" -> log.getMeatKg();
             case "ouă" -> log.getEggsCount();
             case "lână" -> log.getWoolKg();
@@ -142,6 +170,6 @@ public class ProductionLogService implements IProductionLogService {
     public List<ProductionLog> getLogsByUserAndDateRange(Long userId, String startDate, String endDate) {
         LocalDate start = LocalDate.parse(startDate);
         LocalDate end = LocalDate.parse(endDate);
-        return logRepository.findByUserAndPeriod(userId, start, end);
+        return logRepository.findByUserUserIdAndReportDateBetween(userId, start, end);
     }
 }

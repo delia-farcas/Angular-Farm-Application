@@ -35,6 +35,6 @@ describe('LoginPage (spec stub)', () => {
     component.onSubmit();
 
     expect(userServiceSpy).toHaveBeenCalledTimes(1);
-    expect(userServiceSpy).toHaveBeenCalledWith('test@test.com');
+    expect(userServiceSpy).toHaveBeenCalledWith('test@test.com', 'pass');
   });
 });

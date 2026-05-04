@@ -69,9 +69,9 @@ export class UserTrackingService {
 
   /** Retrieves the current user ID. */
   getCurrentUserId(): number {
-    const id = localStorage.getItem('current_user_id');
-    return id ? parseInt(id, 10) : 1;
-  }
+  const id = localStorage.getItem('current_user_id');
+  return id ? parseInt(id, 10) : -1; 
+}
 
   /** Handles the Logout functionality. */
   logout(): void {

@@ -31,9 +31,9 @@ export class LoginPage {
       return;
     }
 
-    const { email } = this.loginForm.value;
+    const { email, password } = this.loginForm.value;
 
-    this.userService.login(email).subscribe({
+    this.userService.login(email, password).subscribe({
       next: (user) => {
         if (user) {
           console.log('Login reușit!', user);
@@ -46,7 +46,7 @@ export class LoginPage {
         }
       },
       error: (err) => {
-        alert('Email incorect sau utilizator inexistent!');
+        alert('Email sau parolă incorectă, sau utilizator inexistent.');
         console.error('Login error:', err);
       },
     });

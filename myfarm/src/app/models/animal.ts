@@ -1,5 +1,5 @@
 export interface Animal {
-  id: number;
+  id?: number; 
   name: string;
   type: 'vaca' | 'capra' | 'gaina' | 'oaie' | 'porc' | 'cal';
   sex: 'mascul' | 'femela';
@@ -7,5 +7,5 @@ export interface Animal {
   status: string;
   location: string;
   observations: string;
-  ownerId: number;
+  userId: number; 
 }

@@ -14,49 +14,57 @@ export class AnimalService {
 
   private animalsLocal: Animal[] = [];
 
-  /** Retrieves the animals paginated. */
-  getAnimalsPaginated(ownerId: number, page: number, size: number): Observable<Animal[]> {
-    const params = new HttpParams().set('page', page.toString()).set('size', size.toString());
+  /** * Preia animalele paginate pentru un anumit proprietar.
+   * Endpoint Backend: @GetMapping("/owner/{ownerId}")
+   */
+  getAnimalsPaginated(ownerId: number, page: number, size: number): Observable<any> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
 
-    return this.http.get<Animal[]>(`${this.apiUrl}/owner/${ownerId}`, { params }).pipe(
-      tap((animals) => {
-        console.log('tap received:', animals); 
-        this.animalsLocal = animals;
+    return this.http.get<any>(`${this.apiUrl}/owner/${ownerId}`, { params }).pipe(
+      tap((response) => {
+        this.animalsLocal = response.content || response; 
         this.syncFarmCounts();
       }),
     );
   }
 
-  /** Handles the Add animal functionality. */
+  /** * Adaugă un animal. 
+   * Trimite obiectul Animal care conține ownerId către AnimalDTO din backend.
+   */
   addAnimal(animal: Animal): Observable<Animal> {
-  return this.http.post<Animal>(this.apiUrl, animal).pipe(
-    tap((newAnimal) => {
-      this.animalsLocal.push(newAnimal); 
-      this.refreshData(); 
-    })
-  );
-}
+    return this.http.post<Animal>(this.apiUrl, animal).pipe(
+      tap((newAnimal) => {
+        this.animalsLocal.push(newAnimal); 
+        this.refreshData(); 
+      })
+    );
+  }
 
-  /** Handles the Update animal functionality. */
+  /** Update animal */
   updateAnimal(animal: Animal): Observable<Animal> {
     return this.http
       .put<Animal>(`${this.apiUrl}/${animal.id}`, animal)
       .pipe(tap(() => this.refreshData()));
   }
 
-  /** Handles the Delete animal functionality. */
+  /** Delete animal */
   deleteAnimal(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(tap(() => this.refreshData()));
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => {
+        this.animalsLocal = this.animalsLocal.filter(a => a.id !== id);
+        this.refreshData();
+      })
+    );
   }
 
-  /** Handles the Refresh data functionality. */
   private refreshData() {
     this.syncFarmCounts();
   }
 
-  /** Handles the Sync farm counts functionality. */
   private syncFarmCounts(): void {
-    const counts = this.animalsLocal.reduce<Partial<Record<Animal['type'], number>>>(
+    const counts = this.animalsLocal.reduce<Partial<Record<string, number>>>(
       (acc, animal) => {
         acc[animal.type] = (acc[animal.type] ?? 0) + 1;
         return acc;

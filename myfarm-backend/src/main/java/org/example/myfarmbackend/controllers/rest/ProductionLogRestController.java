@@ -2,6 +2,7 @@ package org.example.myfarmbackend.controllers.rest;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import org.example.myfarmbackend.dto.ProductionLogDTO;
 import org.example.myfarmbackend.models.ProductionLog;
 import org.example.myfarmbackend.services.ProductionLogService;
 import org.springframework.http.HttpStatus;
@@ -14,10 +15,11 @@ import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/logs")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:4200", "http://127.0.0.1:4200"})
 @Validated
 public class ProductionLogRestController {
 
@@ -28,9 +30,9 @@ public class ProductionLogRestController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductionLog> createOrUpdateLog(@Valid @RequestBody ProductionLog log) {
-        ProductionLog savedLog = logService.saveOrUpdateLog(log);
-        return new ResponseEntity<>(savedLog, HttpStatus.CREATED);
+    public ResponseEntity<ProductionLogDTO> createOrUpdateLog(@Valid @RequestBody ProductionLogDTO logDTO) {
+        ProductionLog savedLog = logService.saveOrUpdateLog(logDTO);
+        return new ResponseEntity<>(mapToDTO(savedLog), HttpStatus.CREATED);
     }
 
     @GetMapping("/report")
@@ -45,12 +47,12 @@ public class ProductionLogRestController {
     }
 
     @GetMapping("/history/{userId}")
-    public ResponseEntity<List<?>> getHistory(
+    public ResponseEntity<List<ProductionLogDTO>> getHistory(
             @PathVariable Long userId,
             @RequestParam String startDate,
             @RequestParam String endDate,
             @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "10") @Min(1) int size
+            @RequestParam(defaultValue = "400") @Min(1) int size
     ) {
         try {
             LocalDate.parse(startDate);
@@ -58,19 +60,43 @@ public class ProductionLogRestController {
         } catch (DateTimeParseException e) {
             return ResponseEntity.badRequest().build();
         }
+
         Object historyRaw = logService.getLogsByUserAndDateRange(userId, startDate, endDate);
-        if (!(historyRaw instanceof List<?> historyList)) {
+
+        if (!(historyRaw instanceof List<?> rawList)) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        int totalElements = historyList.size();
+
+        List<ProductionLogDTO> dtoList = rawList.stream()
+                .filter(ProductionLog.class::isInstance)
+                .map(obj -> mapToDTO((ProductionLog) obj))
+                .collect(Collectors.toList());
+
+        int totalElements = dtoList.size();
         int start = page * size;
+
         if (start >= totalElements) {
             return ResponseEntity.ok(Collections.emptyList());
         }
+
         int end = Math.min(start + size, totalElements);
+        return ResponseEntity.ok(dtoList.subList(start, end));
+    }
 
-        List<?> paginatedList = historyList.subList(start, end);
-
-        return ResponseEntity.ok(paginatedList);
+    private ProductionLogDTO mapToDTO(ProductionLog log) {
+        ProductionLogDTO dto = new ProductionLogDTO();
+        dto.setId(log.getId());
+        dto.setReportDate(log.getReportDate());
+        dto.setMilkLitersCow(log.getMilkLitersCow());
+        dto.setMeatKg(log.getMeatKg());
+        dto.setEggsCount(log.getEggsCount());
+        dto.setMilkLitersSheep(log.getMilkLitersSheep());
+        dto.setWoolKg(log.getWoolKg());
+        dto.setMilkLitersGoat(log.getMilkLitersGoat());
+        dto.setWorkHours(log.getWorkHours());
+        if (log.getUser() != null) {
+            dto.setUserId(log.getUser().getUserId());
+        }
+        return dto;
     }
 }

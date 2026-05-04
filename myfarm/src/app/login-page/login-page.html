@@ -8,8 +8,9 @@
           <input type="email" id="email" formControlName="email" placeholder="Email" />
           <span class="error-msg">
             {{
-              loginForm.get('username')?.touched && loginForm.get('username')?.hasError('required')
-                ? 'Câmpul este obligatoriu.'
+              loginForm.get('email')?.touched &&
+              (loginForm.get('email')?.hasError('required') || loginForm.get('email')?.hasError('email'))
+                ? 'Introduceți un email valid.'
                 : ''
             }}
           </span>

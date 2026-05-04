@@ -41,7 +41,6 @@ export class LunarReports implements OnInit, OnDestroy {
 
   @ViewChildren(BaseChartDirective) charts!: QueryList<BaseChartDirective>;
 
-  /** Instantiates the component and injects dependencies. */
   constructor(
     private farm: FarmService,
     private cdr: ChangeDetectorRef,
@@ -49,18 +48,15 @@ export class LunarReports implements OnInit, OnDestroy {
     this.selectedAnimalId = this.farm.getAnimals()[0]?.id ?? 1;
   }
 
-  /** Initializes the component. */
   ngOnInit(): void {
     this.loadPreferences();
-    this.refreshData(); // Inițiem prima încărcare a datelor
+    this.refreshData();
   }
 
-  /** Handles the Ng on destroy functionality. */
   ngOnDestroy(): void {
     this.logSubscription?.unsubscribe();
   }
 
-  /** Handles the Load preferences functionality. */
   private loadPreferences(): void {
     const savedView = this.trackingService.getPreference('preferred_view');
     if (savedView === 'chart' || savedView === 'table') this.view = savedView;
@@ -71,7 +67,6 @@ export class LunarReports implements OnInit, OnDestroy {
     this.trackingService.logActivity('viewed_lunar_reports');
   }
 
-  /** Handles the Refresh data functionality. */
   refreshData(): void {
     const startIso = this.monthStartIso();
     const endIso = this.monthEndIso();
@@ -81,7 +76,7 @@ export class LunarReports implements OnInit, OnDestroy {
       .getLogsInRange(this.trackingService.getCurrentUserId(), startIso, endIso)
       .subscribe({
         next: (logs) => {
-          this.currentLogs = logs;
+          this.currentLogs = logs || [];
           this.processLogsIntoTable();
           this.cdr.detectChanges();
         },
@@ -89,7 +84,10 @@ export class LunarReports implements OnInit, OnDestroy {
       });
   }
 
-  /** Handles the Process logs into table functionality. */
+  get selectedAnimal(): Animal | undefined {
+    return this.farm.getAnimalById(this.selectedAnimalId);
+  }
+
   private processLogsIntoTable(): void {
     const endDay = new Date(this.year, this.monthIndex + 1, 0).getDate();
     const buckets = [
@@ -105,9 +103,8 @@ export class LunarReports implements OnInit, OnDestroy {
     this.processedRows = buckets.map((b) => {
       const fromIso = `${this.year}-${monthStr}-${pad(b.from)}`;
       const toIso = `${this.year}-${monthStr}-${pad(b.to)}`;
-      const total = this.currentLogs
-        .filter((l) => l.date >= fromIso && l.date <= toIso)
-        .reduce((sum, l) => sum + this.getValueForCategory(l), 0);
+      const filtered = this.currentLogs.filter((l) => l.date >= fromIso && l.date <= toIso);
+      const total = filtered.reduce((sum, l) => sum + this.getValueForCategory(l), 0);
       return { label: `${b.from}-${b.to}`, total };
     });
 
@@ -118,8 +115,19 @@ export class LunarReports implements OnInit, OnDestroy {
     }
   }
 
-  get selectedAnimal(): Animal | undefined {
-    return this.farm.getAnimalById(this.selectedAnimalId);
+  private getValueForCategory(entry: DailyLogEntry): number {
+    switch (this.category) {
+      case 'lapte':
+        return (entry.milkCow || 0) + (entry.milkGoat || 0) + (entry.milkSheep || 0) + (entry.milk || 0);
+      case 'lapte_vaca': return entry.milkCow || 0;
+      case 'lapte_capra': return entry.milkGoat || 0;
+      case 'lapte_oaie': return entry.milkSheep || 0;
+      case 'oua': return entry.eggs || 0;
+      case 'lana': return entry.wool || 0;
+      case 'ore_munca': return entry.workHours || 0;
+      case 'carne': return entry.meat || 0;
+      default: return 0;
+    }
   }
 
   get animals(): Animal[] {
@@ -130,56 +138,33 @@ export class LunarReports implements OnInit, OnDestroy {
     return this.processedRows;
   }
 
-  /** Retrieves the value for category. */
-  private getValueForCategory(entry: DailyLogEntry): number {
-    const mapping: any = {
-      lapte: 'milk',
-      oua: 'eggs',
-      lana: 'wool',
-      ore_munca: 'workHours',
-      carne: 'meat',
-    };
-    return (entry as any)[mapping[this.category]] || 0;
-  }
-
-  /** Handles the Month start iso functionality. */
-  private monthStartIso(): string {
-    return `${this.year}-${String(this.monthIndex + 1).padStart(2, '0')}-01`;
-  }
-
-  /** Handles the Month end iso functionality. */
-  private monthEndIso(): string {
-    const d = new Date(this.year, this.monthIndex + 1, 0);
-    return `${this.year}-${String(this.monthIndex + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }
-
   get unit(): string {
-    const units: any = { lapte: 'L', oua: 'ouă', lana: 'kg', ore_munca: 'ore', carne: 'kg' };
-    return units[this.category] || '';
+    switch (this.category) {
+      case 'lapte':
+      case 'lapte_vaca':
+      case 'lapte_capra':
+      case 'lapte_oaie': return 'L';
+      case 'oua': return 'ouă';
+      case 'lana':
+      case 'carne': return 'kg';
+      case 'ore_munca': return 'ore';
+      default: return '';
+    }
   }
 
-  /** Handles the toggle view event. */
   onToggleView(event: any): void {
     this.view = event.target?.checked ? 'chart' : 'table';
     this.trackingService.setPreference('preferred_view', this.view);
   }
 
-  /** Handles the category change event. */
   onCategoryChange(newCategory: FarmProductCategory): void {
-    this.category = newCategory;
+    this.category = newCategory as FarmProductCategory;
     this.trackingService.setPreference('last_category', newCategory);
-    this.processLogsIntoTable(); // Recalculăm vizualizarea fără a reîncărca de pe server
+    this.processLogsIntoTable();
+    this.cdr.detectChanges();
   }
 
-  /** Handles the Toggle generator functionality. */
-  toggleGenerator(event: any): void {
-    const isGenerating = event.target.checked;
-    if (isGenerating) {
-      this.farm.startServerGenerator().subscribe();
-    } else {
-      this.farm.stopServerGenerator().subscribe();
-    }
-  }
+
 
   get chartData(): ChartConfiguration<'line'>['data'] {
     return {
@@ -187,7 +172,7 @@ export class LunarReports implements OnInit, OnDestroy {
       datasets: [
         {
           data: this.processedRows.map((r) => r.total),
-          label: `${this.category} (Unitate: ${this.unit})`,
+          label: `${this.category} (${this.unit})`,
           borderColor: '#388333',
           tension: 0.35,
           fill: false,
@@ -201,4 +186,13 @@ export class LunarReports implements OnInit, OnDestroy {
     maintainAspectRatio: false,
     scales: { y: { beginAtZero: true } },
   };
+
+  private monthStartIso(): string {
+    return `${this.year}-${String(this.monthIndex + 1).padStart(2, '0')}-01`;
+  }
+
+  private monthEndIso(): string {
+    const d = new Date(this.year, this.monthIndex + 1, 0);
+    return `${this.year}-${String(this.monthIndex + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
 }

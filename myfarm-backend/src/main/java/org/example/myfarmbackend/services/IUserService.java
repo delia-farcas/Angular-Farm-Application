@@ -1,5 +1,6 @@
 package org.example.myfarmbackend.services;
 
+import org.example.myfarmbackend.dto.UserDTO;
 import org.example.myfarmbackend.models.User;
 import java.util.List;
 import java.util.Optional;
@@ -10,10 +11,15 @@ import java.util.Optional;
 public interface IUserService {
 
     /** Registers a new user after checking for email uniqueness. */
-    User registerUser(User user);
+    User registerUser(UserDTO user);
 
     /** Finds a user by their email (useful for login). */
     Optional<User> getUserByEmail(String email);
+
+    /** Validates email and password and returns the user when they match. */
+    Optional<User> authenticate(String email, String password);
+
+    List<User> getAllUsersPaginated(int page, int size);
 
     /** Retrieves a user by their unique ID. */
     Optional<User> getUserById(long id);
@@ -22,7 +28,7 @@ public interface IUserService {
     List<User> getAllUsers();
 
     /** Updates user profile information. */
-    Optional<User> updateUser(long id, User userData);
+    Optional<User> updateUser(long id, UserDTO userData);
 
     /** Deletes a user account from the system. */
     boolean deleteUser(long id);

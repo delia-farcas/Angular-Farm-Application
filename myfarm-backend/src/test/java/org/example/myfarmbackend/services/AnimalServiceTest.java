@@ -1,69 +1,80 @@
 package org.example.myfarmbackend.services;
 
+import org.example.myfarmbackend.dto.AnimalDTO;
 import org.example.myfarmbackend.models.Animal;
 import org.example.myfarmbackend.models.User;
-import org.example.myfarmbackend.repositories.IAnimalRepository;
-import org.example.myfarmbackend.repositories.IUserRepository;
+import org.example.myfarmbackend.repositories.AnimalRepository;
+import org.example.myfarmbackend.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AnimalServiceTest {
 
     @Mock
-    private IAnimalRepository animalRepository;
+    private AnimalRepository animalRepository;
 
     @Mock
-    private IUserRepository userRepository;
+    private UserRepository userRepository;
 
     @InjectMocks
     private AnimalService animalService;
 
-    private Animal testAnimal;
+    private AnimalDTO testDto;
+    private User owner;
 
     @BeforeEach
     void setUp() {
-        testAnimal = new Animal();
-        testAnimal.setId(1L);
-        testAnimal.setName("Zuzu");
-        testAnimal.setOwnerId(10L);
+        owner = User.builder().userId(10L).email("o@o.com").username("Owner").password("p").build();
+
+        testDto = new AnimalDTO();
+        testDto.setUserId(10L);
+        testDto.setName("Zuzu");
+        testDto.setType("vaca");
+        testDto.setSex("femela");
+        testDto.setAge(2);
+        testDto.setStatus("activ");
+        testDto.setLocation("Stână");
+        testDto.setObservations("ok");
     }
 
     @Test
     void addAnimal_ShouldSucceed_WhenOwnerExists() {
-        // Arrange
-        when(userRepository.findById(10L)).thenReturn(Optional.of(new User()));
-        when(animalRepository.save(any(Animal.class))).thenReturn(testAnimal);
+        Animal saved = new Animal();
+        saved.setId(1L);
+        saved.setName("Zuzu");
+        saved.setOwner(owner);
 
-        // Act
-        Animal savedAnimal = animalService.addAnimal(testAnimal);
+        when(userRepository.findById(10L)).thenReturn(Optional.of(owner));
+        when(animalRepository.save(any(Animal.class))).thenReturn(saved);
 
-        // Assert
-        assertNotNull(savedAnimal);
-        assertEquals("Zuzu", savedAnimal.getName());
-        verify(animalRepository, times(1)).save(testAnimal);
+        Animal result = animalService.addAnimal(testDto);
+
+        assertNotNull(result);
+        assertEquals("Zuzu", result.getName());
+        verify(animalRepository, times(1)).save(any(Animal.class));
     }
 
     @Test
     void addAnimal_ShouldThrowException_WhenOwnerDoesNotExist() {
-        // Arrange (Mandatory Bronze: Server-side validation)
         when(userRepository.findById(10L)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            animalService.addAnimal(testAnimal);
-        });
+        Exception exception =
+                assertThrows(RuntimeException.class, () -> animalService.addAnimal(testDto));
 
         assertEquals("Owner not found with ID: 10", exception.getMessage());
         verify(animalRepository, never()).save(any());
@@ -71,19 +82,17 @@ class AnimalServiceTest {
 
     @Test
     void deleteAnimal_ShouldReturnTrue_WhenAnimalExists() {
-        // Arrange
-        when(animalRepository.delete(1L)).thenReturn(true);
+        when(animalRepository.existsById(1L)).thenReturn(true);
+        doNothing().when(animalRepository).deleteById(1L);
 
-        // Act
         boolean result = animalService.deleteAnimal(1L);
 
-        // Assert
         assertTrue(result);
     }
 
     @Test
     void deleteAnimal_ShouldReturnFalse_WhenAnimalDoesNotExist() {
-        when(animalRepository.delete(1L)).thenReturn(false);
+        when(animalRepository.existsById(1L)).thenReturn(false);
 
         boolean result = animalService.deleteAnimal(1L);
 
@@ -95,17 +104,22 @@ class AnimalServiceTest {
         Animal existing = new Animal();
         existing.setId(1L);
         existing.setName("Old");
-        existing.setOwnerId(10L);
+        existing.setType("vaca");
+        existing.setSex("femela");
+        existing.setAge(1);
+        existing.setStatus("activ");
+        existing.setLocation("A");
+        existing.setOwner(owner);
 
-        Animal patch = new Animal();
+        AnimalDTO patch = new AnimalDTO();
         patch.setName("NewName");
-        patch.setType("cow");
-        patch.setSex("female");
+        patch.setType("vaca");
+        patch.setSex("femela");
         patch.setAge(3);
-        patch.setStatus("Healthy");
+        patch.setStatus("activ");
         patch.setLocation("Sector 1");
         patch.setObservations("Obs");
-        patch.setOwnerId(10L);
+        patch.setUserId(10L);
 
         when(animalRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(animalRepository.save(any(Animal.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -114,7 +128,7 @@ class AnimalServiceTest {
 
         assertNotNull(updated);
         assertEquals("NewName", updated.getName());
-        assertEquals("cow", updated.getType());
+        assertEquals("vaca", updated.getType());
         assertEquals(3, updated.getAge());
         verify(animalRepository).findById(1L);
         verify(animalRepository).save(any(Animal.class));
@@ -124,7 +138,7 @@ class AnimalServiceTest {
     void updateAnimal_ShouldReturnNull_WhenNotFound() {
         when(animalRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Animal result = animalService.updateAnimal(1L, new Animal());
+        Animal result = animalService.updateAnimal(1L, testDto);
 
         assertNull(result);
         verify(animalRepository, never()).save(any());
@@ -132,7 +146,12 @@ class AnimalServiceTest {
 
     @Test
     void getAnimalById_ShouldDelegateToRepository() {
-        when(animalRepository.findById(1L)).thenReturn(Optional.of(testAnimal));
+        Animal a = new Animal();
+        a.setId(1L);
+        a.setName("Zuzu");
+        a.setOwner(owner);
+
+        when(animalRepository.findById(1L)).thenReturn(Optional.of(a));
 
         Optional<Animal> result = animalService.getAnimalById(1L);
 
@@ -143,22 +162,27 @@ class AnimalServiceTest {
 
     @Test
     void getUserAnimals_ShouldReturnPaginatedList() {
-        when(animalRepository.findByOwnerIdPaginated(10L, 0, 5)).thenReturn(List.of(testAnimal));
+        Animal a = new Animal();
+        a.setId(1L);
+        a.setName("Zuzu");
+        a.setOwner(owner);
+
+        when(animalRepository.findByOwnerUserId(eq(10L), eq(PageRequest.of(0, 5))))
+                .thenReturn(new PageImpl<>(List.of(a)));
 
         List<Animal> result = animalService.getUserAnimals(10L, 0, 5);
 
         assertEquals(1, result.size());
         assertEquals(1L, result.get(0).getId());
-        verify(animalRepository).findByOwnerIdPaginated(10L, 0, 5);
     }
 
     @Test
     void getTotalAnimalsCount_ShouldDelegateToRepository() {
-        when(animalRepository.countByOwnerId(10L)).thenReturn(7L);
+        when(animalRepository.countByOwnerUserId(10L)).thenReturn(7L);
 
         long count = animalService.getTotalAnimalsCount(10L);
 
         assertEquals(7L, count);
-        verify(animalRepository).countByOwnerId(10L);
+        verify(animalRepository).countByOwnerUserId(10L);
     }
 }

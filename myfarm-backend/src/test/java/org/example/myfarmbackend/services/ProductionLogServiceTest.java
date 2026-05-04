@@ -1,8 +1,11 @@
 package org.example.myfarmbackend.services;
 
+import org.example.myfarmbackend.dto.ProductionLogDTO;
 import org.example.myfarmbackend.models.ProductionLog;
-import org.example.myfarmbackend.repositories.IAnimalRepository;
-import org.example.myfarmbackend.repositories.IProductionLogRepository;
+import org.example.myfarmbackend.models.User;
+import org.example.myfarmbackend.repositories.AnimalRepository;
+import org.example.myfarmbackend.repositories.ProductionLogRepository;
+import org.example.myfarmbackend.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,20 +28,43 @@ import static org.mockito.Mockito.*;
 class ProductionLogServiceTest {
 
     @Mock
-    private IProductionLogRepository logRepository;
+    private ProductionLogRepository logRepository;
 
     @Mock
-    private IAnimalRepository animalRepository;
+    private AnimalRepository animalRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private ProductionLogService productionLogService;
 
+    private User user(long id) {
+        return User.builder().userId(id).email("u" + id + "@t.com").username("u" + id).password("p").build();
+    }
+
+    private ProductionLog logForUser(User u, LocalDate date, double cow, int eggs) {
+        ProductionLog log = new ProductionLog();
+        log.setId(null);
+        log.setReportDate(date);
+        log.setMilkLitersCow(cow);
+        log.setMilkLitersGoat(0);
+        log.setMilkLitersSheep(0);
+        log.setEggsCount(eggs);
+        log.setMeatKg(0);
+        log.setWoolKg(0);
+        log.setWorkHours(0);
+        log.setUser(u);
+        return log;
+    }
+
     @Test
     void getReport_ShouldCalculateWeeklySumsCorrectly() {
-        ProductionLog log1 = new ProductionLog(1L, LocalDate.of(2024, 5, 2), 10.0, 0, 0, 0, 0, 0, 100L);
-        ProductionLog log2 = new ProductionLog(2L, LocalDate.of(2024, 5, 5), 5.0, 0, 0, 0, 0, 0, 100L);
+        User u = user(100L);
+        ProductionLog log1 = logForUser(u, LocalDate.of(2024, 5, 2), 10.0, 0);
+        ProductionLog log2 = logForUser(u, LocalDate.of(2024, 5, 5), 5.0, 0);
 
-        doReturn(List.of(log1, log2)).when(logRepository).findAll();
+        when(logRepository.findAll()).thenReturn(List.of(log1, log2));
 
         Map<String, Double> report = productionLogService.getReport(100L, 2024, 5, "lapte");
 
@@ -48,10 +75,11 @@ class ProductionLogServiceTest {
 
     @Test
     void getReport_ShouldCalculateAnnualSumsCorrectly() {
-        ProductionLog logIan = new ProductionLog(1L, LocalDate.of(2024, 1, 10), 100.0, 0, 0, 0, 0, 0, 100L);
-        ProductionLog logFeb = new ProductionLog(2L, LocalDate.of(2024, 2, 15), 50.0, 0, 0, 0, 0, 0, 100L);
+        User u = user(100L);
+        ProductionLog logIan = logForUser(u, LocalDate.of(2024, 1, 10), 100.0, 0);
+        ProductionLog logFeb = logForUser(u, LocalDate.of(2024, 2, 15), 50.0, 0);
 
-        doReturn(List.of(logIan, logFeb)).when(logRepository).findAll();
+        when(logRepository.findAll()).thenReturn(List.of(logIan, logFeb));
 
         Map<String, Double> report = productionLogService.getReport(100L, 2024, null, "lapte");
 
@@ -61,109 +89,91 @@ class ProductionLogServiceTest {
 
     @Test
     void saveOrUpdateLog_ShouldSave_WhenNotExists() {
-        ProductionLog newLog = new ProductionLog(1L, LocalDate.of(2024, 5, 2), 10.0, 0, 0, 0, 0, 0, 100L);
-        when(animalRepository.countByOwnerIdAndType(100L, "vaca")).thenReturn(1L);
-        doReturn(Optional.empty()).when(logRepository).findByDateAndUserId(any(), anyLong());
-        doReturn(newLog).when(logRepository).save(any());
+        User u = user(10L);
+        ProductionLogDTO dto = new ProductionLogDTO();
+        dto.setReportDate(LocalDate.of(2024, 5, 2));
+        dto.setUserId(10L);
+        dto.setMilkLitersCow(10.0);
+        dto.setMilkLitersGoat(0);
+        dto.setMilkLitersSheep(0);
+        dto.setEggsCount(0);
+        dto.setMeatKg(0);
+        dto.setWoolKg(0);
+        dto.setWorkHours(0);
 
-        ProductionLog saved = productionLogService.saveOrUpdateLog(newLog);
+        ProductionLog saved = new ProductionLog();
+        saved.setId(1L);
+        saved.setReportDate(dto.getReportDate());
+        saved.setMilkLitersCow(10.0);
+        saved.setUser(u);
 
-        assertNotNull(saved);
-        assertEquals(10.0, saved.getMilkLitersCow());
+        when(userRepository.findById(10L)).thenReturn(Optional.of(u));
+        when(logRepository.findByReportDateAndUserUserId(dto.getReportDate(), 10L))
+                .thenReturn(Optional.empty());
+        when(logRepository.save(any(ProductionLog.class))).thenReturn(saved);
+
+        ProductionLog result = productionLogService.saveOrUpdateLog(dto);
+
+        assertNotNull(result);
+        assertEquals(10.0, result.getMilkLitersCow());
+        verify(logRepository).save(any(ProductionLog.class));
     }
 
     @Test
-    void saveOrUpdateLog_ShouldUpdate_WhenExists() {
-        ProductionLog existing = new ProductionLog(1L, LocalDate.of(2024, 5, 2), 10.0, 0, 0, 0, 0, 0, 100L);
-        ProductionLog newLog = new ProductionLog(2L, LocalDate.of(2024, 5, 2), 5.0, 0, 0, 0, 0, 0, 100L);
+    void saveOrUpdateLog_ShouldReplaceFields_WhenExists() {
+        User u = user(10L);
+        ProductionLog existing = new ProductionLog();
+        existing.setId(1L);
+        existing.setReportDate(LocalDate.of(2024, 5, 2));
+        existing.setMilkLitersCow(10.0);
+        existing.setUser(u);
 
-        when(animalRepository.countByOwnerIdAndType(100L, "vaca")).thenReturn(1L);
-        doReturn(Optional.of(existing)).when(logRepository).findByDateAndUserId(any(), anyLong());
-        doReturn(existing).when(logRepository).save(any());
+        ProductionLogDTO dto = new ProductionLogDTO();
+        dto.setReportDate(LocalDate.of(2024, 5, 2));
+        dto.setUserId(10L);
+        dto.setMilkLitersCow(5.0);
+        dto.setMilkLitersGoat(0);
+        dto.setMilkLitersSheep(0);
+        dto.setEggsCount(0);
+        dto.setMeatKg(0);
+        dto.setWoolKg(0);
+        dto.setWorkHours(0);
 
-        ProductionLog updated = productionLogService.saveOrUpdateLog(newLog);
+        when(userRepository.findById(10L)).thenReturn(Optional.of(u));
+        when(logRepository.findByReportDateAndUserUserId(dto.getReportDate(), 10L))
+                .thenReturn(Optional.of(existing));
+        when(logRepository.save(any(ProductionLog.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        assertEquals(15.0, updated.getMilkLitersCow());
+        ProductionLog updated = productionLogService.saveOrUpdateLog(dto);
+
+        assertEquals(5.0, updated.getMilkLitersCow());
     }
 
     @Test
-    void saveOrUpdateLog_ShouldSumAllFields_WhenUpdatingExisting() {
-        ProductionLog existing = new ProductionLog(1L, LocalDate.of(2024, 5, 2), 10.0, 2.0, 3, 4, 5.0, 6.0, 100L);
-        ProductionLog delta = new ProductionLog(2L, LocalDate.of(2024, 5, 2), 1.5, 1.0, 2, 1, 0.5, 2.0, 100L);
+    void saveOrUpdateLog_ShouldThrow_WhenUserNotFound() {
+        ProductionLogDTO dto = new ProductionLogDTO();
+        dto.setReportDate(LocalDate.of(2024, 5, 2));
+        dto.setUserId(99L);
+        dto.setMilkLitersCow(1.0);
+        dto.setMilkLitersGoat(0);
+        dto.setMilkLitersSheep(0);
+        dto.setEggsCount(0);
+        dto.setMeatKg(0);
+        dto.setWoolKg(0);
+        dto.setWorkHours(0);
 
-        when(animalRepository.countByOwnerIdAndType(100L, "vaca")).thenReturn(1L);
-        when(animalRepository.countByOwnerIdAndType(100L, "porc")).thenReturn(1L);
-        when(animalRepository.countByOwnerIdAndType(100L, "gaina")).thenReturn(1L);
-        when(animalRepository.countByOwnerIdAndType(100L, "oaie")).thenReturn(1L);
-        when(animalRepository.countByOwnerIdAndType(100L, "capra")).thenReturn(0L); // LIPSĂ REZOLVATĂ
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
-        doReturn(Optional.of(existing)).when(logRepository).findByDateAndUserId(any(), anyLong());
-        doReturn(existing).when(logRepository).save(any());
-
-        ProductionLog updated = productionLogService.saveOrUpdateLog(delta);
-
-        assertEquals(11.5, updated.getMilkLitersCow());
-        assertEquals(3.0, updated.getMeatKg());
-        assertEquals(5, updated.getEggsCount());
-        assertEquals(5, updated.getMilkLitersSheep());
-        assertEquals(5.5, updated.getWoolKg());
-        assertEquals(8.0, updated.getWorkHours());
-    }
-
-    @Test
-    void saveOrUpdateLog_ShouldThrowException_WhenUserIdIsNull() {
-        ProductionLog log = new ProductionLog();
-        log.setMilkLitersCow(10.0);
-
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> productionLogService.saveOrUpdateLog(log));
-        assertEquals("UserId is required.", ex.getMessage());
-    }
-
-    @Test
-    void saveOrUpdateLog_ShouldRejectCowMilk_WhenNoCows() {
-        ProductionLog log = new ProductionLog(1L, LocalDate.of(2024, 5, 2), 10.0, 0, 0, 0, 0, 0, 100L);
-        when(animalRepository.countByOwnerIdAndType(100L, "vaca")).thenReturn(0L);
-
-        assertThrows(RuntimeException.class, () -> productionLogService.saveOrUpdateLog(log));
-    }
-
-    @Test
-    void saveOrUpdateLog_ShouldRejectSheepMilk_WhenNoSheepOrGoats() {
-        ProductionLog log = new ProductionLog(1L, LocalDate.of(2024, 5, 2), 0.0, 0.0, 5, 0, 0, 0, 100L);
-        when(animalRepository.countByOwnerIdAndType(100L, "oaie")).thenReturn(0L);
-        when(animalRepository.countByOwnerIdAndType(100L, "capra")).thenReturn(0L);
-
-        assertThrows(RuntimeException.class, () -> productionLogService.saveOrUpdateLog(log));
-    }
-
-    @Test
-    void saveOrUpdateLog_ShouldRejectEggs_WhenNoChickens() {
-        ProductionLog log = new ProductionLog(1L, LocalDate.of(2024, 5, 2), 0.0, 0.0, 0, 10, 0, 0, 100L);
-        when(animalRepository.countByOwnerIdAndType(100L, "gaina")).thenReturn(0L);
-
-        assertThrows(RuntimeException.class, () -> productionLogService.saveOrUpdateLog(log));
-    }
-
-    @Test
-    void saveOrUpdateLog_ShouldRejectWool_WhenNoSheep() {
-        ProductionLog log = new ProductionLog(1L, LocalDate.of(2024, 5, 2), 0.0, 0.0, 0, 0, 5.0, 0, 100L);
-        when(animalRepository.countByOwnerIdAndType(100L, "oaie")).thenReturn(0L);
-
-        assertThrows(RuntimeException.class, () -> productionLogService.saveOrUpdateLog(log));
-    }
-
-    @Test
-    void saveOrUpdateLog_ShouldRejectMeat_WhenNoPigs() {
-        ProductionLog log = new ProductionLog(1L, LocalDate.of(2024, 5, 2), 0.0, 10.0, 0, 0, 0, 0, 100L);
-        when(animalRepository.countByOwnerIdAndType(100L, "porc")).thenReturn(0L);
-
-        assertThrows(RuntimeException.class, () -> productionLogService.saveOrUpdateLog(log));
+        RuntimeException ex =
+                assertThrows(RuntimeException.class, () -> productionLogService.saveOrUpdateLog(dto));
+        assertTrue(ex.getMessage().contains("User not found"));
     }
 
     @Test
     void getReport_ShouldHandleUnknownField() {
-        ProductionLog log = new ProductionLog(1L, LocalDate.of(2024, 5, 2), 10.0, 0, 0, 0, 0, 0, 100L);
-        doReturn(List.of(log)).when(logRepository).findAll();
+        User u = user(100L);
+        ProductionLog log = logForUser(u, LocalDate.of(2024, 5, 2), 10.0, 0);
+        when(logRepository.findAll()).thenReturn(List.of(log));
 
         Map<String, Double> report = productionLogService.getReport(100L, 2024, null, "invalid");
 
@@ -171,12 +181,14 @@ class ProductionLogServiceTest {
     }
 
     @Test
-    void getLogsByUserAndDateRange_ShouldWork() {
-        doReturn(List.of()).when(logRepository).findByUserAndPeriod(anyLong(), any(), any());
+    void getLogsByUserAndDateRange_ShouldDelegateToRepository() {
+        when(logRepository.findByUserUserIdAndReportDateBetween(eq(100L), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
 
-        List<ProductionLog> result = productionLogService.getLogsByUserAndDateRange(100L, "2024-01-01", "2024-01-31");
+        List<ProductionLog> result =
+                productionLogService.getLogsByUserAndDateRange(100L, "2024-01-01", "2024-01-31");
 
         assertNotNull(result);
-        verify(logRepository).findByUserAndPeriod(eq(100L), any(), any());
+        verify(logRepository).findByUserUserIdAndReportDateBetween(eq(100L), any(), any());
     }
 }

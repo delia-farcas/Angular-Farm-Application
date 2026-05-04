@@ -5,8 +5,9 @@ import { FarmService } from '../services/farm.service';
 import { UserTrackingService } from '../services/user-tracking.service';
 import { Animal } from '../models/farm';
 import { Router } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
+import { of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import type { DailyProductionPayload } from '../services/farm.service';
 
 @Component({
   selector: 'app-manage-page',
@@ -20,11 +21,11 @@ export class ManagePage {
   @Output() goToAddAnimal = new EventEmitter<void>();
 
   search = '';
-  todaysInput: Record<number, number | null> = {};
-  invalidInput: Record<number, boolean> = {};
-
-  todaysMilkInput: Record<number, number | null> = {};
-  invalidMilkInput: Record<number, boolean> = {};
+  
+  todaysInput: any = {};
+  invalidInput: any = {};
+  todaysMilkInput: any = {};
+  invalidMilkInput: any = {};
 
   currentUsername: string = 'Delia';
   private trackingService = inject(UserTrackingService);
@@ -32,18 +33,17 @@ export class ManagePage {
   saveMessage: string | null = null;
   saveMessageType: 'success' | 'warning' | null = null;
 
-  /** Instantiates the component and injects dependencies. */
   constructor(
     private farm: FarmService,
     private router: Router,
   ) {
     this.currentUsername = this.trackingService.getCurrentUser();
-    for (const a of this.farm.getAnimals()) {
+    this.farm.getAnimals().forEach((a) => {
       this.todaysInput[a.id] = null;
       this.invalidInput[a.id] = false;
       this.todaysMilkInput[a.id] = null;
       this.invalidMilkInput[a.id] = false;
-    }
+    });
   }
 
   get animals(): Animal[] {
@@ -53,52 +53,30 @@ export class ManagePage {
     return list.filter((a) => a.name.toLowerCase().includes(q));
   }
 
-  /** Retrieves the gestiune unit. */
   getGestiuneUnit(animal: Animal): string {
     switch (animal.name) {
-      case 'Vaca':
-        return 'L';
-      case 'Capra':
-        return 'L';
-      case 'Gaina':
-        return 'ouă';
-      case 'Oaie':
-        return 'kg';
-      case 'Cal':
-        return 'ore';
-      case 'Porc':
-        return 'kg';
-      default:
-        return '';
+      case 'Vaca': return 'L';
+      case 'Capra': return 'L';
+      case 'Gaina': return 'ouă';
+      case 'Oaie': return 'kg';
+      case 'Cal': return 'ore';
+      case 'Porc': return 'kg';
+      default: return '';
     }
   }
 
-  /** Retrieves the gestiune placeholder. */
   getGestiunePlaceholder(animal: Animal): string {
     switch (animal.name) {
-      case 'Vaca':
-        return 'ex: 15';
-      case 'Capra':
-        return 'ex: 25';
-      case 'Gaina':
-        return 'ex: 40';
-      case 'Oaie':
-        return 'ex: 3';
-      case 'Cal':
-        return 'ex: 6';
-      case 'Porc':
-        return 'ex: 12';
-      default:
-        return 'N/A';
+      case 'Vaca': return 'ex: 15';
+      case 'Capra': return 'ex: 25';
+      case 'Gaina': return 'ex: 40';
+      case 'Oaie': return 'ex: 3';
+      case 'Cal': return 'ex: 6';
+      case 'Porc': return 'ex: 12';
+      default: return 'N/A';
     }
   }
 
-  /** Handles the Is gestiune enabled functionality. */
-  isGestiuneEnabled(_: Animal): boolean {
-    return true;
-  }
-
-  /** Handles the Mark validity functionality. */
   markValidity(animalId: number, value: any): void {
     if (value === null || value === undefined || value === '') {
       this.invalidInput[animalId] = false;
@@ -108,7 +86,6 @@ export class ManagePage {
     this.invalidInput[animalId] = !Number.isFinite(num) || num < 0;
   }
 
-  /** Handles the Mark milk validity functionality. */
   markMilkValidity(animalId: number, value: any): void {
     if (value === null || value === undefined || value === '') {
       this.invalidMilkInput[animalId] = false;
@@ -118,138 +95,94 @@ export class ManagePage {
     this.invalidMilkInput[animalId] = !Number.isFinite(num) || num < 0;
   }
 
-  /** Handles the save today event. */
   onSaveToday(): void {
     this.saveMessage = null;
     this.saveMessageType = null;
 
-    const requests = [];
+    const merged: DailyProductionPayload = {
+      milkLitersCow: 0,
+      milkLitersGoat: 0,
+      milkLitersSheep: 0,
+      eggsCount: 0,
+      woolKg: 0,
+      meatKg: 0,
+      workHours: 0,
+    };
+
+    let hasInput = false;
 
     for (const a of this.farm.getAnimals()) {
-      const raw = this.todaysInput[a.id];
-      const rawMilk = this.todaysMilkInput[a.id];
+      const valInput = this.todaysInput[a.id];
+      const milkInput = this.todaysMilkInput[a.id];
 
-      const value = raw !== null && raw !== undefined ? Number(raw) : null;
-      const validValue = value !== null && Number.isFinite(value) && value >= 0 ? value : null;
+      const val = valInput !== null && valInput !== '' ? Number(valInput) : null;
+      const milkVal = milkInput !== null && milkInput !== '' ? Number(milkInput) : null;
 
-      const milkValue = rawMilk !== null && rawMilk !== undefined ? Number(rawMilk) : null;
-      const validMilkValue =
-        milkValue !== null && Number.isFinite(milkValue) && milkValue >= 0 ? milkValue : null;
+      if (val === null && milkVal === null) {
+        continue;
+      }
 
-      if (validValue === null && validMilkValue === null) continue;
+      hasInput = true;
 
       switch (a.name) {
         case 'Vaca':
-        case 'Capra':
-          if (validValue !== null) {
-            requests.push(
-              this.farm.upsertTodayLog(a.id, { milk: validValue }).pipe(
-                map(() => ({ ok: true as const })),
-                catchError((err) => of({ ok: false as const, err })),
-              ),
-            );
-          }
+          if (val !== null) merged.milkLitersCow = val;
           break;
-        case 'Gaina':
-          if (validValue !== null) {
-            requests.push(
-              this.farm.upsertTodayLog(a.id, { eggs: validValue }).pipe(
-                map(() => ({ ok: true as const })),
-                catchError((err) => of({ ok: false as const, err })),
-              ),
-            );
-          }
+        case 'Capra':
+          if (val !== null) merged.milkLitersGoat = val;
           break;
         case 'Oaie':
-          const patch: any = {};
-          if (validValue !== null) patch.wool = validValue;
-          if (validMilkValue !== null) patch.milk = validMilkValue;
-          if (Object.keys(patch).length > 0) {
-            requests.push(
-              this.farm.upsertTodayLog(a.id, patch).pipe(
-                map(() => ({ ok: true as const })),
-                catchError((err) => of({ ok: false as const, err })),
-              ),
-            );
-          }
+          if (val !== null) merged.woolKg = val;
+          if (milkVal !== null) merged.milkLitersSheep = milkVal;
+          break;
+        case 'Gaina':
+          if (val !== null) merged.eggsCount = val;
           break;
         case 'Cal':
-          if (validValue !== null) {
-            requests.push(
-              this.farm.upsertTodayLog(a.id, { workHours: validValue }).pipe(
-                map(() => ({ ok: true as const })),
-                catchError((err) => of({ ok: false as const, err })),
-              ),
-            );
-          }
+          if (val !== null) merged.workHours = val;
           break;
         case 'Porc':
-          if (validValue !== null) {
-            requests.push(
-              this.farm.upsertTodayLog(a.id, { meat: validValue }).pipe(
-                map(() => ({ ok: true as const })),
-                catchError((err) => of({ ok: false as const, err })),
-              ),
-            );
-          }
+          if (val !== null) merged.meatKg = val;
           break;
       }
     }
 
-    if (requests.length === 0) {
+    if (!hasInput) {
       this.saveMessageType = 'warning';
       this.saveMessage = 'Nu ai introdus valori pentru gestiunea de azi.';
       return;
     }
 
-    forkJoin(requests).subscribe((results) => {
-      const failed = results.find((r) => !r.ok) as any;
-      if (failed) {
-        const msg =
-          failed?.err?.error?.error ||
-          failed?.err?.error?.date ||
-          failed?.err?.message ||
-          'Nu s-a putut salva gestiunea.';
-        this.saveMessageType = 'warning';
-        this.saveMessage = msg;
-        return;
-      }
+    this.farm
+      .upsertDailyLog(merged)
+      .pipe(
+        map(() => ({ ok: true as const })),
+        catchError((err) => of({ ok: false as const, err })),
+      )
+      .subscribe((result) => {
+        if (!result.ok) {
+          this.saveMessageType = 'warning';
+          this.saveMessage = 'Eroare la comunicarea cu serverul.';
+          return;
+        }
 
-      for (const a of this.farm.getAnimals()) {
-        this.todaysInput[a.id] = null;
-        this.invalidInput[a.id] = false;
-        this.todaysMilkInput[a.id] = null;
-        this.invalidMilkInput[a.id] = false;
-      }
+        this.farm.getAnimals().forEach((a) => {
+          this.todaysInput[a.id] = null;
+          this.todaysMilkInput[a.id] = null;
+        });
 
-      this.saveMessageType = 'success';
-      this.saveMessage = 'Gestiunea a fost salvată cu succes.';
-
-      // Keep the success visible briefly, then go back.
-      setTimeout(() => this.goBack.emit(), 600);
-    });
+        this.saveMessageType = 'success';
+        this.saveMessage = 'Gestiunea a fost salvată cu succes.';
+        setTimeout(() => this.goBack.emit(), 600);
+      });
   }
 
-  /** Handles the add animal click event. */
-  onAddAnimalClick(): void {
-    this.goToAddAnimal.emit();
+  isGestiuneEnabled(animal: Animal): boolean {
+    return true; 
   }
 
-  /** Handles the back click event. */
-  onBackClick(): void {
-    this.goBack.emit();
-  }
-  /** Navigates to to bazinga. */
-  navigateToBazinga(): void {
-    this.router.navigate(['bazinga']);
-  }
-
-  /** Navigates to to raports. */
-  navigateToRaports(): void {
-    this.router.navigate(['raports']);
-  }
-}
-
-export class DashboardComponent {
-  userName = 'Delia';
+  onAddAnimalClick(): void { this.goToAddAnimal.emit(); }
+  onBackClick(): void { this.goBack.emit(); }
+  navigateToBazinga(): void { this.router.navigate(['bazinga']); }
+  navigateToRaports(): void { this.router.navigate(['raports']); }
 }

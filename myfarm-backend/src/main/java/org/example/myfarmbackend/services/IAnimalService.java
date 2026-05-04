@@ -1,5 +1,6 @@
 package org.example.myfarmbackend.services;
 
+import org.example.myfarmbackend.dto.AnimalDTO;
 import org.example.myfarmbackend.models.Animal;
 import java.util.List;
 import java.util.Optional;
@@ -10,10 +11,10 @@ import java.util.Optional;
 public interface IAnimalService {
 
     /** Validates and saves a new animal. */
-    Animal addAnimal(Animal animal);
+    Animal addAnimal(AnimalDTO animalDTO);
 
     /** Updates an existing animal's details. */
-    Animal updateAnimal(long id, Animal animalData);
+    Animal updateAnimal(long id, AnimalDTO animalData);
 
     /** Removes an animal by ID and returns success status. */
     boolean deleteAnimal(long id);

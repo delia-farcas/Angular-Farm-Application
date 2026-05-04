@@ -1,4 +1,4 @@
-import { Component, ViewChildren, QueryList, ChangeDetectorRef } from '@angular/core';
+import { Component, ViewChildren, QueryList, ChangeDetectorRef, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
@@ -6,7 +6,6 @@ import type { ChartConfiguration } from 'chart.js';
 import { FarmService } from '../services/farm.service';
 import { Animal, FarmProductCategory, DailyLogEntry } from '../models/farm';
 import { UserTrackingService } from '../services/user-tracking.service';
-import { inject } from '@angular/core';
 
 @Component({
   selector: 'app-yearly-reports',
@@ -15,32 +14,27 @@ import { inject } from '@angular/core';
   templateUrl: './yearly-reports.html',
   styleUrl: './yearly-reports.css',
 })
-export class YearlyReports {
+export class YearlyReports implements OnInit {
   view: 'table' | 'chart' = 'table';
   category: FarmProductCategory = 'lapte';
   selectedAnimalId: number;
 
   private readonly year = new Date().getFullYear();
-  private isGenerating = false;
-  private generatorId: any;
 
   currentLogs: DailyLogEntry[] = [];
   processedRows: { label: string; total: number }[] = [];
   grandTotal = 0;
 
   private trackingService = inject(UserTrackingService);
+  private farm = inject(FarmService);
+  private cdr = inject(ChangeDetectorRef);
 
   @ViewChildren(BaseChartDirective) charts!: QueryList<BaseChartDirective>;
 
-  /** Instantiates the component and injects dependencies. */
-  constructor(
-    private farm: FarmService,
-    private cdr: ChangeDetectorRef,
-  ) {
+  constructor() {
     this.selectedAnimalId = this.farm.getAnimals()[0]?.id ?? 1;
   }
 
-  /** Initializes the component. */
   ngOnInit() {
     this.refreshData();
   }
@@ -53,41 +47,28 @@ export class YearlyReports {
     return this.farm.getAnimalById(this.selectedAnimalId);
   }
 
-  /** Handles the Refresh data functionality. */
   refreshData(): void {
     const start = `${this.year}-01-01`;
     const end = `${this.year}-12-31`;
-    this.farm.getLogsInRange(this.trackingService.getCurrentUserId(), start, end).subscribe((logs) => {
-      this.currentLogs = logs || [];
-      this.processLogsIntoTable();
-      this.cdr.detectChanges();
+    const userId = this.trackingService.getCurrentUserId();
+
+    this.farm.getLogsInRange(userId, start, end).subscribe({
+      next: (logs) => {
+        this.currentLogs = logs || [];
+        this.processLogsIntoTable();
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error(err),
     });
   }
 
-  /** Handles the Process logs into table functionality. */
   private processLogsIntoTable(): void {
-    const months = [
-      'Ianuarie',
-      'Februarie',
-      'Martie',
-      'Aprilie',
-      'Mai',
-      'Iunie',
-      'Iulie',
-      'August',
-      'Septembrie',
-      'Octombrie',
-      'Noiembrie',
-      'Decembrie',
-    ];
+    const months = ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     this.processedRows = months.map((label, idx) => {
-      const startIso = `${this.year}-${this.pad2(idx + 1)}-01`;
-      const endDate = new Date(this.year, idx + 1, 0).getDate();
-      const endIso = `${this.year}-${this.pad2(idx + 1)}-${this.pad2(endDate)}`;
-
+      const prefix = `${this.year}-${this.pad2(idx + 1)}`;
       const total = this.currentLogs
-        .filter((l) => l.date >= startIso && l.date <= endIso)
+        .filter((l) => l.date && l.date.startsWith(prefix))
         .reduce((sum, l) => sum + this.getValueForCategory(l), 0);
       return { label, total };
     });
@@ -99,25 +80,37 @@ export class YearlyReports {
     }
   }
 
-  /** Retrieves the value for category. */
   private getValueForCategory(entry: DailyLogEntry): number {
     switch (this.category) {
       case 'lapte':
-        return entry.milk || 0;
-      case 'oua':
-        return entry.eggs || 0;
-      case 'lana':
-        return entry.wool || 0;
-      case 'ore_munca':
-        return entry.workHours || 0;
-      case 'carne':
-        return entry.meat || 0;
+        return (entry.milkCow || 0) + (entry.milkGoat || 0) + (entry.milkSheep || 0) + (entry.milk || 0);
+      case 'lapte_vaca': return entry.milkCow || 0;
+      case 'lapte_capra': return entry.milkGoat || 0;
+      case 'lapte_oaie': return entry.milkSheep || 0;
+      case 'oua': return entry.eggs || 0;
+      case 'lana': return entry.wool || 0;
+      case 'ore_munca': return entry.workHours || 0;
+      case 'carne': return entry.meat || 0;
+      default: return 0;
     }
   }
 
-  /** Handles the Pad2 functionality. */
   private pad2(n: number): string {
     return String(n).padStart(2, '0');
+  }
+
+  get unit(): string {
+    switch (this.category) {
+      case 'lapte':
+      case 'lapte_vaca':
+      case 'lapte_capra':
+      case 'lapte_oaie': return 'L';
+      case 'oua': return 'ouă';
+      case 'lana':
+      case 'carne': return 'kg';
+      case 'ore_munca': return 'ore';
+      default: return '';
+    }
   }
 
   get tableRows(): { label: string; total: number }[] {
@@ -128,38 +121,17 @@ export class YearlyReports {
     return this.grandTotal;
   }
 
-  get unit(): string {
-    switch (this.category) {
-      case 'lapte':
-        return 'L';
-      case 'oua':
-        return 'ouă';
-      case 'lana':
-        return 'kg';
-      case 'ore_munca':
-        return 'ore';
-      case 'carne':
-        return 'kg';
-    }
-  }
-
   get chartData(): ChartConfiguration<'line'>['data'] {
-    const labels = this.processedRows.map((r) => r.label);
-    const data = this.processedRows.map((r) => r.total);
-
     return {
-      labels,
+      labels: this.processedRows.map((r) => r.label),
       datasets: [
         {
-          data,
-          label: `${this.selectedAnimal?.name ?? 'Animal'} • ${this.category}`,
+          data: this.processedRows.map((r) => r.total),
+          label: `${this.category} (${this.unit})`,
           tension: 0.35,
-          fill: false,
           borderColor: '#388333',
-          pointBackgroundColor: '#388333',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: '#388333',
+          backgroundColor: 'rgba(56, 131, 51, 0.1)',
+          fill: true,
         },
       ],
     };
@@ -168,72 +140,16 @@ export class YearlyReports {
   chartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { display: true } },
     scales: { y: { beginAtZero: true } },
   };
 
-  /** Handles the toggle view event. */
   onToggleView(event: any): void {
-    const isChecked = event.target?.checked;
-    this.view = isChecked ? 'chart' : 'table';
+    this.view = event.target?.checked ? 'chart' : 'table';
   }
 
-  /** Handles the Toggle generator functionality. */
-  toggleGenerator(event: any) {
-    this.isGenerating = event.target.checked;
-    if (this.isGenerating) {
-      this.generatorId = setInterval(() => {
-        this.updateCharts();
-      }, 500);
-    } else {
-      this.stopGenerator();
-    }
-  }
-
-  /** Handles the Stop generator functionality. */
-  stopGenerator() {
-    if (this.generatorId) {
-      clearInterval(this.generatorId);
-    }
-  }
-
-  /** Handles the Update charts functionality. */
-  updateCharts(): void {
-    const animal = this.selectedAnimal;
-    if (!animal) return;
-
-    const m = Math.floor(Math.random() * 12) + 1;
-    const d = Math.floor(Math.random() * 28) + 1;
-    const dateStr = `${this.year}-${this.pad2(m)}-${this.pad2(d)}`;
-
-    let existing = animal.logs.find((l) => l.date === dateStr);
-    if (!existing) {
-      existing = { date: dateStr, milk: 0, eggs: 0, wool: 0, workHours: 0, meat: 0 };
-      animal.logs.push(existing);
-    }
-
-    const randomAdd = Math.floor(Math.random() * 20) + 1;
-    switch (this.category) {
-      case 'lapte':
-        existing.milk += randomAdd;
-        break;
-      case 'oua':
-        existing.eggs += randomAdd;
-        break;
-      case 'lana':
-        existing.wool += randomAdd;
-        break;
-      case 'ore_munca':
-        existing.workHours += randomAdd;
-        break;
-      case 'carne':
-        existing.meat += randomAdd;
-        break;
-    }
-
+  onCategoryChange(newCategory: FarmProductCategory): void {
+    this.category = newCategory as FarmProductCategory;
+    this.processLogsIntoTable();
     this.cdr.detectChanges();
-    if (this.charts) {
-      this.charts.forEach((chart) => chart.update());
-    }
   }
 }

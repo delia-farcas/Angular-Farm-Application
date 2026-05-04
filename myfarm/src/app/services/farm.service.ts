@@ -1,8 +1,19 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, throwError } from 'rxjs';
 import { Animal, DailyLogEntry } from '../models/farm';
 import { UserTrackingService } from './user-tracking.service';
+
+/** One combined row for POST /api/logs (matches ProductionLogDTO). */
+export interface DailyProductionPayload {
+  milkLitersCow: number;
+  milkLitersGoat: number;
+  milkLitersSheep: number;
+  eggsCount: number;
+  woolKg: number;
+  meatKg: number;
+  workHours: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class FarmService {
@@ -19,17 +30,14 @@ export class FarmService {
     { id: 2, name: 'Cal', icon: '/animals/horse.svg', count: 0, logs: [] },
   ];
 
-  /** Retrieves the animals. */
   getAnimals(): Animal[] {
     return this.animals;
   }
 
-  /** Retrieves the animal by id. */
   getAnimalById(id: number): Animal | undefined {
     return this.animals.find((a) => a.id === id);
   }
 
-  /** Handles the Sync counts functionality. */
   syncCounts(countsByType: Partial<Record<string, number>>): void {
     const typeToId: Record<string, number> = {
       vaca: 1,
@@ -48,12 +56,70 @@ export class FarmService {
     }
   }
 
-  /** Handles the Upsert log functionality. */
-  upsertLog(logData: any): Observable<any> {
+  /** Saves all of today’s production in one request (avoids parallel POSTs overwriting the same row). */
+  upsertDailyLog(fields: DailyProductionPayload): Observable<unknown> {
+    const userId = this.trackingService.getCurrentUserId();
+    if (userId < 1) {
+      return throwError(() => new Error('Utilizator neautentificat (ID invalid). Reconectați-vă.'));
+    }
+
+    const logData = {
+      reportDate: new Date().toISOString().split('T')[0],
+      milkLitersCow: fields.milkLitersCow,
+      milkLitersGoat: fields.milkLitersGoat,
+      milkLitersSheep: Math.round(fields.milkLitersSheep),
+      eggsCount: Math.round(fields.eggsCount),
+      woolKg: fields.woolKg,
+      meatKg: fields.meatKg,
+      workHours: fields.workHours,
+      userId,
+    };
+
     return this.http.post(this.apiUrl, logData);
   }
 
-  /** Retrieves the production report. */
+  getLogsInRange(userId: number, startIso: string, endIso: string): Observable<DailyLogEntry[]> {
+      const params = new HttpParams()
+        .set('startDate', startIso)
+        .set('endDate', endIso)
+        .set('page', '0')
+        .set('size', '400');
+
+    return this.http.get<any[]>(`${this.apiUrl}/history/${userId}`, { params }).pipe(
+      map((logs) =>
+        logs.map((log) => ({
+          date: this.normalizeReportDate(log?.reportDate),
+          milkCow: Number(log?.milkLitersCow) || 0,
+          milkGoat: Number(log?.milkLitersGoat) || 0,
+          milkSheep: Number(log?.milkLitersSheep) || 0,
+          eggs: Number(log?.eggsCount) || 0,
+          wool: Number(log?.woolKg) || 0,
+          workHours: Number(log?.workHours) || 0,
+          meat: Number(log?.meatKg) || 0,
+        })),
+      ),
+    );
+    }
+
+  private normalizeReportDate(reportDate: unknown): string {
+    // Most common: Spring serializes LocalDate as "YYYY-MM-DD"
+    if (typeof reportDate === 'string') return reportDate;
+
+    // Some setups serialize LocalDate as { year, monthValue, dayOfMonth }
+    if (reportDate && typeof reportDate === 'object') {
+      const anyDate = reportDate as any;
+      const y = Number(anyDate.year);
+      const m = Number(anyDate.monthValue ?? anyDate.month);
+      const d = Number(anyDate.dayOfMonth ?? anyDate.day);
+      if (Number.isFinite(y) && Number.isFinite(m) && Number.isFinite(d)) {
+        return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      }
+    }
+
+    // Fallback: avoid breaking reports (they filter on ISO-like strings)
+    return '';
+  }
+
   getProductionReport(
     userId: number,
     year: number,
@@ -72,50 +138,11 @@ export class FarmService {
       .pipe(map((data) => Object.entries(data).map(([label, value]) => ({ label, value }))));
   }
 
-  /** Handles the Upsert today log functionality. */
-  upsertTodayLog(animalId: number, patch: Partial<Omit<DailyLogEntry, 'date'>>): Observable<any> {
-    // Backend distinguishes cow milk vs sheep/goat milk.
-    const milkLitersCow = animalId === 1 ? patch.milk || 0 : 0;
-    const milkLitersSheep = animalId === 5 || animalId === 6 ? patch.milk || 0 : 0;
-
-    const logData = {
-      reportDate: new Date().toISOString().split('T')[0],
-      milkLitersCow,
-      milkLitersSheep,
-      eggsCount: patch.eggs || 0,
-      woolKg: patch.wool || 0,
-      meatKg: patch.meat || 0,
-      workHours: patch.workHours || 0,
-      userId: this.trackingService.getCurrentUserId(),
-    };
-    return this.http.post(this.apiUrl, logData);
-  }
-
-  /** Retrieves the logs in range. */
-  getLogsInRange(userId: number, startIso: string, endIso: string): Observable<DailyLogEntry[]> {
-    const params = new HttpParams().set('startDate', startIso).set('endDate', endIso);
-
-    return this.http.get<any[]>(`${this.apiUrl}/history/${userId}`, { params }).pipe(
-      map((logs) =>
-        logs.map((log) => ({
-          date: log.reportDate,
-          milk: log.milkLitersCow + log.milkLitersSheep,
-          eggs: log.eggsCount,
-          wool: log.woolKg,
-          workHours: log.workHours,
-          meat: log.meatKg,
-        })),
-      ),
-    );
-  }
-
-  /** Handles the Start server generator functionality. */
   startServerGenerator(): Observable<any> {
     const params = new HttpParams().set('ownerId', this.trackingService.getCurrentUserId().toString());
     return this.http.post('http://localhost:8080/api/generate/start', null, { params });
   }
 
-  /** Handles the Stop server generator functionality. */
   stopServerGenerator(): Observable<any> {
     return this.http.post('http://localhost:8080/api/generate/stop', null);
   }

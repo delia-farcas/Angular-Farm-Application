@@ -4,13 +4,14 @@ import { ManagePage } from './manage-page';
 import { FarmService } from '../services/farm.service';
 import type { Animal } from '../models/farm';
 import { of } from 'rxjs';
+import { UserTrackingService } from '../services/user-tracking.service';
 
 describe('ManagePage', () => {
   let component: ManagePage;
   let fixture: ComponentFixture<ManagePage>;
   let farm: {
     getAnimals: () => Animal[];
-    upsertTodayLog: (id: number, patch: any) => any;
+    upsertDailyLog: (payload: any) => any;
   };
   let upsertSpy: any;
 
@@ -24,12 +25,18 @@ describe('ManagePage', () => {
     ];
     farm = {
       getAnimals: () => animals,
-      upsertTodayLog: upsertSpy,
+      upsertDailyLog: upsertSpy,
     };
 
     await TestBed.configureTestingModule({
       imports: [ManagePage],
-      providers: [{ provide: FarmService, useValue: farm }],
+      providers: [
+        { provide: FarmService, useValue: farm },
+        {
+          provide: UserTrackingService,
+          useValue: { getCurrentUser: () => 'Test', getCurrentUserId: () => 1 },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ManagePage);
@@ -65,9 +72,16 @@ describe('ManagePage', () => {
     component.todaysInput[3] = 5; // Porc disabled => ignored
     component.onSaveToday();
 
-    expect(upsertSpy).toHaveBeenCalledWith(1, { milk: 12 });
-    expect(upsertSpy).toHaveBeenCalledWith(4, { eggs: 7 });
-    expect(upsertSpy).toHaveBeenCalledWith(3, { meat: 5 });
+    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    expect(upsertSpy).toHaveBeenCalledWith({
+      milkLitersCow: 12,
+      milkLitersGoat: 0,
+      milkLitersSheep: 0,
+      eggsCount: 7,
+      woolKg: 0,
+      meatKg: 5,
+      workHours: 0,
+    });
 
     // goBack is emitted after a short timeout when save succeeded
     vi.runAllTimers();

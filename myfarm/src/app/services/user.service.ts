@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { User } from '../models/user';
 import { UserTrackingService } from './user-tracking.service';
@@ -16,7 +16,7 @@ export class UserService {
     tap((savedUser) => {
       if (savedUser) {
         // Folosește .id sau .userId în funcție de cum se numește câmpul în Java!
-        const idToSave = savedUser.id || savedUser.userId; 
+        const idToSave = savedUser.userId; 
         this.trackingService.setCurrentUser(savedUser.username, idToSave);
       }
     })
@@ -24,12 +24,13 @@ export class UserService {
 }
 
   /** Handles the Login functionality. */
-  login(email: string): Observable<User> {
-    const params = new HttpParams().set('email', email);
-    return this.http.get<User>(`${this.apiUrl}/login`, { params }).pipe(
-      tap((user) => {
-        if (user) this.trackingService.setCurrentUser(user.username, user.userId);
-      }),
-    );
+  login(email: string, password: string): Observable<User> {
+    return this.http
+      .post<User>(`${this.apiUrl}/login`, { email, password })
+      .pipe(
+        tap((user) => {
+          if (user) this.trackingService.setCurrentUser(user.username, user.userId);
+        }),
+      );
   }
 }

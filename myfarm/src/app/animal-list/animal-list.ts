@@ -49,7 +49,7 @@ export class AnimalList implements OnInit {
       sex: 'femela',
       age: 1,
       observations: '',
-      ownerId: this.trackingService.getCurrentUserId(),
+      userId: this.trackingService.getCurrentUserId(),
     };
 
     this.animalService.addAnimal(newAnimal).subscribe(() => {

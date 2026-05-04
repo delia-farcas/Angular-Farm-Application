@@ -1,32 +1,49 @@
 package org.example.myfarmbackend.services;
 
+import org.example.myfarmbackend.dto.UserDTO;
 import org.example.myfarmbackend.models.User;
-import org.example.myfarmbackend.repositories.IUserRepository;
+import org.example.myfarmbackend.repositories.UserRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class UserService implements IUserService {
 
-    private final IUserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public UserService(IUserRepository userRepository) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Override
-    public User registerUser(User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already in use: " + user.getEmail());
+    public User registerUser(UserDTO dto) {
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already in use: " + dto.getEmail());
         }
+
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword());
+
         return userRepository.save(user);
     }
 
     @Override
     public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public Optional<User> authenticate(String email, String password) {
+        return userRepository
+                .findByEmail(email)
+                .filter(u -> u.getPassword().equals(password));
     }
 
     @Override
@@ -40,16 +57,21 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public Optional<User> updateUser(long id, User userData) {
+    public List<User> getAllUsersPaginated(int page, int size) {
+        return userRepository.findAll(PageRequest.of(page, size)).getContent();
+    }
+
+    @Override
+    public Optional<User> updateUser(long id, UserDTO dto) {
         return userRepository.findById(id).map(existingUser -> {
-            Optional<User> userWithSameEmail = userRepository.findByEmail(userData.getEmail());
+            Optional<User> userWithSameEmail = userRepository.findByEmail(dto.getEmail());
             if (userWithSameEmail.isPresent() && userWithSameEmail.get().getUserId() != id) {
                 throw new RuntimeException("Email-ul este deja utilizat de alt cont!");
             }
 
-            existingUser.setUsername(userData.getUsername());
-            existingUser.setEmail(userData.getEmail());
-            existingUser.setPassword(userData.getPassword());
+            existingUser.setUsername(dto.getUsername());
+            existingUser.setEmail(dto.getEmail());
+            existingUser.setPassword(dto.getPassword());
 
             return userRepository.save(existingUser);
         });
@@ -57,6 +79,10 @@ public class UserService implements IUserService {
 
     @Override
     public boolean deleteUser(long id) {
-        return userRepository.delete(id);
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }

@@ -1,56 +1,17 @@
 package org.example.myfarmbackend.repositories;
 
 import org.example.myfarmbackend.models.ProductionLog;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
+
 
 @Repository
-public class ProductionLogRepository implements IProductionLogRepository {
-    private final List<ProductionLog> reports = new ArrayList<>();
-    private final AtomicLong idGenerator = new AtomicLong(1);
+public interface ProductionLogRepository extends JpaRepository<ProductionLog, Long> {
 
-    @Override
-    public List<ProductionLog> findAll() {
-        return new ArrayList<>(reports);
-    }
-
-    @Override
-    public Optional<ProductionLog> findByDateAndUserId(LocalDate date, Long userId) {
-        return reports.stream()
-                .filter(r -> r.getReportDate().equals(date) && r.getUserId().equals(userId))
-                .findFirst();
-    }
-
-    @Override
-    public ProductionLog save(ProductionLog report) {
-        if (report.getId() == null || report.getId() == 0) {
-            report.setId(idGenerator.getAndIncrement());
-            reports.add(report);
-            return report;
-        }
-
-        // Update existing by id if present, otherwise treat as new (frontend-provided id).
-        for (int i = 0; i < reports.size(); i++) {
-            if (reports.get(i).getId().equals(report.getId())) {
-                reports.set(i, report);
-                return report;
-            }
-        }
-
-        reports.add(report);
-        return report;
-    }
-
-    @Override
-    public List<ProductionLog> findByUserAndPeriod(Long userId, LocalDate start, LocalDate end) {
-        return reports.stream()
-                .filter(r -> r.getUserId().equals(userId))
-                .filter(r -> !r.getReportDate().isBefore(start) && !r.getReportDate().isAfter(end))
-                .toList();
-    }
+    Optional<ProductionLog> findByReportDateAndUserUserId(LocalDate reportDate, Long userId);
+    List<ProductionLog> findByUserUserIdAndReportDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
 }

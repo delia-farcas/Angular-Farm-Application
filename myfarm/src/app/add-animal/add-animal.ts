@@ -60,7 +60,7 @@ export class AddAnimal implements OnChanges, OnInit {
     age: 0,
     location: '',
     observations: '',
-    ownerId: this.trackingService.getCurrentUserId(),
+    userId: this.trackingService.getCurrentUserId(),
   };
 
   /** Instantiates the component and injects dependencies. */
@@ -124,7 +124,7 @@ export class AddAnimal implements OnChanges, OnInit {
     ...this.animal,
     name: this.animal.name.trim(),
     location: this.animal.location.trim(),
-    ownerId: this.trackingService.getCurrentUserId(),
+    userId: this.trackingService.getCurrentUserId(),
   };
 
   if (this.isEditMode && trimmed.id) {
@@ -187,7 +187,7 @@ export class AddAnimal implements OnChanges, OnInit {
       status: 'Sanatoasa',
       location: '',
       observations: '',
-      ownerId: this.trackingService.getCurrentUserId(),
+      userId: this.trackingService.getCurrentUserId(),
     };
   }
 

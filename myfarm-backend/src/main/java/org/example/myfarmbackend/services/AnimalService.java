@@ -1,51 +1,88 @@
 package org.example.myfarmbackend.services;
 
+import jakarta.transaction.Transactional;
+import org.example.myfarmbackend.dto.AnimalDTO;
 import org.example.myfarmbackend.models.Animal;
-import org.example.myfarmbackend.repositories.IAnimalRepository;
-import org.example.myfarmbackend.repositories.IUserRepository;
+import org.example.myfarmbackend.models.User;
+import org.example.myfarmbackend.repositories.AnimalRepository;
+import org.example.myfarmbackend.repositories.UserRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
 public class AnimalService implements IAnimalService {
 
-    private final IAnimalRepository animalRepository;
-    private final IUserRepository userRepository;
+    private final AnimalRepository animalRepository;
+    private final UserRepository userRepository;
 
-    public AnimalService(IAnimalRepository animalRepository, IUserRepository userRepository) {
+    public AnimalService(AnimalRepository animalRepository, UserRepository userRepository) {
         this.animalRepository = animalRepository;
         this.userRepository = userRepository;
     }
 
     @Override
-    public Animal addAnimal(Animal animal) {
-        userRepository.findById(animal.getOwnerId())
-                .orElseThrow(() -> new RuntimeException("Owner not found with ID: " + animal.getOwnerId()));
+    public Animal addAnimal(AnimalDTO dto) {
+        User owner = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("Owner not found with ID: " + dto.getUserId()));
+        Animal animal = new Animal();
+        mapDtoToEntity(dto, animal);
+
+        animal.setOwner(owner);
 
         return animalRepository.save(animal);
     }
 
     @Override
-    public Animal updateAnimal(long id, Animal animalData) {
+    public Animal updateAnimal(long id, AnimalDTO dto) { // Schimbăm în DTO
         return animalRepository.findById(id)
                 .map(existingAnimal -> {
-                        existingAnimal.setName(animalData.getName());
-                        existingAnimal.setType(animalData.getType());
-                        existingAnimal.setSex(animalData.getSex());
-                        existingAnimal.setAge(animalData.getAge());
-                        existingAnimal.setStatus(animalData.getStatus());
-                        existingAnimal.setLocation(animalData.getLocation());
-                        existingAnimal.setObservations(animalData.getObservations());
+                    mapDtoToEntity(dto, existingAnimal);
 
-            return animalRepository.save(existingAnimal);
-        }).orElse(null);
+                    // Reîncarcă proprietarul doar dacă ID-ul din DTO diferă de cel curent (evită apel inutil și erori când frontend trimite același userId).
+                    if (dto.getUserId() != null) {
+                        Long currentOwnerId =
+                                existingAnimal.getOwner() != null
+                                        ? existingAnimal.getOwner().getUserId()
+                                        : null;
+                        if (!Objects.equals(currentOwnerId, dto.getUserId())) {
+                            User newOwner =
+                                    userRepository
+                                            .findById(dto.getUserId())
+                                            .orElseThrow(
+                                                    () ->
+                                                            new RuntimeException(
+                                                                    "New owner not found"));
+                            existingAnimal.setOwner(newOwner);
+                        }
+                    }
+
+                    return animalRepository.save(existingAnimal);
+                }).orElse(null);
+    }
+
+    private void mapDtoToEntity(AnimalDTO dto, Animal animal) {
+        animal.setName(dto.getName());
+        animal.setType(dto.getType());
+        animal.setSex(dto.getSex());
+        animal.setAge(dto.getAge());
+        animal.setStatus(dto.getStatus());
+        animal.setLocation(dto.getLocation());
+        animal.setObservations(dto.getObservations());
     }
 
     @Override
+    @Transactional
     public boolean deleteAnimal(long id) {
-        return animalRepository.delete(id);
+        if (animalRepository.existsById(id)) {
+            animalRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -54,12 +91,15 @@ public class AnimalService implements IAnimalService {
     }
 
     @Override
+    @Transactional
     public List<Animal> getUserAnimals(long ownerId, int page, int size) {
-        return animalRepository.findByOwnerIdPaginated(ownerId, page, size);
+        Pageable pageable = PageRequest.of(page, size);
+
+        return animalRepository.findByOwnerUserId(ownerId, pageable).getContent();
     }
 
     @Override
     public long getTotalAnimalsCount(long ownerId) {
-        return animalRepository.countByOwnerId(ownerId);
+        return animalRepository.countByOwnerUserId(ownerId);
     }
 }
