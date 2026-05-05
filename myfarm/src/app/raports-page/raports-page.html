@@ -19,7 +19,7 @@
         <div class="sub-item" (click)="goToLunarReports()">Raport Lunar</div>
         <div class="sub-item" (click)="goToYearlyReports()">Raport anual</div>
       </div>
-      <a class="nav-item" (click)="navigateToUsers()">Useri</a>
+      <a *ngIf="isAdmin()" class="nav-item" (click)="navigateToUsers()">Useri</a>
       <div class="separator"></div>
 
       <div class="user-account">

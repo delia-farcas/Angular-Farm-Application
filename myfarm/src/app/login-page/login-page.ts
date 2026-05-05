@@ -38,7 +38,7 @@ export class LoginPage {
         if (user) {
           console.log('Login reușit!', user);
 
-          this.trackingService.setCurrentUser(user.username, user.userId);
+          this.trackingService.setCurrentUser(user.username, user.role, user.userId);
           this.trackingService.setLastLogin();
           this.trackingService.logActivity('login');
 

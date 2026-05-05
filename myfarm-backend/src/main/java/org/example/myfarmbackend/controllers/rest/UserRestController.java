@@ -43,8 +43,13 @@ public class UserRestController {
 
     @GetMapping("/summary")
     public ResponseEntity<List<UserListItemDTO>> listUsersWithAnimalCounts(
+            @RequestParam Long requesterId,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "15") @Min(1) int size) {
+        if (!userService.isAdmin(requesterId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         return ResponseEntity.ok(userService.getUsersWithAnimalCounts(page, size));
     }
 
@@ -59,11 +64,15 @@ public class UserRestController {
 
     @GetMapping
     public ResponseEntity<List<User>> list(
+            @RequestParam Long requesterId, // ID-ul celui care face cererea
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size
     ) {
-        List<User> users = userService.getAllUsersPaginated(page, size);
-        return ResponseEntity.ok(users);
+        if (userService.isAdmin(requesterId)) {
+            List<User> users = userService.getAllUsersPaginated(page, size);
+            return ResponseEntity.ok(users);
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @PutMapping("/{id}")
@@ -86,6 +95,14 @@ public class UserRestController {
         dto.setUserId(user.getUserId());
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
+
+        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+            String roleName = user.getRoles().iterator().next().getName();
+            dto.setRole(roleName);
+        } else {
+            dto.setRole("ROLE_USER");
+        }
+
         return dto;
     }
 }

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UserOptions } from '../user-options/user-options';
+import { UserTrackingService } from '../services/user-tracking.service';
 @Component({
   selector: 'app-bazinga-page',
   standalone: true,
@@ -13,10 +14,17 @@ export class BazingaPage {
   isMenuOpen = false;
 
   /** Instantiates the component and injects dependencies. */
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private trackingService: UserTrackingService,
+  ) {}
 
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen;
+  }
+
+  isAdmin(): boolean {
+    return this.trackingService.isCurrentUserAdmin();
   }
 
   /** Navigates to home. */

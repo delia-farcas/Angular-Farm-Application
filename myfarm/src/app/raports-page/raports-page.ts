@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { LunarReports } from '../lunar-reports/lunar-reports';
 import { YearlyReports } from '../yearly-reports/yearly-reports';
 import { UserOptions } from '../user-options/user-options';
+import { UserTrackingService } from '../services/user-tracking.service';
 
 @Component({
   selector: 'app-raports-page',
@@ -17,10 +18,17 @@ export class RaportsPage {
   isMenuOpen = false;
 
   /** Instantiates the component and injects dependencies. */
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private trackingService: UserTrackingService,
+  ) {}
 
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen;
+  }
+
+  isAdmin(): boolean {
+    return this.trackingService.isCurrentUserAdmin();
   }
 
   /** Handles the Go to lunar reports functionality. */

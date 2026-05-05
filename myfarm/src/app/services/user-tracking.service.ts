@@ -48,8 +48,9 @@ export class UserTrackingService {
   }
 
   /** Sets the current user. */
-  setCurrentUser(username: string, userId?: number): void {
+  setCurrentUser(username: string, userRole?: string, userId?: number): void {
     localStorage.setItem('current_user', username);
+    localStorage.setItem('current_user_role', userRole || 'ROLE_USER');
     if (userId !== undefined) {
       localStorage.setItem('current_user_id', userId.toString());
     }
@@ -73,10 +74,19 @@ export class UserTrackingService {
   return id ? parseInt(id, 10) : -1; 
 }
 
+  getCurrentUserRole(): string {
+    return localStorage.getItem('current_user_role') || 'ROLE_USER';
+  }
+
+  isCurrentUserAdmin(): boolean {
+    return this.getCurrentUserRole() === 'ROLE_ADMIN';
+  }
+
   /** Handles the Logout functionality. */
   logout(): void {
     localStorage.removeItem('current_user');
     localStorage.removeItem('current_user_id');
+    localStorage.removeItem('current_user_role');
     this.cookieService.delete('current_user', '/');
     this.cookieService.delete('current_user_id', '/');
   }

@@ -16,9 +16,8 @@ export class UserService {
   return this.http.post<User>(`${this.apiUrl}/register`, user).pipe(
     tap((savedUser) => {
       if (savedUser) {
-        // Folosește .id sau .userId în funcție de cum se numește câmpul în Java!
         const idToSave = savedUser.userId; 
-        this.trackingService.setCurrentUser(savedUser.username, idToSave);
+        this.trackingService.setCurrentUser(savedUser.username, savedUser.role, idToSave);
       }
     })
   );
@@ -30,14 +29,19 @@ export class UserService {
       .post<User>(`${this.apiUrl}/login`, { email, password })
       .pipe(
         tap((user) => {
-          if (user) this.trackingService.setCurrentUser(user.username, user.userId);
+          if (user){
+            this.trackingService.setCurrentUser(user.username, user.role, user.userId);
+          }
         }),
       );
   }
 
   /** Paginated users with animal counts (admin list). */
   listUsersWithSummary(page: number, size: number): Observable<UserListRow[]> {
-    const params = new HttpParams().set('page', String(page)).set('size', String(size));
+    const params = new HttpParams()
+      .set('requesterId', String(this.trackingService.getCurrentUserId()))
+      .set('page', String(page))
+      .set('size', String(size));
     return this.http.get<UserListRow[]>(`${this.apiUrl}/summary`, { params });
   }
 
@@ -45,4 +49,3 @@ export class UserService {
     return this.http.delete<void>(`${this.apiUrl}/${userId}`);
   }
 }
-

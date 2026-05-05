@@ -15,7 +15,7 @@
       <a class="nav-item" (click)="navigateToBazinga(); closeNav()">Predictor genetic</a>
       <a class="nav-item" (click)="navigateToRaports(); closeNav()">Rapoarte</a>
 
-      <a class="nav-item" (click)="closeNav()">Useri</a>
+      <a *ngIf="isAdmin()" class="nav-item" (click)="closeNav()">Useri</a>
 
       <div class="separator"></div>
 

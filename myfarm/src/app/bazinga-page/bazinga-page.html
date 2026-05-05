@@ -14,7 +14,7 @@
       <a class="nav-item" (click)="navigateHome()">Acasa</a>
       <a class="nav-item">Predictor genetic</a>
       <a class="nav-item" (click)="navigateToRaports()">Rapoarte</a>
-      <a class="nav-item" (click)="navigateToUsers()">Useri</a>
+      <a *ngIf="isAdmin()" class="nav-item" (click)="navigateToUsers()">Useri</a>
 
       <div class="separator"></div>
 

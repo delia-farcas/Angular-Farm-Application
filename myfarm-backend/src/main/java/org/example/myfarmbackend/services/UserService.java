@@ -2,8 +2,11 @@ package org.example.myfarmbackend.services;
 
 import org.example.myfarmbackend.dto.UserDTO;
 import org.example.myfarmbackend.dto.UserListItemDTO;
+import org.example.myfarmbackend.models.Role;
 import org.example.myfarmbackend.models.User;
 import org.example.myfarmbackend.repositories.AnimalRepository;
+import org.example.myfarmbackend.repositories.PermisionRepository;
+import org.example.myfarmbackend.repositories.RoleRepository;
 import org.example.myfarmbackend.repositories.UserRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -19,10 +22,17 @@ public class UserService implements IUserService {
 
     private final UserRepository userRepository;
     private final AnimalRepository animalRepository;
+    private final RoleRepository roleRepository;
+    private final PermisionRepository permisionRepository;
 
-    public UserService(UserRepository userRepository, AnimalRepository animalRepository) {
+    public UserService(UserRepository userRepository,
+                       AnimalRepository animalRepository,
+                       RoleRepository roleRepository,
+                       PermisionRepository permisionRepository) {
         this.userRepository = userRepository;
         this.animalRepository = animalRepository;
+        this.roleRepository = roleRepository;
+        this.permisionRepository = permisionRepository;
     }
 
     @Override
@@ -35,8 +45,19 @@ public class UserService implements IUserService {
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
-
+        Role defaultRole = roleRepository.findByName("ROLE_USER")
+                .orElseThrow(() -> new RuntimeException("Error: Role ROLE_USER not found in DB."));
+        user.getRoles().add(defaultRole);
         return userRepository.save(user);
+    }
+
+    @Override
+    public boolean isAdmin(long userId) {
+        return userRepository.findById(userId)
+                .map(user -> user.getRoles() != null
+                        && user.getRoles().stream()
+                        .anyMatch(role -> "ROLE_ADMIN".equals(role.getName())))
+                .orElse(false);
     }
 
     @Override

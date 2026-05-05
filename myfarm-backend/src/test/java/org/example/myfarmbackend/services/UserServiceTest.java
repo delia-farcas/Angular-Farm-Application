@@ -1,8 +1,11 @@
 package org.example.myfarmbackend.services;
 
 import org.example.myfarmbackend.dto.UserDTO;
+import org.example.myfarmbackend.models.Role;
 import org.example.myfarmbackend.models.User;
 import org.example.myfarmbackend.repositories.AnimalRepository;
+import org.example.myfarmbackend.repositories.PermisionRepository;
+import org.example.myfarmbackend.repositories.RoleRepository;
 import org.example.myfarmbackend.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +29,12 @@ class UserServiceTest {
 
     @Mock
     private AnimalRepository animalRepository;
+
+    @Mock
+    private RoleRepository roleRepository;
+
+    @Mock
+    private PermisionRepository permisionRepository;
 
     @InjectMocks
     private UserService userService;
@@ -51,7 +60,10 @@ class UserServiceTest {
 
     @Test
     void registerUser_ShouldSucceed_WhenEmailIsUnique() {
+        Role defaultRole = new Role();
+        defaultRole.setName("ROLE_USER");
         when(userRepository.findByEmail(testDto.getEmail())).thenReturn(Optional.empty());
+        when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.of(defaultRole));
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
         User result = userService.registerUser(testDto);

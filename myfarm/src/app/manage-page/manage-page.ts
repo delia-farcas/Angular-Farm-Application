@@ -183,6 +183,10 @@ export class ManagePage {
     return true; 
   }
 
+  isAdmin(): boolean {
+    return this.trackingService.isCurrentUserAdmin();
+  }
+
   toggleMenu(): void { this.isMenuOpen = !this.isMenuOpen; }
   onAddAnimalClick(): void { this.goToAddAnimal.emit(); }
   onBackClick(): void { this.goBack.emit(); }

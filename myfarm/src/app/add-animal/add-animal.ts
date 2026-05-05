@@ -57,6 +57,10 @@ export class AddAnimal implements OnChanges, OnInit {
     this.isMenuOpen = !this.isMenuOpen;
   }
 
+  isAdmin(): boolean {
+    return this.trackingService.isCurrentUserAdmin();
+  }
+
   animal: Animal = {
     id: 0,
     name: '',

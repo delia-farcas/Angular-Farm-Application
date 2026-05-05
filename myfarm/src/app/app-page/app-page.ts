@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ListPage } from '../list-page/list-page';
 import { Router } from '@angular/router';
 import { UserOptions } from '../user-options/user-options';
+import { UserTrackingService } from '../services/user-tracking.service';
 @Component({
   selector: 'app-app-page',
   standalone: true,
@@ -12,11 +13,18 @@ import { UserOptions } from '../user-options/user-options';
 })
 export class AppPage {
   /** Instantiates the component and injects dependencies. */
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private trackingService: UserTrackingService,
+  ) {}
   isMenuOpen = false;
 
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
+  }
+
+  isAdmin(): boolean {
+    return this.trackingService.isCurrentUserAdmin();
   }
 
   /** Navigates to To add animal. */

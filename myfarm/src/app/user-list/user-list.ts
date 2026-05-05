@@ -35,6 +35,11 @@ export class UserList implements OnInit {
   hasMoreData = true;
 
   ngOnInit(): void {
+    if (!this.trackingService.isCurrentUserAdmin()) {
+      this.hasMoreData = false;
+      return;
+    }
+
     this.resetAndLoad();
   }
 

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UserTrackingService } from '../services/user-tracking.service';
@@ -12,12 +12,22 @@ import { UserOptions } from '../user-options/user-options';
   templateUrl: './users-list.html',
   styleUrl: './users-list.css',
 })
-export class UsersList {
+export class UsersList implements OnInit {
   private router = inject(Router);
   private trackingService = inject(UserTrackingService);
 
   currentUsername = this.trackingService.getCurrentUser();
   isMenuOpen = false;
+
+  ngOnInit(): void {
+    if (!this.trackingService.isCurrentUserAdmin()) {
+      this.router.navigate(['home']);
+    }
+  }
+
+  isAdmin(): boolean {
+    return this.trackingService.isCurrentUserAdmin();
+  }
 
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen;

@@ -14,6 +14,8 @@ public interface IUserService {
     /** Registers a new user after checking for email uniqueness. */
     User registerUser(UserDTO user);
 
+    boolean isAdmin(long userId);
+
     /** Finds a user by their email (useful for login). */
     Optional<User> getUserByEmail(String email);
 

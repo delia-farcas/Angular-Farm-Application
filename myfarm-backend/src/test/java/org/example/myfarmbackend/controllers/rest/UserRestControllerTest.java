@@ -3,6 +3,7 @@ package org.example.myfarmbackend.controllers.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.myfarmbackend.dto.LoginRequest;
 import org.example.myfarmbackend.dto.UserDTO;
+import org.example.myfarmbackend.dto.UserListItemDTO;
 import org.example.myfarmbackend.exceptions.GlobalExceptionHandler;
 import org.example.myfarmbackend.models.User;
 import org.example.myfarmbackend.services.UserService;
@@ -73,15 +74,48 @@ class UserRestControllerTest {
 
     @Test
     void list_ShouldPaginateInController() throws Exception {
+        when(userService.isAdmin(1L)).thenReturn(true);
         when(userService.getAllUsersPaginated(0, 1))
                 .thenReturn(
                         List.of(
                                 User.builder().userId(1L).email("a@a.com").username("a").password("p").build(),
                                 User.builder().userId(2L).email("b@b.com").username("b").password("p").build()));
 
-        mockMvc.perform(get("/api/users").queryParam("page", "0").queryParam("size", "1"))
+        mockMvc.perform(
+                        get("/api/users")
+                                .queryParam("requesterId", "1")
+                                .queryParam("page", "0")
+                                .queryParam("size", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].userId").value(1));
+    }
+
+    @Test
+    void list_ShouldReturn403_WhenRequesterIsNotAdmin() throws Exception {
+        when(userService.isAdmin(2L)).thenReturn(false);
+
+        mockMvc.perform(get("/api/users").queryParam("requesterId", "2"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void summary_ShouldReturn403_WhenRequesterIsNotAdmin() throws Exception {
+        when(userService.isAdmin(2L)).thenReturn(false);
+
+        mockMvc.perform(get("/api/users/summary").queryParam("requesterId", "2"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void summary_ShouldReturnRows_WhenRequesterIsAdmin() throws Exception {
+        when(userService.isAdmin(1L)).thenReturn(true);
+        when(userService.getUsersWithAnimalCounts(0, 15))
+                .thenReturn(List.of(new UserListItemDTO(2L, "user", "user@farm.ro", 3)));
+
+        mockMvc.perform(get("/api/users/summary").queryParam("requesterId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].userId").value(2))
+                .andExpect(jsonPath("$[0].animalCount").value(3));
     }
 
     @Test
