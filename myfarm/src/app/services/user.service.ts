@@ -45,6 +45,14 @@ export class UserService {
     return this.http.get<UserListRow[]>(`${this.apiUrl}/summary`, { params });
   }
 
+  getAllUsers(): Observable<User[]> {
+    const params = new HttpParams().set(
+      'requesterId',
+      String(this.trackingService.getCurrentUserId()),
+    );
+    return this.http.get<User[]>(this.apiUrl, { params });
+  }
+
   deleteUser(userId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${userId}`);
   }

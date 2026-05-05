@@ -1,28 +1,63 @@
-
-<div class="app-container">
-  <div class="navbar">
-    <button class="hamburger" onclick="document.body.classList.toggle('nav-open')">
-      <span></span><span></span><span></span>
-    </button>
-
-    <div class="overlay" onclick="document.body.classList.remove('nav-open')"></div>
-
-    <nav class="side-nav">
-      <div class="logo">
-        <img src="logo2.svg" alt="Logo" />
+<div class="chat-page-container">
+  <div *ngIf="errorMessage" class="chat-error">{{ errorMessage }}</div>
+  
+  <!-- Sidebar utilizatori -->
+  <div class="users-sidebar">
+    <div class="sidebar-header">
+      <h3>Mesaje</h3>
+    </div>
+    <div class="users-list">
+      <div *ngIf="isLoadingUsers" class="sidebar-state">Se incarca utilizatorii...</div>
+      <div *ngIf="!isLoadingUsers && allUsers.length === 0" class="sidebar-state">
+        Nu exista utilizatori disponibili.
       </div>
-      <div class="separator"></div>
-      <div class = "back-btn">înapoi</div>
-      <div class="user-account">
-        <app-user-options *ngIf="isMenuOpen" class="floating-menu"></app-user-options>
-        <div class="user-pfp">C</div>
-        <span class="user-name">Contul meu</span>
-        <span class="user-name" (click)="toggleMenu()" style="cursor:pointer">
-          {{ isMenuOpen ? 'v' : '^' }} 
-        </span>
+      <div *ngFor="let user of allUsers" 
+           (click)="selectUser(user)" 
+           [class.active]="selectedUserId === user.userId"
+           class="user-item">
+        <div class="user-avatar">{{ (user.username || '?')[0].toUpperCase() }}</div>
+        <div class="user-details">
+          <span class="user-name">{{ user.username }}</span>
+        </div>
       </div>
-    </nav>
+    </div>
   </div>
-  <div class="main-content">
+
+  <!-- Fereastra de chat -->
+  <div class="chat-main">
+    <div *ngIf="selectedUserId; else noSelection" class="chat-wrapper">
+      
+      <div class="chat-header">
+        Vorbești cu {{ selectedUser?.username }}
+      </div>
+
+      <div class="messages-history">
+        <div *ngFor="let msg of messages" 
+             [ngClass]="{'sent': msg.senderId === currentUserId, 'received': msg.senderId !== currentUserId}"
+             class="msg-row">
+          <div class="bubble">
+            {{ msg.content }}
+            <span class="time">{{ msg.timestamp | date:'HH:mm' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <input [(ngModel)]="newMessageText" 
+               (keyup.enter)="send()" 
+               placeholder="Scrie un mesaj...">
+        <button (click)="send()" [disabled]="!newMessageText.trim() || currentUserId <= 0">
+          Trimite
+        </button>
+      </div>
+
+    </div>
+
+    <ng-template #noSelection>
+      <div class="empty-state">
+        <p>Selectează un prieten din listă pentru a începe conversația.</p>
+      </div>
+    </ng-template>
   </div>
+
 </div>
