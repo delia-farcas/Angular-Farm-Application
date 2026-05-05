@@ -14,17 +14,21 @@
       <a class="nav-item" (click)="navigateHome()">Acasa</a>
       <a class="nav-item" (click)="navigateToBazinga()">Predictor genetic</a>
       <a class="nav-item" (click)="goToLunarReports()">Rapoarte</a>
-
+    
       <div class="sub-menu">
         <div class="sub-item" (click)="goToLunarReports()">Raport Lunar</div>
         <div class="sub-item" (click)="goToYearlyReports()">Raport anual</div>
       </div>
-
+      <a class="nav-item" (click)="navigateToUsers()">Useri</a>
       <div class="separator"></div>
 
       <div class="user-account">
+        <app-user-options *ngIf="isMenuOpen" class="floating-menu"></app-user-options>
         <div class="user-pfp">C</div>
         <span class="user-name">Contul meu</span>
+        <span class="user-name" (click)="toggleMenu()" style="cursor:pointer">
+          {{ isMenuOpen ? 'v' : '^' }}
+        </span>
       </div>
     </nav>
   </div>

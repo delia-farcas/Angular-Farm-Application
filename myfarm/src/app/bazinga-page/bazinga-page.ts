@@ -1,15 +1,23 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { UserOptions } from '../user-options/user-options';
 @Component({
   selector: 'app-bazinga-page',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, UserOptions],
   templateUrl: './bazinga-page.html',
   styleUrl: './bazinga-page.css',
 })
 export class BazingaPage {
+  isMenuOpen = false;
+
   /** Instantiates the component and injects dependencies. */
   constructor(private router: Router) {}
+
+  toggleMenu(): void {
+    this.isMenuOpen = !this.isMenuOpen;
+  }
 
   /** Navigates to home. */
   navigateHome(): void {
@@ -18,5 +26,9 @@ export class BazingaPage {
   /** Navigates to to raports. */
   navigateToRaports(): void {
     this.router.navigate(['raports']);
+  }
+
+  navigateToUsers(): void {
+    this.router.navigate(['users']);
   }
 }

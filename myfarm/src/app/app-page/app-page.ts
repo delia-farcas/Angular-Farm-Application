@@ -2,17 +2,22 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ListPage } from '../list-page/list-page';
 import { Router } from '@angular/router';
-
+import { UserOptions } from '../user-options/user-options';
 @Component({
   selector: 'app-app-page',
   standalone: true,
-  imports: [ListPage, CommonModule],
+  imports: [ListPage, UserOptions, CommonModule],
   templateUrl: './app-page.html',
   styleUrls: ['./app-page.css'],
 })
 export class AppPage {
   /** Instantiates the component and injects dependencies. */
   constructor(private router: Router) {}
+  isMenuOpen = false;
+
+  toggleMenu() {
+    this.isMenuOpen = !this.isMenuOpen;
+  }
 
   /** Navigates to To add animal. */
   navigatetoAddAnimal(): void {

@@ -1,3 +1,4 @@
+
 <div class="app-container">
   <div class="navbar">
     <button class="hamburger" onclick="document.body.classList.toggle('nav-open')">
@@ -10,14 +11,8 @@
       <div class="logo">
         <img src="logo2.svg" alt="Logo" />
       </div>
-
-      <a class="nav-item">Acasa</a>
-      <a class="nav-item" (click)="navigateToBazinga()">Predictor genetic</a>
-      <a class="nav-item" (click)="navigateToRaports()">Rapoarte</a>
-      <a class="nav-item" (click)="navigateToUsers()">Useri</a>
-
       <div class="separator"></div>
-
+      <div class = "back-btn">înapoi</div>
       <div class="user-account">
         <app-user-options *ngIf="isMenuOpen" class="floating-menu"></app-user-options>
         <div class="user-pfp">C</div>
@@ -29,6 +24,5 @@
     </nav>
   </div>
   <div class="main-content">
-    <app-list-page></app-list-page>
   </div>
 </div>

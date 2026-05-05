@@ -14,12 +14,17 @@
       <a class="nav-item" (click)="navigateHome()">Acasa</a>
       <a class="nav-item">Predictor genetic</a>
       <a class="nav-item" (click)="navigateToRaports()">Rapoarte</a>
+      <a class="nav-item" (click)="navigateToUsers()">Useri</a>
 
       <div class="separator"></div>
 
       <div class="user-account">
+        <app-user-options *ngIf="isMenuOpen" class="floating-menu"></app-user-options>
         <div class="user-pfp">C</div>
         <span class="user-name">Contul meu</span>
+        <span class="user-name" (click)="toggleMenu()" style="cursor:pointer">
+          {{ isMenuOpen ? 'v' : '^' }}
+        </span>
       </div>
     </nav>
   </div>

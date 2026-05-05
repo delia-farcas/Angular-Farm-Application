@@ -14,11 +14,12 @@ import { Animal } from '../models/animal';
 import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { UserTrackingService } from '../services/user-tracking.service';
 import { Router } from '@angular/router';
+import { UserOptions } from '../user-options/user-options';
 
 @Component({
   selector: 'app-add-animal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UserOptions],
   templateUrl: './add-animal.html',
   styleUrl: './add-animal.css',
 })
@@ -30,6 +31,7 @@ export class AddAnimal implements OnChanges, OnInit {
   isPickerVisible = false;
   isEditMode = false;
   formSubmitted = false;
+  isMenuOpen = false;
 
   iconMapping: Record<string, string> = {
     vaca: '/animals/cow.svg',
@@ -50,6 +52,10 @@ export class AddAnimal implements OnChanges, OnInit {
   };
 
   private trackingService = inject(UserTrackingService);
+
+  toggleMenu(): void {
+    this.isMenuOpen = !this.isMenuOpen;
+  }
 
   animal: Animal = {
     id: 0,
@@ -199,5 +205,9 @@ export class AddAnimal implements OnChanges, OnInit {
   /** Navigates to to raports. */
   navigateToRaports(): void {
     this.router.navigate(['raports']);
+  }
+
+  navigateToUsers(): void {
+    this.router.navigate(['users']);
   }
 }

@@ -8,11 +8,12 @@ import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import type { DailyProductionPayload } from '../services/farm.service';
+import { UserOptions } from '../user-options/user-options';
 
 @Component({
   selector: 'app-manage-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UserOptions],
   templateUrl: './manage-page.html',
   styleUrl: './manage-page.css',
 })
@@ -32,6 +33,7 @@ export class ManagePage {
 
   saveMessage: string | null = null;
   saveMessageType: 'success' | 'warning' | null = null;
+  isMenuOpen = false;
 
   constructor(
     private farm: FarmService,
@@ -181,8 +183,10 @@ export class ManagePage {
     return true; 
   }
 
+  toggleMenu(): void { this.isMenuOpen = !this.isMenuOpen; }
   onAddAnimalClick(): void { this.goToAddAnimal.emit(); }
   onBackClick(): void { this.goBack.emit(); }
   navigateToBazinga(): void { this.router.navigate(['bazinga']); }
   navigateToRaports(): void { this.router.navigate(['raports']); }
+  navigateToUsers(): void { this.router.navigate(['users']); }
 }

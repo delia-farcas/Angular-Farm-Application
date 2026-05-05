@@ -93,9 +93,19 @@ body {
 }
 
 .user-account {
+  position: relative; 
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.floating-menu {
+  position: absolute;
+  bottom: 100%; 
+  left: 0;
+  width: 200px; 
+  z-index: 100;
+  margin-bottom: 10px;
 }
 
 .user-pfp {

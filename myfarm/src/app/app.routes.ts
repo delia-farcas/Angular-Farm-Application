@@ -6,6 +6,7 @@ import { RaportsPage } from './raports-page/raports-page';
 import { AddAnimal } from './add-animal/add-animal';
 import { ManagePage } from './manage-page/manage-page';
 import { UsersList } from './users-list/users-list';
+import { ChatPage } from './chat-page/chat-page';
 
 export const routes: Routes = [
   {
@@ -32,7 +33,12 @@ export const routes: Routes = [
     path: 'manage',
     component: ManagePage,
   },
-  {path: 'users',
+  {
+    path: 'users',
     component: UsersList,
+  },
+  { 
+    path: 'chat',
+    component: ChatPage,
   }
 ];
