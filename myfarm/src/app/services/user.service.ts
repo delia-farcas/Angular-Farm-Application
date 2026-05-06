@@ -56,4 +56,15 @@ export class UserService {
   deleteUser(userId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${userId}`);
   }
+  getLogs(): Observable<any[]> {
+  return this.http.get<any[]>('http://localhost:8080/api/admin/logs');
+}
+
+  getObservations(): Observable<any[]> {
+    return this.http.get<any[]>('http://localhost:8080/api/admin/observations');
+  }
+
+  resolveObservation(id: number): Observable<any> {
+    return this.http.put(`http://localhost:8080/api/admin/observations/${id}/resolve`, {});
+  }
 }

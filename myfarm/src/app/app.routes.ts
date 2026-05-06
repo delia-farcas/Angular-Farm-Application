@@ -7,6 +7,7 @@ import { AddAnimal } from './add-animal/add-animal';
 import { ManagePage } from './manage-page/manage-page';
 import { UsersList } from './users-list/users-list';
 import { ChatPage } from './chat-page/chat-page';
+import { MonitoringComponent } from './monitoring-component/monitoring-component';
 
 export const routes: Routes = [
   {
@@ -40,5 +41,9 @@ export const routes: Routes = [
   { 
     path: 'chat',
     component: ChatPage,
+  },
+  {
+    path: 'activity',
+    component: MonitoringComponent
   }
 ];

@@ -45,4 +45,8 @@ export class AppPage {
   navigateToUsers(): void {
     this.router.navigate(['users']);
   }
+
+  navigateToActivity(): void {
+    this.router.navigate(['activity']);
+  }
 }

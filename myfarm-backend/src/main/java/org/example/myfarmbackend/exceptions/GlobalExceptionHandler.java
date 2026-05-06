@@ -1,9 +1,12 @@
 package org.example.myfarmbackend.exceptions;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.example.myfarmbackend.services.MonitoringService; // Import nou
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException; // Import nou
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -16,6 +19,28 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private final MonitoringService monitoringService;
+
+    public GlobalExceptionHandler(MonitoringService monitoringService) {
+        this.monitoringService = monitoringService;
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+        monitoringService.logAction(
+                null,
+                "SUSPECT",
+                "ACCESS_DENIED_ATTEMPT: " + request.getRequestURI(),
+                403,
+                request.getRemoteAddr()
+        );
+
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "Nu aveți permisiunea de a accesa această resursă (403).");
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {

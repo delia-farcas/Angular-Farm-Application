@@ -1,9 +1,11 @@
 package org.example.myfarmbackend.controllers.rest;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.example.myfarmbackend.dto.ProductionLogDTO;
 import org.example.myfarmbackend.models.ProductionLog;
+import org.example.myfarmbackend.services.MonitoringService;
 import org.example.myfarmbackend.services.ProductionLogService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +26,25 @@ import java.util.stream.Collectors;
 public class ProductionLogRestController {
 
     private final ProductionLogService logService;
+    private final MonitoringService monitoringService;
 
-    public ProductionLogRestController(ProductionLogService logService) {
+    public ProductionLogRestController(ProductionLogService logService, MonitoringService monitoringService) {
         this.logService = logService;
+        this.monitoringService = monitoringService;
     }
 
     @PostMapping
-    public ResponseEntity<ProductionLogDTO> createOrUpdateLog(@Valid @RequestBody ProductionLogDTO logDTO) {
+    public ResponseEntity<ProductionLogDTO> createOrUpdateLog(@Valid @RequestBody ProductionLogDTO logDTO, HttpServletRequest request) {
         ProductionLog savedLog = logService.saveOrUpdateLog(logDTO);
+
+        monitoringService.logAction(
+                logDTO.getUserId(),
+                "USER",
+                "PRODUCTION_DATA_SAVE: " + logDTO.getReportDate(),
+                201,
+                request.getRemoteAddr()
+        );
+
         return new ResponseEntity<>(mapToDTO(savedLog), HttpStatus.CREATED);
     }
 
@@ -40,9 +53,19 @@ public class ProductionLogRestController {
             @RequestParam long userId,
             @RequestParam int year,
             @RequestParam(required = false) Integer month,
-            @RequestParam String resourceField) {
+            @RequestParam String resourceField,
+            HttpServletRequest request) {
 
         Map<String, Double> report = logService.getReport(userId, year, month, resourceField);
+
+        monitoringService.logAction(
+                userId,
+                "USER",
+                "VIEW_PRODUCTION_REPORT: " + resourceField,
+                200,
+                request.getRemoteAddr()
+        );
+
         return ResponseEntity.ok(report);
     }
 
@@ -52,7 +75,8 @@ public class ProductionLogRestController {
             @RequestParam String startDate,
             @RequestParam String endDate,
             @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "400") @Min(1) int size
+            @RequestParam(defaultValue = "400") @Min(1) int size,
+            HttpServletRequest request
     ) {
         try {
             LocalDate.parse(startDate);
@@ -71,6 +95,14 @@ public class ProductionLogRestController {
                 .filter(ProductionLog.class::isInstance)
                 .map(obj -> mapToDTO((ProductionLog) obj))
                 .collect(Collectors.toList());
+
+        monitoringService.logAction(
+                userId,
+                "USER",
+                "VIEW_PRODUCTION_HISTORY: " + startDate + " to " + endDate,
+                200,
+                request.getRemoteAddr()
+        );
 
         int totalElements = dtoList.size();
         int start = page * size;

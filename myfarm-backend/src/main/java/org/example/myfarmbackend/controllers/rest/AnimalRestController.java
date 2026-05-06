@@ -1,8 +1,10 @@
 package org.example.myfarmbackend.controllers.rest;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.example.myfarmbackend.dto.AnimalDTO;
 import org.example.myfarmbackend.models.Animal;
 import org.example.myfarmbackend.services.AnimalService;
+import org.example.myfarmbackend.services.MonitoringService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
@@ -20,29 +22,36 @@ import java.util.stream.Collectors;
 public class AnimalRestController {
 
     private final AnimalService animalService;
+    private final MonitoringService monitoringService;
 
-    public AnimalRestController(AnimalService animalService) {
+    public AnimalRestController(AnimalService animalService, MonitoringService monitoringService) {
         this.animalService = animalService;
+        this.monitoringService = monitoringService;
     }
 
     @GetMapping("/owner/{ownerId}")
     public List<AnimalDTO> getAnimalsByOwner(
             @PathVariable Long ownerId,
             @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "5") @Min(1) int size) {
+            @RequestParam(defaultValue = "5") @Min(1) int size,
+            HttpServletRequest request) {
+
         List<Animal> animals = animalService.getUserAnimals(ownerId, page, size);
-        List<AnimalDTO> animalDtos = animals.stream()
-                .map(this::mapEntityToDto) // Aici chemăm funcția de conversie pentru fiecare animal
+
+        monitoringService.logAction(ownerId, "USER", "FETCH_OWNED_ANIMALS", 200, request.getRemoteAddr());
+
+        return animals.stream()
+                .map(this::mapEntityToDto)
                 .collect(Collectors.toList());
-        return animalDtos;
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AnimalDTO> getAnimalById(@PathVariable long id) {
-        return animalService
-                .getAnimalById(id)
-                .map(this::mapEntityToDto)
-                .map(ResponseEntity::ok)
+    public ResponseEntity<AnimalDTO> getAnimalById(@PathVariable long id, HttpServletRequest request) {
+        return animalService.getAnimalById(id)
+                .map(animal -> {
+                    monitoringService.logAction(animal.getOwner().getUserId(), "USER", "VIEW_ANIMAL_DETAILS_ID: " + id, 200, request.getRemoteAddr());
+                    return ResponseEntity.ok(mapEntityToDto(animal));
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -52,17 +61,39 @@ public class AnimalRestController {
     }
 
     @PostMapping
-    public ResponseEntity<AnimalDTO> addAnimal(@Valid @RequestBody AnimalDTO dto) {
-
+    public ResponseEntity<AnimalDTO> addAnimal(@Valid @RequestBody AnimalDTO dto, HttpServletRequest request) {
         Animal savedAnimal = animalService.addAnimal(dto);
-        AnimalDTO responseDTO = mapEntityToDto(savedAnimal);
 
-        return ResponseEntity.ok(responseDTO);
+        monitoringService.logAction(dto.getUserId(), "USER", "ADD_NEW_ANIMAL: " + dto.getName(), 201, request.getRemoteAddr());
+
+        return ResponseEntity.ok(mapEntityToDto(savedAnimal));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Animal> updateAnimal(@PathVariable Long id, @Valid @RequestBody AnimalDTO animalDto, HttpServletRequest request) {
+        Animal updated = animalService.updateAnimal(id, animalDto);
+        if (updated != null) {
+            monitoringService.logAction(animalDto.getUserId(), "USER", "UPDATE_ANIMAL_ID: " + id, 200, request.getRemoteAddr());
+            return ResponseEntity.ok(updated);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAnimal(@PathVariable Long id, HttpServletRequest request) {
+        // Obținem animalul înainte de ștergere pentru a știi cine era proprietarul în log
+        Optional<Animal> animal = animalService.getAnimalById(id);
+        Long ownerId = animal.isPresent() ? animal.get().getOwner().getUserId() : null;
+
+        if (animalService.deleteAnimal(id)) {
+            monitoringService.logAction(ownerId, "USER", "DELETE_ANIMAL_ID: " + id, 204, request.getRemoteAddr());
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 
     private AnimalDTO mapEntityToDto(Animal animal) {
         AnimalDTO dto = new AnimalDTO();
-
         dto.setId(animal.getId());
         dto.setName(animal.getName());
         dto.setType(animal.getType());
@@ -75,23 +106,6 @@ public class AnimalRestController {
         if (animal.getOwner() != null) {
             dto.setUserId(animal.getOwner().getUserId());
         }
-
         return dto;
-    }
-    @PutMapping("/{id}")
-    public ResponseEntity<Animal> updateAnimal(@PathVariable Long id, @Valid @RequestBody AnimalDTO animalDto) {
-        Animal updated = animalService.updateAnimal(id, animalDto);
-        if (updated != null) {
-            return ResponseEntity.ok(updated);
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAnimal(@PathVariable Long id) {
-        if (animalService.deleteAnimal(id)) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
     }
 }

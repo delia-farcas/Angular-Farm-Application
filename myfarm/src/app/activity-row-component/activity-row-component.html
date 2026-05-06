@@ -1,0 +1,27 @@
+@if (type === 'observation') {
+  <!-- Celule pentru tabelul de Alerte/Suspecți -->
+  <td>{{ data.userId || 'GUEST' }}</td>
+  <td>{{ data.violationType }}</td>
+  <td>
+    <span class="risk-badge" [attr.data-risk]="data.riskLevel">
+      {{ data.riskLevel }}
+    </span>
+  </td>
+  <td>
+    <div class="action-buttons-container">
+      <button type="button" class="resolve-btn" (click)="onResolve()">
+        Rezolvă
+      </button>
+    </div>
+  </td>
+} @else {
+  <!-- Celule pentru tabelul de Log-uri de activitate -->
+  <td>{{ data.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+  <td>{{ data.ipAddress }}</td>
+  <td class="action-info-cell">{{ data.actionInfo }}</td>
+  <td>
+    <span class="status-badge" [class.error-status]="data.statusCode >= 400">
+      {{ data.statusCode }}
+    </span>
+  </td>
+}
