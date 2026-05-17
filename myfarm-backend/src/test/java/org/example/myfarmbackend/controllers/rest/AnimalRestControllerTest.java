@@ -1,11 +1,13 @@
 package org.example.myfarmbackend.controllers.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.myfarmbackend.controllers.rest.AnimalRestController;
 import org.example.myfarmbackend.dto.AnimalDTO;
 import org.example.myfarmbackend.exceptions.GlobalExceptionHandler;
 import org.example.myfarmbackend.models.Animal;
 import org.example.myfarmbackend.models.User;
 import org.example.myfarmbackend.services.AnimalService;
+import org.example.myfarmbackend.services.MonitoringService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -23,8 +25,11 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+
 @WebMvcTest(controllers = AnimalRestController.class)
 @Import(GlobalExceptionHandler.class)
+@AutoConfigureMockMvc(addFilters = false)
 class AnimalRestControllerTest {
 
     @Autowired
@@ -35,6 +40,9 @@ class AnimalRestControllerTest {
 
     @MockBean
     private AnimalService animalService;
+
+    @MockBean
+    private MonitoringService monitoringService;
 
     @Test
     void post_ShouldReturn400_WhenValidationFails() throws Exception {

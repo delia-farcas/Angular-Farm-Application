@@ -4,6 +4,7 @@
   background: #f6f7f9;
   color: #202124;
   position: relative;
+  font-family: 'Poppins', Helvetica, sans-serif;
 }
 
 .chat-error {
@@ -21,21 +22,24 @@
 }
 
 .users-sidebar {
-  width: 300px;
-  border-right: 1px solid #dfe3e8;
-  background: #ffffff;
+  width: 250px;
+  border-right: #8b653e solid 10px;
+  background: #bc8954;
   display: flex;
   flex-direction: column;
+  color: #fff;
+  font-family: 'Poppins', Helvetica, sans-serif;
 }
 
 .sidebar-header {
   padding: 18px 20px;
-  border-bottom: 1px solid #eceff3;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
 }
 
 .sidebar-header h3 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.2rem;
+  font-weight: 400;
 }
 
 .users-list {
@@ -44,7 +48,7 @@
 
 .sidebar-state {
   padding: 14px 16px;
-  color: #667085;
+  color: rgba(255, 255, 255, 0.85);
   font-size: 0.9rem;
 }
 
@@ -54,27 +58,32 @@
   gap: 12px;
   padding: 12px 16px;
   cursor: pointer;
-  border-bottom: 1px solid #f1f3f5;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  transition: background 0.2s;
 }
 
 .user-item:hover,
 .user-item.active {
-  background: #eef4ff;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .user-avatar {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: #2563eb;
-  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8d5b8;
+  color: #7a5c2e;
   font-weight: 700;
+  font-size: 0.9rem;
 }
 
 .user-name {
-  font-weight: 600;
+  font-weight: 400;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .chat-main {
@@ -125,7 +134,7 @@
 }
 
 .sent .bubble {
-  background: #2563eb;
+  background: #398333;
   color: #ffffff;
 }
 
@@ -157,7 +166,7 @@
   padding: 10px 16px;
   border: 0;
   border-radius: 6px;
-  background: #2563eb;
+  background: #398333;
   color: #ffffff;
   font-weight: 700;
   cursor: pointer;

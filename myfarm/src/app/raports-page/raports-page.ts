@@ -54,4 +54,8 @@ export class RaportsPage {
   navigateToUsers(): void {
     this.router.navigate(['users']);
   }
+
+  navigateToActivity(): void {
+    this.router.navigate(['activity']);
+  }
 }

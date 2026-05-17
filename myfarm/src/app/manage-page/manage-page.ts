@@ -193,4 +193,6 @@ export class ManagePage {
   navigateToBazinga(): void { this.router.navigate(['bazinga']); }
   navigateToRaports(): void { this.router.navigate(['raports']); }
   navigateToUsers(): void { this.router.navigate(['users']); }
+  navigateHome(): void { this.router.navigate(['home']); }
+  navigateToActivity(): void { this.router.navigate(['activity']); }
 }

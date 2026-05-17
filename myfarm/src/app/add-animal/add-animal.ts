@@ -214,4 +214,12 @@ export class AddAnimal implements OnChanges, OnInit {
   navigateToUsers(): void {
     this.router.navigate(['users']);
   }
+
+  navigateHome(): void {
+    this.router.navigate(['home']);
+  }
+
+  navigateToActivity(): void {
+    this.router.navigate(['activity']);
+  }
 }

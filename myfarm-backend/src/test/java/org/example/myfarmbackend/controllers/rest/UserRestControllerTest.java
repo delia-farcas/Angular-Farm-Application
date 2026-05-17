@@ -6,7 +6,8 @@ import org.example.myfarmbackend.dto.UserDTO;
 import org.example.myfarmbackend.dto.UserListItemDTO;
 import org.example.myfarmbackend.exceptions.GlobalExceptionHandler;
 import org.example.myfarmbackend.models.User;
-import org.example.myfarmbackend.services.UserService;
+import org.example.myfarmbackend.services.IUserService;
+import org.example.myfarmbackend.services.MonitoringService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -25,8 +26,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+
 @WebMvcTest(controllers = UserRestController.class)
 @Import(GlobalExceptionHandler.class)
+@AutoConfigureMockMvc(addFilters = false)
 class UserRestControllerTest {
 
     @Autowired
@@ -36,7 +40,10 @@ class UserRestControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private UserService userService;
+    private IUserService userService;
+
+    @MockBean
+    private MonitoringService monitoringService;
 
     @Test
     void register_ShouldReturn400_WhenInvalid() throws Exception {

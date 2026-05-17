@@ -10,6 +10,7 @@ import { FarmService } from './farm.service';
 export class AnimalService {
   private http = inject(HttpClient);
   private farmService = inject(FarmService);
+  //private apiUrl = 'http://172.30.246.114:8080/api/animals';
   private apiUrl = 'http://localhost:8080/api/animals';
 
   private animalsLocal: Animal[] = [];

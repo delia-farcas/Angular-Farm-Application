@@ -14,6 +14,9 @@ export const routes: Routes = [
     path: '',
     component: StartingPage,
   },
+  { path: 'login', 
+    component: StartingPage 
+  },
   {
     path: 'home',
     component: AppPage,

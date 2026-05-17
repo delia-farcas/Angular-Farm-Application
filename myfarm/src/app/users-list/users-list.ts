@@ -45,6 +45,10 @@ export class UsersList implements OnInit {
     this.router.navigate(['home']);
   }
 
+  navigateToActivity(): void {
+    this.router.navigate(['activity']);
+  }
+
   toggleNav(): void {
     document.body.classList.toggle('nav-open');
   }

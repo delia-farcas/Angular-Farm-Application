@@ -1,8 +1,10 @@
 package org.example.myfarmbackend.controllers.rest;
 
+import org.example.myfarmbackend.controllers.rest.ProductionLogRestController;
 import org.example.myfarmbackend.exceptions.GlobalExceptionHandler;
 import org.example.myfarmbackend.models.ProductionLog;
 import org.example.myfarmbackend.models.User;
+import org.example.myfarmbackend.services.MonitoringService;
 import org.example.myfarmbackend.services.ProductionLogService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +24,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+
 @WebMvcTest(controllers = ProductionLogRestController.class)
 @Import(GlobalExceptionHandler.class)
+@AutoConfigureMockMvc(addFilters = false)
 class ProductionLogRestControllerTest {
 
     @Autowired
@@ -31,6 +36,9 @@ class ProductionLogRestControllerTest {
 
     @MockBean
     private ProductionLogService productionLogService;
+
+    @MockBean
+    private MonitoringService monitoringService;
 
     @Test
     void post_ShouldReturn400_WhenMissingRequiredFields() throws Exception {

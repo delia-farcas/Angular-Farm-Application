@@ -8,7 +8,9 @@ import org.example.myfarmbackend.repositories.AnimalRepository;
 import org.example.myfarmbackend.repositories.PermisionRepository;
 import org.example.myfarmbackend.repositories.RoleRepository;
 import org.example.myfarmbackend.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,8 @@ public class UserService implements IUserService {
     private final AnimalRepository animalRepository;
     private final RoleRepository roleRepository;
     private final PermisionRepository permisionRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
                        AnimalRepository animalRepository,
@@ -44,7 +48,8 @@ public class UserService implements IUserService {
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword());
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
+        user.setPassword(encodedPassword);
         Role defaultRole = roleRepository.findByName("ROLE_USER")
                 .orElseThrow(() -> new RuntimeException("Error: Role ROLE_USER not found in DB."));
         user.getRoles().add(defaultRole);
@@ -69,7 +74,7 @@ public class UserService implements IUserService {
     public Optional<User> authenticate(String email, String password) {
         return userRepository
                 .findByEmail(email)
-                .filter(u -> u.getPassword().equals(password));
+                .filter(u -> passwordEncoder.matches(password, u.getPassword()));
     }
 
     @Override
@@ -108,7 +113,8 @@ public class UserService implements IUserService {
 
             existingUser.setUsername(dto.getUsername());
             existingUser.setEmail(dto.getEmail());
-            existingUser.setPassword(dto.getPassword());
+            String encodedPassword = passwordEncoder.encode(dto.getPassword());
+            existingUser.setPassword(encodedPassword);
 
             return userRepository.save(existingUser);
         });
@@ -116,10 +122,14 @@ public class UserService implements IUserService {
 
     @Override
     public boolean deleteUser(long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
+        return userRepository.findById(id).map(user -> {
+
+            user.getRoles().clear();
+            userRepository.save(user);
+
+            userRepository.delete(user);
+
             return true;
-        }
-        return false;
+        }).orElse(false);
     }
 }

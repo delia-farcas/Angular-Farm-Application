@@ -20,7 +20,6 @@ export class FarmService {
   private http = inject(HttpClient);
   private trackingService = inject(UserTrackingService);
   private apiUrl = 'http://localhost:8080/api/logs';
-
   private animals: Animal[] = [
     { id: 1, name: 'Vaca', icon: '/animals/cow.svg', count: 0, logs: [] },
     { id: 3, name: 'Porc', icon: '/animals/pig.svg', count: 0, logs: [] },
@@ -136,14 +135,5 @@ export class FarmService {
     return this.http
       .get<Record<string, number>>(`${this.apiUrl}/report`, { params })
       .pipe(map((data) => Object.entries(data).map(([label, value]) => ({ label, value }))));
-  }
-
-  startServerGenerator(): Observable<any> {
-    const params = new HttpParams().set('ownerId', this.trackingService.getCurrentUserId().toString());
-    return this.http.post('http://localhost:8080/api/generate/start', null, { params });
-  }
-
-  stopServerGenerator(): Observable<any> {
-    return this.http.post('http://localhost:8080/api/generate/stop', null);
   }
 }

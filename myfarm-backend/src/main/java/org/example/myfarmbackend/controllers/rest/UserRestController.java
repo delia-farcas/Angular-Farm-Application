@@ -3,19 +3,24 @@ package org.example.myfarmbackend.controllers.rest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import org.example.myfarmbackend.config.JwtTokenProvider;
 import org.example.myfarmbackend.dto.LoginRequest;
+import org.example.myfarmbackend.dto.LoginResponseDTO;
 import org.example.myfarmbackend.dto.UserDTO;
 import org.example.myfarmbackend.dto.UserListItemDTO;
 import org.example.myfarmbackend.models.User;
+import org.example.myfarmbackend.models.Role;
 import org.example.myfarmbackend.services.IUserService;
 import org.example.myfarmbackend.services.MonitoringService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder; // Import nou pentru context
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -25,10 +30,12 @@ public class UserRestController {
 
     private final IUserService userService;
     private final MonitoringService monitoringService;
+    private final JwtTokenProvider tokenProvider;
 
-    public UserRestController(IUserService userService, MonitoringService monitoringService) {
+    public UserRestController(IUserService userService, MonitoringService monitoringService, JwtTokenProvider tokenProvider) {
         this.userService = userService;
         this.monitoringService = monitoringService;
+        this.tokenProvider = tokenProvider;
     }
 
     @PostMapping("/register")
@@ -39,16 +46,22 @@ public class UserRestController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserDTO> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         Optional<User> authUser = userService.authenticate(loginRequest.email(), loginRequest.password());
 
         if (authUser.isPresent()) {
             User user = authUser.get();
-            String role = user.getRoles() != null && !user.getRoles().isEmpty() ?
-                    user.getRoles().iterator().next().getName() : "USER";
+            List<String> roles = user.getRoles().stream()
+                    .map(Role::getName)
+                    .collect(Collectors.toList());
 
-            monitoringService.logAction(user.getUserId(), role, "LOGIN_SUCCESS", 200, request.getRemoteAddr());
-            return ResponseEntity.ok(toPublicUserDto(user));
+            String primaryRole = roles.isEmpty() ? "ROLE_USER" : roles.get(0);
+            String token = tokenProvider.generateToken(user.getEmail(), roles);
+
+            monitoringService.logAction(user.getUserId(), primaryRole, "LOGIN_SUCCESS", 200, request.getRemoteAddr());
+
+            UserDTO userDto = toPublicUserDto(user);
+            return ResponseEntity.ok(new LoginResponseDTO(token, userDto));
         } else {
             monitoringService.logAction(null, "GUEST", "FAILED_LOGIN", 401, request.getRemoteAddr());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -57,43 +70,28 @@ public class UserRestController {
 
     @GetMapping("/summary")
     public ResponseEntity<List<UserListItemDTO>> listUsersWithAnimalCounts(
-            @RequestParam Long requesterId,
             @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "15") @Min(1) int size,
-            HttpServletRequest request) {
-
-        if (!userService.isAdmin(requesterId)) {
-            monitoringService.logAction(requesterId, "USER", "UNAUTHORIZED_SUMMARY_ACCESS", 403, request.getRemoteAddr());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+            @RequestParam(defaultValue = "15") @Min(1) int size) {
 
         return ResponseEntity.ok(userService.getUsersWithAnimalCounts(page, size));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getById(@PathVariable Long id, HttpServletRequest request) {
+    public ResponseEntity<UserDTO> getById(@PathVariable Long id) {
         return userService.getUserById(id)
-                .map(user -> {
-                    return ResponseEntity.ok(toPublicUserDto(user));
-                })
+                .map(user -> ResponseEntity.ok(toPublicUserDto(user)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping
     public ResponseEntity<List<User>> list(
-            @RequestParam Long requesterId,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size,
             HttpServletRequest request
     ) {
-        if (userService.isAdmin(requesterId)) {
-            List<User> users = userService.getAllUsersPaginated(page, size);
-            monitoringService.logAction(requesterId, "ADMIN", "LIST_USERS_ACCESS", 200, request.getRemoteAddr());
-            return ResponseEntity.ok(users);
-        }
-
-        monitoringService.logAction(requesterId, "USER", "UNAUTHORIZED_LIST_ACCESS_ATTEMPT", 403, request.getRemoteAddr());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        List<User> users = userService.getAllUsersPaginated(page, size);
+        monitoringService.logAction(null, "ADMIN", "LIST_USERS_ACCESS BY: " + getAuthenticatedUserEmail(), 200, request.getRemoteAddr());
+        return ResponseEntity.ok(users);
     }
 
     @PutMapping("/{id}")
@@ -107,14 +105,9 @@ public class UserRestController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id, @RequestParam Long requesterId, HttpServletRequest request) {
-        if (!userService.isAdmin(requesterId)) {
-            monitoringService.logAction(requesterId, "USER", "FORBIDDEN_DELETE_USER_ATTEMPT", 403, request.getRemoteAddr());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
+    public ResponseEntity<Void> delete(@PathVariable Long id, HttpServletRequest request) {
         if (userService.deleteUser(id)) {
-            monitoringService.logAction(requesterId, "ADMIN", "DELETE_USER_SUCCESS_ID: " + id, 204, request.getRemoteAddr());
+            monitoringService.logAction(null, "ADMIN", "DELETE_USER_SUCCESS_ID: " + id + " BY: " + getAuthenticatedUserEmail(), 204, request.getRemoteAddr());
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
@@ -132,7 +125,11 @@ public class UserRestController {
         } else {
             dto.setRole("ROLE_USER");
         }
-
         return dto;
+    }
+
+    private String getAuthenticatedUserEmail() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return principal != null ? principal.toString() : "UNKNOWN";
     }
 }

@@ -16,6 +16,7 @@
       <a class="nav-item" (click)="navigateToRaports(); closeNav()">Rapoarte</a>
 
       <a *ngIf="isAdmin()" class="nav-item" (click)="closeNav()">Useri</a>
+      <a *ngIf="isAdmin()" class="nav-item" (click)="navigateToActivity(); closeNav()">Securitate & Activitate</a>
 
       <div class="separator"></div>
 

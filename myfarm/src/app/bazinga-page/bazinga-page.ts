@@ -39,4 +39,8 @@ export class BazingaPage {
   navigateToUsers(): void {
     this.router.navigate(['users']);
   }
+
+  navigateToActivity(): void {
+    this.router.navigate(['activity']);
+  }
 }

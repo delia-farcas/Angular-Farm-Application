@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { UserTrackingService } from '../services/user-tracking.service';
 import { UserService } from '../services/user.service';
 import { Router } from '@angular/router';
+import { InactivityTimerService } from '../services/inactivity-timer.service';
 
 @Component({
   selector: 'app-login-page',
@@ -13,7 +14,7 @@ import { Router } from '@angular/router';
 })
 export class LoginPage {
   @Output() goToSignup = new EventEmitter<void>();
-
+  private inactivityTimer = inject(InactivityTimerService);
   private userService = inject(UserService);
   private fb = inject(FormBuilder);
   private trackingService = inject(UserTrackingService);
@@ -34,14 +35,19 @@ export class LoginPage {
     const { email, password } = this.loginForm.value;
 
     this.userService.login(email, password).subscribe({
-      next: (user) => {
-        if (user) {
-          console.log('Login reușit!', user);
+      next: (response) => {
+        if (response && response.user) {
+          console.log('Login reușit!', response);
 
-          this.trackingService.setCurrentUser(user.username, user.role, user.userId);
+          this.trackingService.setCurrentUser(
+            response.user.username, 
+            response.user.role, 
+            response.user.userId
+          );
+          
           this.trackingService.setLastLogin();
           this.trackingService.logActivity('login');
-
+          this.inactivityTimer.startMonitoring();
           this.router.navigate(['/home']);
         }
       },

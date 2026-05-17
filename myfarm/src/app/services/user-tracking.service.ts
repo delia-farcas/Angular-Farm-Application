@@ -87,6 +87,7 @@ export class UserTrackingService {
     localStorage.removeItem('current_user');
     localStorage.removeItem('current_user_id');
     localStorage.removeItem('current_user_role');
+    sessionStorage.removeItem('token');
     this.cookieService.delete('current_user', '/');
     this.cookieService.delete('current_user_id', '/');
   }

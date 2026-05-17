@@ -5,6 +5,11 @@ import { User } from '../models/user';
 import type { UserListRow } from '../models/user-list-row';
 import { UserTrackingService } from './user-tracking.service';
 
+interface LoginResponse {
+  token: string;
+  user: User;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private http = inject(HttpClient);
@@ -13,52 +18,66 @@ export class UserService {
 
   /** Handles the Register functionality. */
   register(user: User): Observable<User> {
-  return this.http.post<User>(`${this.apiUrl}/register`, user).pipe(
-    tap((savedUser) => {
-      if (savedUser) {
-        const idToSave = savedUser.userId; 
-        this.trackingService.setCurrentUser(savedUser.username, savedUser.role, idToSave);
-      }
-    })
-  );
-}
+    return this.http.post<User>(`${this.apiUrl}/register`, user).pipe(
+      tap((savedUser) => {
+        if (savedUser) {
+          const idToSave = savedUser.userId; 
+          this.trackingService.setCurrentUser(savedUser.username, savedUser.role, idToSave);
+        }
+      })
+    );
+  }
 
   /** Handles the Login functionality. */
-  login(email: string, password: string): Observable<User> {
+  login(email: string, password: string): Observable<LoginResponse> {
     return this.http
-      .post<User>(`${this.apiUrl}/login`, { email, password })
+      .post<LoginResponse>(`${this.apiUrl}/login`, { email, password })
       .pipe(
-        tap((user) => {
-          if (user){
+        tap((response) => {
+          if (response && response.token) {
+            // 1. Salvăm token-ul primit de la backend în sessionStorage
+            sessionStorage.setItem('token', response.token);
+
+            // 2. Salvăm restul detaliilor utilizatorului în trackingService, exact cum făceai înainte
+            const user = response.user;
             this.trackingService.setCurrentUser(user.username, user.role, user.userId);
           }
-        }),
+        })
       );
   }
 
-  /** Paginated users with animal counts (admin list). */
+  /** Metodă helper pentru a lua token-ul rapid în aplicație */
+  getToken(): string | null {
+    return sessionStorage.getItem('token');
+  }
+
+  /** Metodă de logout pentru a curăța tot */
+  logout(): void {
+    sessionStorage.removeItem('token');
+    // Dacă trackingService are vreo metodă de clear, o poți apela și pe aceea aici
+  }
+
+  /** Paginated users with animal counts (admin list) - CURĂȚAT DE REQUESTER_ID */
   listUsersWithSummary(page: number, size: number): Observable<UserListRow[]> {
     const params = new HttpParams()
-      .set('requesterId', String(this.trackingService.getCurrentUserId()))
       .set('page', String(page))
       .set('size', String(size));
     return this.http.get<UserListRow[]>(`${this.apiUrl}/summary`, { params });
   }
 
+  /** Get all users - CURĂȚAT DE REQUESTER_ID */
   getAllUsers(): Observable<User[]> {
-    const params = new HttpParams().set(
-      'requesterId',
-      String(this.trackingService.getCurrentUserId()),
-    );
-    return this.http.get<User[]>(this.apiUrl, { params });
+    return this.http.get<User[]>(this.apiUrl);
   }
 
+  /** Delete user - CURĂȚAT DE REQUESTER_ID */
   deleteUser(userId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${userId}`);
   }
+
   getLogs(): Observable<any[]> {
-  return this.http.get<any[]>('http://localhost:8080/api/admin/logs');
-}
+    return this.http.get<any[]>('http://localhost:8080/api/admin/logs');
+  }
 
   getObservations(): Observable<any[]> {
     return this.http.get<any[]>('http://localhost:8080/api/admin/observations');
