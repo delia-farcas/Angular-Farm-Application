@@ -1,14 +1,15 @@
 .app-container {
   display: flex;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .main-content {
   flex: 1;
   overflow-y: auto; 
   background: #f9f7f2;
+  min-width: 0;
 }
 
 * {
@@ -25,13 +26,14 @@ body {
 
 .app-container {
   display: flex;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .main-content {
   flex: 1;
+  min-width: 0;
 }
 
 .side-nav {
@@ -184,27 +186,37 @@ body {
   }
 
   .side-nav {
+    position: fixed;
     transform: translateX(-100%);
   }
 
-  body.nav-open .side-nav {
+  :host-context(body.nav-open) .side-nav {
     transform: translateX(0);
   }
 
-  body.nav-open .overlay {
+  :host-context(body.nav-open) .overlay {
     display: block;
   }
 
-  body.nav-open .hamburger span:nth-child(1) {
+  :host-context(body.nav-open) .hamburger span:nth-child(1) {
     transform: translateY(7px) rotate(45deg);
   }
 
-  body.nav-open .hamburger span:nth-child(2) {
+  :host-context(body.nav-open) .hamburger span:nth-child(2) {
     opacity: 0;
   }
 
-  body.nav-open .hamburger span:nth-child(3) {
+  :host-context(body.nav-open) .hamburger span:nth-child(3) {
     transform: translateY(-7px) rotate(-45deg);
+  }
+
+  .app-container {
+    display: block;
+  }
+
+  .main-content {
+    min-height: 100vh;
+    padding-top: 56px;
   }
 }
 
@@ -228,6 +240,21 @@ body {
   font-size: 2rem;
   font-weight: 400;
   color: #222;
+}
+
+@media (max-width: 640px) {
+  .content-panel {
+    padding: 20px 14px;
+    border-radius: 14px;
+  }
+
+  .greeting {
+    font-size: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
 }
 
 
@@ -254,7 +281,7 @@ body {
 .table-container {
   width: 100%;
   max-height: 400px; 
-  overflow-y: auto;
+  overflow: auto;
   border: 1px solid #c5d9b2;
   border-radius: 8px;
   background: white;
@@ -306,6 +333,7 @@ body {
 
 .users-table {
   width: 100%;
+  min-width: 640px;
   border-collapse: collapse;
 }
 

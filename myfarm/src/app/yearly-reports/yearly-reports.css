@@ -12,7 +12,7 @@
   color: #2e2f31;
   width: 100%;
   min-height: 100vh;
-  padding: 3rem 1.5rem;
+  padding: 3rem 1.5rem 6rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -29,6 +29,10 @@
 .table-container {
   display: flex;
   gap: 2rem;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-x: auto;
 }
 
 .title {
@@ -127,6 +131,7 @@
 .data-table {
   width: 100%;
   max-width: 600px;
+  min-width: 280px;
   border-collapse: collapse;
   font-family: 'Inter', 'Poppins', sans-serif;
   margin: 0 auto;
@@ -206,7 +211,7 @@
 
 @media (max-width: 700px) {
   .page {
-    padding: 1.25rem 1rem;
+    padding: 1.25rem 1rem 6rem;
     gap: 1.5rem;
   }
 
@@ -216,7 +221,15 @@
 
   .filters {
     flex-direction: column;
+    align-items: stretch;
     gap: 1rem;
+    width: 100%;
+  }
+
+  .filter-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
   }
 
   .data-table th,
@@ -238,5 +251,17 @@
 
   .view-toggle {
     align-self: center;
+  }
+
+  .table-container {
+    flex-direction: column;
+    overflow-x: visible;
+  }
+
+  .toggles-container {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    align-items: center;
   }
 }

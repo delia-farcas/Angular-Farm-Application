@@ -11,7 +11,7 @@
   border-radius: 20px;
   padding: 40px 48px;
   width: 100%;
-  min-height: 670px;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   font-family: 'Poppins', Helvetica, sans-serif;
@@ -99,7 +99,7 @@
 .table-container {
   width: 100%;
   height: 440px;
-  overflow-y: auto;
+  overflow: auto;
   border: 1px solid #c5d9b2;
   border-radius: 8px;
   margin-bottom: 16px;
@@ -107,6 +107,7 @@
 
 .animal-table {
   width: 100%;
+  min-width: 620px;
   border-collapse: collapse;
   flex: 1;
 }
@@ -158,7 +159,7 @@
 
 @media (max-width: 640px) {
   .content-panel {
-    padding: 24px 18px;
+    padding: 20px 14px;
     border-radius: 14px;
   }
 
@@ -176,7 +177,8 @@
   }
 
   .search-bar {
-    flex: 1;
+    flex: 1 1 180px;
+    min-width: 0;
   }
 
   .search-bar input {
@@ -187,6 +189,16 @@
   .animal-table tbody td {
     padding: 8px 6px;
     font-size: 0.82rem;
+  }
+
+  .add-row,
+  .manage-row {
+    justify-content: stretch;
+  }
+
+  .btn-add,
+  .btn-manage {
+    width: 100%;
   }
 }
 

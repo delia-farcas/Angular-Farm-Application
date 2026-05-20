@@ -4,6 +4,18 @@
   color: #2e2f31;
 }
 
+.activity-container {
+  min-width: 0;
+}
+
+.table-container {
+  overflow: auto;
+}
+
+.users-table {
+  min-width: 640px;
+}
+
 .alert-text { color: #d32f2f; }
 
 /* Badge pentru risc */
