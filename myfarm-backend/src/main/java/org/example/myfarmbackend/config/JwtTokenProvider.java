@@ -17,7 +17,7 @@ public class JwtTokenProvider {
     private final Key jwtSecret = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
 
-    private final long jwtExpirationInMs = 10000;
+    private final long jwtExpirationInMs = 900000;
 
     public String generateToken(String email, List<String> roles) {
         Date now = new Date();

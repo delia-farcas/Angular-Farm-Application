@@ -10,10 +10,12 @@ import org.example.myfarmbackend.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,7 +38,9 @@ class UserServiceTest {
     @Mock
     private PermisionRepository permisionRepository;
 
-    @InjectMocks
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     private UserService userService;
 
     private User testUser;
@@ -44,12 +48,16 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
+        userService = new UserService(userRepository, animalRepository, roleRepository, permisionRepository);
+        ReflectionTestUtils.setField(userService, "passwordEncoder", passwordEncoder);
+
         testUser =
                 User.builder()
                         .userId(1L)
                         .username("GeorgeP")
                         .email("george@farm.ro")
                         .password("parola123")
+                        .roles(new HashSet<>())
                         .build();
 
         testDto = new UserDTO();
@@ -64,13 +72,18 @@ class UserServiceTest {
         defaultRole.setName("ROLE_USER");
         when(userRepository.findByEmail(testDto.getEmail())).thenReturn(Optional.empty());
         when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.of(defaultRole));
-        when(userRepository.save(any(User.class))).thenReturn(testUser);
+        when(passwordEncoder.encode("parola123")).thenReturn("encoded-password");
+        when(userRepository.save(any(User.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         User result = userService.registerUser(testDto);
 
         assertNotNull(result);
         assertEquals("george@farm.ro", result.getEmail());
-        verify(userRepository, times(1)).save(any(User.class));
+        assertEquals("encoded-password", result.getPassword());
+        assertTrue(result.getRoles().contains(defaultRole));
+        verify(passwordEncoder).encode("parola123");
+        verify(userRepository).save(any(User.class));
     }
 
     @Test
@@ -78,26 +91,52 @@ class UserServiceTest {
         when(userRepository.findByEmail(testDto.getEmail())).thenReturn(Optional.of(testUser));
 
         assertThrows(RuntimeException.class, () -> userService.registerUser(testDto));
+        verify(passwordEncoder, never()).encode(anyString());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void registerUser_ShouldThrowException_WhenDefaultRoleMissing() {
+        when(userRepository.findByEmail(testDto.getEmail())).thenReturn(Optional.empty());
+        when(passwordEncoder.encode("parola123")).thenReturn("encoded-password");
+        when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.registerUser(testDto));
+
+        assertTrue(exception.getMessage().contains("ROLE_USER"));
         verify(userRepository, never()).save(any());
     }
 
     @Test
     void authenticate_ShouldReturnUser_WhenPasswordMatches() {
         when(userRepository.findByEmail("george@farm.ro")).thenReturn(Optional.of(testUser));
+        when(passwordEncoder.matches("parola123", "parola123")).thenReturn(true);
 
         Optional<User> result = userService.authenticate("george@farm.ro", "parola123");
 
         assertTrue(result.isPresent());
         assertEquals("GeorgeP", result.get().getUsername());
+        verify(passwordEncoder).matches("parola123", "parola123");
     }
 
     @Test
     void authenticate_ShouldReturnEmpty_WhenPasswordWrong() {
         when(userRepository.findByEmail("george@farm.ro")).thenReturn(Optional.of(testUser));
+        when(passwordEncoder.matches("wrong", "parola123")).thenReturn(false);
 
         Optional<User> result = userService.authenticate("george@farm.ro", "wrong");
 
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void authenticate_ShouldReturnEmpty_WhenEmailMissing() {
+        when(userRepository.findByEmail("missing@farm.ro")).thenReturn(Optional.empty());
+
+        Optional<User> result = userService.authenticate("missing@farm.ro", "parola123");
+
+        assertTrue(result.isEmpty());
+        verify(passwordEncoder, never()).matches(anyString(), anyString());
     }
 
     @Test
@@ -132,6 +171,7 @@ class UserServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userRepository.findByEmail("new@farm.ro")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode("pass")).thenReturn("encoded-pass");
         when(userRepository.save(any(User.class)))
                 .thenAnswer(
                         inv -> {
@@ -144,6 +184,7 @@ class UserServiceTest {
 
         assertTrue(result.isPresent());
         assertEquals("NewName", result.get().getUsername());
+        assertEquals("encoded-pass", result.get().getPassword());
     }
 
     @Test
@@ -174,22 +215,26 @@ class UserServiceTest {
 
     @Test
     void deleteUser_ShouldReturnTrue_WhenExists() {
-        when(userRepository.existsById(1L)).thenReturn(true);
-        doNothing().when(userRepository).deleteById(1L);
+        Role role = new Role();
+        role.setName("ROLE_USER");
+        testUser.getRoles().add(role);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
         boolean result = userService.deleteUser(1L);
 
         assertTrue(result);
-        verify(userRepository).deleteById(1L);
+        assertTrue(testUser.getRoles().isEmpty());
+        verify(userRepository).save(testUser);
+        verify(userRepository).delete(testUser);
     }
 
     @Test
     void deleteUser_ShouldReturnFalse_WhenMissing() {
-        when(userRepository.existsById(1L)).thenReturn(false);
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         boolean result = userService.deleteUser(1L);
 
         assertFalse(result);
-        verify(userRepository, never()).deleteById(anyLong());
+        verify(userRepository, never()).delete(any());
     }
 }

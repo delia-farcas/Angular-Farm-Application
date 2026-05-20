@@ -1,5 +1,7 @@
 package org.example.myfarmbackend.controllers.rest;
 
+import org.example.myfarmbackend.config.JwtAuthenticationFilter;
+import org.example.myfarmbackend.config.JwtTokenProvider;
 import org.example.myfarmbackend.controllers.rest.ProductionLogRestController;
 import org.example.myfarmbackend.exceptions.GlobalExceptionHandler;
 import org.example.myfarmbackend.models.ProductionLog;
@@ -39,6 +41,12 @@ class ProductionLogRestControllerTest {
 
     @MockBean
     private MonitoringService monitoringService;
+
+    @MockBean
+    private JwtTokenProvider tokenProvider;
+
+    @MockBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Test
     void post_ShouldReturn400_WhenMissingRequiredFields() throws Exception {

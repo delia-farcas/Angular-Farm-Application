@@ -1,6 +1,8 @@
 package org.example.myfarmbackend.controllers.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.myfarmbackend.config.JwtAuthenticationFilter;
+import org.example.myfarmbackend.config.JwtTokenProvider;
 import org.example.myfarmbackend.controllers.rest.AnimalRestController;
 import org.example.myfarmbackend.dto.AnimalDTO;
 import org.example.myfarmbackend.exceptions.GlobalExceptionHandler;
@@ -43,6 +45,12 @@ class AnimalRestControllerTest {
 
     @MockBean
     private MonitoringService monitoringService;
+
+    @MockBean
+    private JwtTokenProvider tokenProvider;
+
+    @MockBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Test
     void post_ShouldReturn400_WhenValidationFails() throws Exception {

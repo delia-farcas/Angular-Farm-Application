@@ -12,7 +12,7 @@ export class InactivityTimerService {
   private ngZone = inject(NgZone);
 
   // 15 minute exprimate în milisecunde (15 * 60 * 1000)
-  private readonly INACTIVITY_TIMEOUT = 10000; 
+  private readonly INACTIVITY_TIMEOUT = 900000; 
   private timeoutId: any;
   private activitySubscription?: Subscription;
 

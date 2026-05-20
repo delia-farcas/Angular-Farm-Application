@@ -6,13 +6,25 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:h2:mem:animal-repository-test;DB_CLOSE_DELAY=-1;MODE=LEGACY;NON_KEYWORDS=USER,USERS,TYPE",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=",
+        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+        "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.data.mongodb.repositories.enabled=false"
+})
 class AnimalRepositoryTest {
 
     @Autowired
@@ -21,13 +33,16 @@ class AnimalRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private TestEntityManager entityManager;
+
     @Test
     void findByOwnerUserId_returnsPage() {
         User owner = new User();
         owner.setEmail("owner-animals@farm.test");
         owner.setUsername("OwnerAnimals");
         owner.setPassword("secret");
-        owner = userRepository.save(owner);
+        owner = userRepository.saveAndFlush(owner);
 
         Animal a = new Animal();
         a.setName("Bessie");
@@ -61,7 +76,8 @@ class AnimalRepositoryTest {
         a.setStatus("activ");
         a.setLocation("Stână");
         a.setOwner(owner);
-        animalRepository.save(a);
+        animalRepository.saveAndFlush(a);
+        entityManager.clear();
 
         assertEquals(1L, animalRepository.countByOwnerUserId(owner.getUserId()));
         assertEquals(1L, animalRepository.countByOwnerUserIdAndTypeIgnoreCase(owner.getUserId(), "VACA"));

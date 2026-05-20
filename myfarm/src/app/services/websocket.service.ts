@@ -14,7 +14,7 @@ export class WebSocketService {
   /** Instantiates the component and injects dependencies. */
   constructor() {
     this.stompClient = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws-farm'),
+      webSocketFactory: () => new SockJS('https://192.168.101.24:8080/ws-farm'),
       debug: (str) => {},
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,

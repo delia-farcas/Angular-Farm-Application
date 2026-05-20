@@ -14,8 +14,8 @@ export class ChatService {
 
   message$ = this.messageSource.asObservable();
 
-  private readonly apiUrl = 'http://localhost:8080/api/chat';
-  private readonly websocketUrl = 'http://localhost:8080/ws-chat';
+  private readonly apiUrl = 'https://192.168.101.24:8080/api/chat';
+  private readonly websocketUrl = 'https://192.168.101.24:8080/ws-chat';
 
   constructor(private http: HttpClient) {}
 

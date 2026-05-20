@@ -19,7 +19,7 @@ export interface DailyProductionPayload {
 export class FarmService {
   private http = inject(HttpClient);
   private trackingService = inject(UserTrackingService);
-  private apiUrl = 'http://localhost:8080/api/logs';
+  private apiUrl = 'https://192.168.101.24:8080/api/logs';
   private animals: Animal[] = [
     { id: 1, name: 'Vaca', icon: '/animals/cow.svg', count: 0, logs: [] },
     { id: 3, name: 'Porc', icon: '/animals/pig.svg', count: 0, logs: [] },

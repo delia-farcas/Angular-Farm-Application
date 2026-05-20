@@ -14,7 +14,7 @@ interface LoginResponse {
 export class UserService {
   private http = inject(HttpClient);
   private trackingService = inject(UserTrackingService);
-  private apiUrl = 'http://localhost:8080/api/users';
+  private apiUrl = 'https://192.168.101.24:8080/api/users';
 
   /** Handles the Register functionality. */
   register(user: User): Observable<User> {
@@ -76,14 +76,14 @@ export class UserService {
   }
 
   getLogs(): Observable<any[]> {
-    return this.http.get<any[]>('http://localhost:8080/api/admin/logs');
+    return this.http.get<any[]>('https://192.168.101.24:8080/api/admin/logs');
   }
 
   getObservations(): Observable<any[]> {
-    return this.http.get<any[]>('http://localhost:8080/api/admin/observations');
+    return this.http.get<any[]>('https://192.168.101.24:8080/api/admin/observations');
   }
 
   resolveObservation(id: number): Observable<any> {
-    return this.http.put(`http://localhost:8080/api/admin/observations/${id}/resolve`, {});
+    return this.http.put(`https://192.168.101.24:8080/api/admin/observations/${id}/resolve`, {});
   }
 }

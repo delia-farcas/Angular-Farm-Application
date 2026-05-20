@@ -30,3 +30,6 @@ myfarm-backend/.env
 myfarm-backend/.env
 myfarm-backend/src/test/resources/application.properties
 myfarm-backend/.env
+myfarm-backend/src/main/resources/keystore.p12
+myfarm-backend/src/main/resources/application.properties
+myfarm-backend/src/main/resources/application.properties

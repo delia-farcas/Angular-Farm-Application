@@ -5,17 +5,32 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:h2:mem:user-repository-test;DB_CLOSE_DELAY=-1;MODE=LEGACY;NON_KEYWORDS=USER,USERS",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=",
+        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+        "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.data.mongodb.repositories.enabled=false"
+})
 class UserRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TestEntityManager entityManager;
 
     @Test
     void saveAndFindByEmail() {
@@ -36,10 +51,14 @@ class UserRepositoryTest {
         u.setEmail("bob@farm.test");
         u.setUsername("Bob");
         u.setPassword("secret");
-        User saved = userRepository.save(u);
+        User saved = userRepository.saveAndFlush(u);
+        entityManager.clear();
 
         assertTrue(userRepository.existsById(saved.getUserId()));
         userRepository.deleteById(saved.getUserId());
-        assertFalse(userRepository.existsById(saved.getUserId()));
+        userRepository.flush();
+        entityManager.clear();
+
+        assertTrue(userRepository.findById(saved.getUserId()).isEmpty());
     }
 }
