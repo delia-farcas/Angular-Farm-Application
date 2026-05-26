@@ -67,9 +67,9 @@ describe('ManagePage', () => {
 
     upsertSpy.mockReturnValue(of({}));
 
-    component.todaysInput[1] = 12; // Vaca => milk
-    component.todaysInput[4] = 7; // Gaina => eggs
-    component.todaysInput[3] = 5; // Porc disabled => ignored
+    component.todaysInput[1] = 12;
+    component.todaysInput[4] = 7;
+    component.todaysInput[3] = 5;
     component.onSaveToday();
 
     expect(upsertSpy).toHaveBeenCalledTimes(1);
@@ -83,7 +83,6 @@ describe('ManagePage', () => {
       workHours: 0,
     });
 
-    // goBack is emitted after a short timeout when save succeeded
     vi.runAllTimers();
     expect(goBackSpy).toHaveBeenCalledTimes(1);
   });

@@ -42,10 +42,7 @@ export class SignupPage {
   onSubmit(): void {
     if (this.signupForm.invalid) {
       this.signupForm.markAllAsTouched();
-      return;
     }
-    // TODO: handle signup logic
-    console.log('Signup:', this.signupForm.value);
   }
 
   onLoginClick(): void {

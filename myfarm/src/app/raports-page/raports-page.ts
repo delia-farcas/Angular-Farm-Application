@@ -17,7 +17,6 @@ export class RaportsPage {
   currentPage: 'lunar' | 'yearly' = 'lunar';
   isMenuOpen = false;
 
-  /** Instantiates the component and injects dependencies. */
   constructor(
     private router: Router,
     private trackingService: UserTrackingService,
@@ -31,22 +30,18 @@ export class RaportsPage {
     return this.trackingService.isCurrentUserAdmin();
   }
 
-  /** Handles the Go to lunar reports functionality. */
   goToLunarReports(): void {
     this.currentPage = 'lunar';
   }
 
-  /** Handles the Go to yearly reports functionality. */
   goToYearlyReports(): void {
     this.currentPage = 'yearly';
   }
 
-  /** Navigates to home. */
   navigateHome(): void {
     this.router.navigate(['home']);
   }
 
-  /** Navigates to to bazinga. */
   navigateToBazinga(): void {
     this.router.navigate(['bazinga']);
   }

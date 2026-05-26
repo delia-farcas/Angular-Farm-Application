@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -20,6 +21,7 @@ export class ChatPage implements OnInit, OnDestroy {
   newMessageText = '';
   errorMessage = '';
   isLoadingUsers = false;
+  isSidebarOpen = false;
 
   currentUserId = -1;
   selectedUserId: number | null = null;
@@ -31,18 +33,19 @@ export class ChatPage implements OnInit, OnDestroy {
     private chatService: ChatService,
     private trackingService: UserTrackingService,
     private cdr: ChangeDetectorRef,
+    private location: Location,
   ) {}
 
   ngOnInit(): void {
     this.currentUserId = this.trackingService.getCurrentUserId();
     if (this.currentUserId <= 0) {
-      this.errorMessage = 'Nu am gasit utilizatorul curent. Autentifica-te din nou daca vrei sa trimiti mesaje.';
-      return; 
+      this.errorMessage =
+        'Nu am gasit utilizatorul curent. Autentifica-te din nou daca vrei sa trimiti mesaje.';
+      return;
     }
 
     void this.chatService.connect(this.currentUserId);
     this.loadUsers();
-
 
     this.messageSub = this.chatService.message$.subscribe((msg) => {
       if (!msg || !this.selectedUserId) return;
@@ -59,20 +62,20 @@ export class ChatPage implements OnInit, OnDestroy {
   }
 
   loadUsers(): void {
-  this.isLoadingUsers = true;
-  this.chatService.getContacts(this.currentUserId).subscribe({
-    next: (users) => {
-      this.allUsers = users;
-      this.isLoadingUsers = false;
-      this.cdr.detectChanges(); // ← add this
-    },
-    error: () => {
-      this.errorMessage = 'Nu s-a putut incarca lista de utilizatori.';
-      this.isLoadingUsers = false;
-      this.cdr.detectChanges(); 
-    },
-  });
-}
+    this.isLoadingUsers = true;
+    this.chatService.getContacts(this.currentUserId).subscribe({
+      next: (users) => {
+        this.allUsers = users;
+        this.isLoadingUsers = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.errorMessage = 'Nu s-a putut incarca lista de utilizatori.';
+        this.isLoadingUsers = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
 
   selectUser(user: User): void {
     this.selectedUser = user;
@@ -88,6 +91,18 @@ export class ChatPage implements OnInit, OnDestroy {
         this.errorMessage = 'Nu s-a putut incarca istoricul conversatiei.';
       },
     });
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  closeSidebar(): void {
+    this.isSidebarOpen = false;
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 
   send(): void {

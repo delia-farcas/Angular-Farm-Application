@@ -22,7 +22,7 @@ export class ManagePage {
   @Output() goToAddAnimal = new EventEmitter<void>();
 
   search = '';
-  
+
   todaysInput: any = {};
   invalidInput: any = {};
   todaysMilkInput: any = {};
@@ -57,25 +57,39 @@ export class ManagePage {
 
   getGestiuneUnit(animal: Animal): string {
     switch (animal.name) {
-      case 'Vaca': return 'L';
-      case 'Capra': return 'L';
-      case 'Gaina': return 'ouă';
-      case 'Oaie': return 'kg';
-      case 'Cal': return 'ore';
-      case 'Porc': return 'kg';
-      default: return '';
+      case 'Vaca':
+        return 'L';
+      case 'Capra':
+        return 'L';
+      case 'Gaina':
+        return 'ouă';
+      case 'Oaie':
+        return 'kg';
+      case 'Cal':
+        return 'ore';
+      case 'Porc':
+        return 'kg';
+      default:
+        return '';
     }
   }
 
   getGestiunePlaceholder(animal: Animal): string {
     switch (animal.name) {
-      case 'Vaca': return 'ex: 15';
-      case 'Capra': return 'ex: 25';
-      case 'Gaina': return 'ex: 40';
-      case 'Oaie': return 'ex: 3';
-      case 'Cal': return 'ex: 6';
-      case 'Porc': return 'ex: 12';
-      default: return 'N/A';
+      case 'Vaca':
+        return 'ex: 15';
+      case 'Capra':
+        return 'ex: 25';
+      case 'Gaina':
+        return 'ex: 40';
+      case 'Oaie':
+        return 'ex: 3';
+      case 'Cal':
+        return 'ex: 6';
+      case 'Porc':
+        return 'ex: 12';
+      default:
+        return 'N/A';
     }
   }
 
@@ -179,20 +193,36 @@ export class ManagePage {
       });
   }
 
-  isGestiuneEnabled(animal: Animal): boolean {
-    return true; 
+  isGestiuneEnabled(): boolean {
+    return true;
   }
 
   isAdmin(): boolean {
     return this.trackingService.isCurrentUserAdmin();
   }
 
-  toggleMenu(): void { this.isMenuOpen = !this.isMenuOpen; }
-  onAddAnimalClick(): void { this.goToAddAnimal.emit(); }
-  onBackClick(): void { this.goBack.emit(); }
-  navigateToBazinga(): void { this.router.navigate(['bazinga']); }
-  navigateToRaports(): void { this.router.navigate(['raports']); }
-  navigateToUsers(): void { this.router.navigate(['users']); }
-  navigateHome(): void { this.router.navigate(['home']); }
-  navigateToActivity(): void { this.router.navigate(['activity']); }
+  toggleMenu(): void {
+    this.isMenuOpen = !this.isMenuOpen;
+  }
+  onAddAnimalClick(): void {
+    this.goToAddAnimal.emit();
+  }
+  onBackClick(): void {
+    this.goBack.emit();
+  }
+  navigateToBazinga(): void {
+    this.router.navigate(['bazinga']);
+  }
+  navigateToRaports(): void {
+    this.router.navigate(['raports']);
+  }
+  navigateToUsers(): void {
+    this.router.navigate(['users']);
+  }
+  navigateHome(): void {
+    this.router.navigate(['home']);
+  }
+  navigateToActivity(): void {
+    this.router.navigate(['activity']);
+  }
 }

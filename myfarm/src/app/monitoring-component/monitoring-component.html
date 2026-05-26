@@ -1,5 +1,5 @@
 <div class="app-container">
-<div class="navbar">
+  <div class="navbar">
     <button class="hamburger" onclick="document.body.classList.toggle('nav-open')">
       <span></span><span></span><span></span>
     </button>
@@ -23,8 +23,8 @@
         <app-user-options *ngIf="isMenuOpen" class="floating-menu"></app-user-options>
         <div class="user-pfp">C</div>
         <span class="user-name">Contul meu</span>
-        <span class="user-name" (click)="toggleMenu()" style="cursor:pointer">
-          {{ isMenuOpen ? 'v' : '^' }} 
+        <span class="user-name" (click)="toggleMenu()" style="cursor: pointer">
+          {{ isMenuOpen ? 'v' : '^' }}
         </span>
       </div>
     </nav>

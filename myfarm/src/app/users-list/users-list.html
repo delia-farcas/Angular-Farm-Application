@@ -16,7 +16,9 @@
       <a class="nav-item" (click)="navigateToRaports(); closeNav()">Rapoarte</a>
 
       <a *ngIf="isAdmin()" class="nav-item" (click)="closeNav()">Useri</a>
-      <a *ngIf="isAdmin()" class="nav-item" (click)="navigateToActivity(); closeNav()">Securitate & Activitate</a>
+      <a *ngIf="isAdmin()" class="nav-item" (click)="navigateToActivity(); closeNav()"
+        >Securitate & Activitate</a
+      >
 
       <div class="separator"></div>
 
@@ -24,7 +26,7 @@
         <app-user-options *ngIf="isMenuOpen" class="floating-menu"></app-user-options>
         <div class="user-pfp">{{ currentUsername.charAt(0) | uppercase }}</div>
         <span class="user-name">{{ currentUsername }}</span>
-        <span class="user-name" (click)="toggleMenu()" style="cursor:pointer">
+        <span class="user-name" (click)="toggleMenu()" style="cursor: pointer">
           {{ isMenuOpen ? 'v' : '^' }}
         </span>
       </div>

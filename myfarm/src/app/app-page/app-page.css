@@ -10,11 +10,23 @@ body {
   background: #f9f7f2;
 }
 
+@media (min-width: 769px) {
+  .app-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .side-nav {
+    position: sticky;
+    transform: translateX(0);
+  }
+}
+
 .app-container {
   display: flex;
   min-height: 100vh;
   width: 100%;
-  overflow-x: hidden;
 }
 
 .main-content {
@@ -24,6 +36,7 @@ body {
 }
 
 .side-nav {
+  position: sticky;
   top: 0;
   left: 0;
   width: 250px;
@@ -95,7 +108,7 @@ body {
 }
 
 .user-account {
-  position: relative; 
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -103,9 +116,9 @@ body {
 
 .floating-menu {
   position: absolute;
-  bottom: 100%; 
+  bottom: 100%;
   left: 0;
-  width: 200px; 
+  width: 200px;
   z-index: 100;
   margin-bottom: 10px;
 }

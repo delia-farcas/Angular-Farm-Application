@@ -1,5 +1,4 @@
 @if (type === 'observation') {
-  <!-- Celule pentru tabelul de Alerte/Suspecți -->
   <td>{{ data.userId || 'GUEST' }}</td>
   <td>{{ data.violationType }}</td>
   <td>
@@ -9,14 +8,11 @@
   </td>
   <td>
     <div class="action-buttons-container">
-      <button type="button" class="resolve-btn" (click)="onResolve()">
-        Rezolvă
-      </button>
+      <button type="button" class="resolve-btn" (click)="onResolve()">Rezolvă</button>
     </div>
   </td>
 } @else {
-  <!-- Celule pentru tabelul de Log-uri de activitate -->
-  <td>{{ data.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+  <td>{{ data.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
   <td>{{ data.ipAddress }}</td>
   <td class="action-info-cell">{{ data.actionInfo }}</td>
   <td>

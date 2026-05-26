@@ -14,13 +14,11 @@ import { UserTrackingService } from '../services/user-tracking.service';
 export class CookieConsent implements OnInit {
   showPopup = false;
 
-  /** Instantiates the component and injects dependencies. */
   constructor(
     private trackingService: UserTrackingService,
     private router: Router,
   ) {}
 
-  /** Initializes the component. */
   ngOnInit() {
     if (this.isAutomationEnvironment()) {
       return;
@@ -35,19 +33,16 @@ export class CookieConsent implements OnInit {
     this.updateVisibility(this.router.url);
   }
 
-  /** Handles the Accept cookies functionality. */
   acceptCookies() {
     this.trackingService.setCookieConsent(true);
     this.showPopup = false;
   }
 
-  /** Handles the Decline cookies functionality. */
   declineCookies() {
     this.trackingService.setCookieConsent(false);
     this.showPopup = false;
   }
 
-  /** Handles the Update visibility functionality. */
   private updateVisibility(url: string) {
     const onHomePage = this.normalizeUrl(url) === '/home';
     const shouldShow = onHomePage && this.trackingService.isCookieConsentPromptPending();
@@ -59,7 +54,6 @@ export class CookieConsent implements OnInit {
     }
   }
 
-  /** Handles the Normalize url functionality. */
   private normalizeUrl(url: string): string {
     if (!url) {
       return '/';
@@ -68,7 +62,6 @@ export class CookieConsent implements OnInit {
     return url.split('?')[0].split('#')[0] || '/';
   }
 
-  /** Handles the Is automation environment functionality. */
   private isAutomationEnvironment(): boolean {
     return typeof navigator !== 'undefined' && navigator.webdriver;
   }

@@ -27,6 +27,7 @@ export class LunarReports implements OnInit, OnDestroy {
   view: 'table' | 'chart' = 'table';
   category: FarmProductCategory = 'lapte';
   selectedAnimalId: number;
+  isAnimalSelectOpen = false;
 
   private readonly now = new Date();
   private readonly year = this.now.getFullYear();
@@ -88,6 +89,15 @@ export class LunarReports implements OnInit, OnDestroy {
     return this.farm.getAnimalById(this.selectedAnimalId);
   }
 
+  toggleAnimalSelect(): void {
+    this.isAnimalSelectOpen = !this.isAnimalSelectOpen;
+  }
+
+  selectAnimal(animal: Animal): void {
+    this.selectedAnimalId = animal.id;
+    this.isAnimalSelectOpen = false;
+  }
+
   private processLogsIntoTable(): void {
     const endDay = new Date(this.year, this.monthIndex + 1, 0).getDate();
     const buckets = [
@@ -118,15 +128,25 @@ export class LunarReports implements OnInit, OnDestroy {
   private getValueForCategory(entry: DailyLogEntry): number {
     switch (this.category) {
       case 'lapte':
-        return (entry.milkCow || 0) + (entry.milkGoat || 0) + (entry.milkSheep || 0) + (entry.milk || 0);
-      case 'lapte_vaca': return entry.milkCow || 0;
-      case 'lapte_capra': return entry.milkGoat || 0;
-      case 'lapte_oaie': return entry.milkSheep || 0;
-      case 'oua': return entry.eggs || 0;
-      case 'lana': return entry.wool || 0;
-      case 'ore_munca': return entry.workHours || 0;
-      case 'carne': return entry.meat || 0;
-      default: return 0;
+        return (
+          (entry.milkCow || 0) + (entry.milkGoat || 0) + (entry.milkSheep || 0) + (entry.milk || 0)
+        );
+      case 'lapte_vaca':
+        return entry.milkCow || 0;
+      case 'lapte_capra':
+        return entry.milkGoat || 0;
+      case 'lapte_oaie':
+        return entry.milkSheep || 0;
+      case 'oua':
+        return entry.eggs || 0;
+      case 'lana':
+        return entry.wool || 0;
+      case 'ore_munca':
+        return entry.workHours || 0;
+      case 'carne':
+        return entry.meat || 0;
+      default:
+        return 0;
     }
   }
 
@@ -143,12 +163,17 @@ export class LunarReports implements OnInit, OnDestroy {
       case 'lapte':
       case 'lapte_vaca':
       case 'lapte_capra':
-      case 'lapte_oaie': return 'L';
-      case 'oua': return 'ouă';
+      case 'lapte_oaie':
+        return 'L';
+      case 'oua':
+        return 'ouă';
       case 'lana':
-      case 'carne': return 'kg';
-      case 'ore_munca': return 'ore';
-      default: return '';
+      case 'carne':
+        return 'kg';
+      case 'ore_munca':
+        return 'ore';
+      default:
+        return '';
     }
   }
 
@@ -163,8 +188,6 @@ export class LunarReports implements OnInit, OnDestroy {
     this.processLogsIntoTable();
     this.cdr.detectChanges();
   }
-
-
 
   get chartData(): ChartConfiguration<'line'>['data'] {
     return {

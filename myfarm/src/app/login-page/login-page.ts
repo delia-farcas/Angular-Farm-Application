@@ -25,7 +25,6 @@ export class LoginPage {
     password: ['', Validators.required],
   });
 
-  /** Handles the submit event. */
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -37,14 +36,12 @@ export class LoginPage {
     this.userService.login(email, password).subscribe({
       next: (response) => {
         if (response && response.user) {
-          console.log('Login reușit!', response);
-
           this.trackingService.setCurrentUser(
-            response.user.username, 
-            response.user.role, 
-            response.user.userId
+            response.user.username,
+            response.user.role,
+            response.user.userId,
           );
-          
+
           this.trackingService.setLastLogin();
           this.trackingService.logActivity('login');
           this.inactivityTimer.startMonitoring();
@@ -58,7 +55,6 @@ export class LoginPage {
     });
   }
 
-  /** Handles the signup click event. */
   onSignupClick(): void {
     this.goToSignup.emit();
   }

@@ -9,7 +9,8 @@
           <span class="error-msg">
             {{
               loginForm.get('email')?.touched &&
-              (loginForm.get('email')?.hasError('required') || loginForm.get('email')?.hasError('email'))
+              (loginForm.get('email')?.hasError('required') ||
+                loginForm.get('email')?.hasError('email'))
                 ? 'Introduceți un email valid.'
                 : ''
             }}

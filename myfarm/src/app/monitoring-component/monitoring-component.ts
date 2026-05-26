@@ -10,7 +10,7 @@ import { UserOptions } from '../user-options/user-options';
   standalone: true,
   imports: [CommonModule, ActivityList, UserOptions],
   templateUrl: './monitoring-component.html',
-  styleUrl: './monitoring-component.css'
+  styleUrl: './monitoring-component.css',
 })
 export class MonitoringComponent implements OnInit {
   private router = inject(Router);

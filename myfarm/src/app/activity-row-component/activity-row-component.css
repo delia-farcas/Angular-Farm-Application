@@ -4,21 +4,32 @@
   color: #2e2f31;
 }
 
-.alert-text { color: #d32f2f; }
+.alert-text {
+  color: #d32f2f;
+}
 
-/* Badge pentru risc */
 .risk-badge {
   padding: 2px 8px;
   border-radius: 4px;
   font-weight: bold;
   font-size: 0.8rem;
 }
-.risk-badge[data-risk="HIGH"] { background: #ffd7d7; color: #d32f2f; }
-.risk-badge[data-risk="MEDIUM"] { background: #fff4d7; color: #a87d00; }
+.risk-badge[data-risk='HIGH'] {
+  background: #ffd7d7;
+  color: #d32f2f;
+}
+.risk-badge[data-risk='MEDIUM'] {
+  background: #fff4d7;
+  color: #a87d00;
+}
 
-/* Badge pentru status */
-.status-badge { color: #398333; font-weight: 600; }
-.status-badge.error { color: #d32f2f; }
+.status-badge {
+  color: #398333;
+  font-weight: 600;
+}
+.status-badge.error {
+  color: #d32f2f;
+}
 
 .resolve-btn {
   background: #bc8954;

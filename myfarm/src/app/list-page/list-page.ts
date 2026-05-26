@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Output, inject, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Output,
+  inject,
+  OnInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AnimalService } from '../services/animal';
@@ -31,47 +39,43 @@ export class ListPage implements OnInit {
   currentPage = 0;
   pageSize = 15;
   isLoading = false;
-  hasMoreData = true; 
-  /** Initializes the component. */
+  hasMoreData = true;
+
   ngOnInit() {
     this.currentUsername = this.trackingService.getCurrentUser();
-    this.loadAnimals(); // Încărcăm prima pagină
+    this.loadAnimals();
   }
 
-  /** Handles the Load animals functionality. */
-loadAnimals() {
-  if (this.isLoading || !this.hasMoreData) return;
+  loadAnimals() {
+    if (this.isLoading || !this.hasMoreData) return;
 
-  this.isLoading = true;
-  this.cdr.markForCheck(); // after setting isLoading
+    this.isLoading = true;
+    this.cdr.markForCheck();
 
-  this.animalService.getAnimalsPaginated(
-    this.trackingService.getCurrentUserId(),
-    this.currentPage,
-    this.pageSize
-  )
-  .pipe(
-    finalize(() => {
-      this.isLoading = false;
-      this.cdr.markForCheck(); // after finalize changes isLoading
-    })
-  )
-  .subscribe({
-    next: (newAnimals) => {
-      if (newAnimals.length < this.pageSize) {
-        this.hasMoreData = false;
-      }
-      this.animals = [...this.animals, ...newAnimals];
-      this.currentPage++;
-      this.cdr.markForCheck(); // after updating animals
-    },
-    error: (err) => {
-      console.error('Eroare la încărcarea animalelor', err);
-      this.cdr.markForCheck();
-    }
-  });
-}
-  /** Handles the table scroll event. */
+    this.animalService
+      .getAnimalsPaginated(this.trackingService.getCurrentUserId(), this.currentPage, this.pageSize)
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        }),
+      )
+      .subscribe({
+        next: (newAnimals) => {
+          if (newAnimals.length < this.pageSize) {
+            this.hasMoreData = false;
+          }
+          this.animals = [...this.animals, ...newAnimals];
+          this.currentPage++;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('Eroare la încărcarea animalelor', err);
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
   onTableScroll(event: any) {
     const element = event.target;
 
@@ -84,7 +88,6 @@ loadAnimals() {
     }
   }
 
-  /** Returns the list of animals filtered by the selected type. */
   get filteredAnimals(): Animal[] {
     if (this.selectedType === 'toate') {
       return this.animals;
@@ -92,7 +95,6 @@ loadAnimals() {
     return this.animals.filter((a) => a.type === this.selectedType);
   }
 
-  /** Handles the Delete animal functionality. */
   deleteAnimal(id: number) {
     const confirmed = window.confirm('Sigur vrei să ștergi animalul?');
     if (!confirmed) return;
@@ -105,17 +107,14 @@ loadAnimals() {
     });
   }
 
-  /** Handles the Edit animal functionality. */
   editAnimal(animal: Animal) {
     this.router.navigate(['add'], { state: { animalToEdit: animal } });
   }
 
-  /** Navigates to To add animal. */
   navigatetoAddAnimal(): void {
     this.router.navigate(['add']);
   }
 
-  /** Navigates to to manage. */
   navigateToManage(): void {
     this.router.navigate(['manage']);
   }

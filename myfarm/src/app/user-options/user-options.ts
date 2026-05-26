@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { UserTrackingService } from '../services/user-tracking.service';
 @Component({
   selector: 'app-user-options',
   imports: [],
@@ -7,10 +8,17 @@ import { Router } from '@angular/router';
   styleUrl: './user-options.css',
 })
 export class UserOptions {
-  
-  constructor(private router: Router) {
-  }  
+  private trackingService = inject(UserTrackingService);
+  constructor(private router: Router) {}
   goToChat() {
     this.router.navigate(['/chat']);
+  }
+
+  logout() {
+    this.router.navigate(['/login']).then((navigatCuSucces) => {
+      if (navigatCuSucces) {
+        this.trackingService.logout();
+      }
+    });
   }
 }

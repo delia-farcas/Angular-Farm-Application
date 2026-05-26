@@ -185,6 +185,11 @@ body {
     display: block;
   }
 
+  :host-context(body.nav-open) .hamburger {
+    opacity: 0;
+    pointer-events: none;
+  }
+
   :host-context(body.nav-open) .hamburger span:nth-child(1) {
     transform: translateY(7px) rotate(45deg);
   }

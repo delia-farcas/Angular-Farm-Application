@@ -13,7 +13,6 @@ import { UserTrackingService } from '../services/user-tracking.service';
 export class BazingaPage {
   isMenuOpen = false;
 
-  /** Instantiates the component and injects dependencies. */
   constructor(
     private router: Router,
     private trackingService: UserTrackingService,
@@ -27,11 +26,10 @@ export class BazingaPage {
     return this.trackingService.isCurrentUserAdmin();
   }
 
-  /** Navigates to home. */
   navigateHome(): void {
     this.router.navigate(['home']);
   }
-  /** Navigates to to raports. */
+
   navigateToRaports(): void {
     this.router.navigate(['raports']);
   }

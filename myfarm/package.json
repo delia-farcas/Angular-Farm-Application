@@ -23,8 +23,6 @@
     "ngx-cookie-service": "^21.3.1",
     "rxjs": "~7.8.0",
     "sockjs-client": "^1.6.1",
-    "stompjs": "^2.3.3",
-    "ts-morph": "^28.0.0",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
@@ -34,7 +32,6 @@
     "@playwright/test": "^1.59.1",
     "@types/node": "^25.6.0",
     "@types/sockjs-client": "^1.5.4",
-    "@types/stompjs": "^2.3.10",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2",

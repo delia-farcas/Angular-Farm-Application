@@ -1,5 +1,4 @@
 <div class="activity-container">
-  <!-- Secțiune Alerte -->
   <div class="table-section">
     <h3 class="section-title alert-text">🚨 Alerte Securitate</h3>
     <div class="table-container">
@@ -14,14 +13,18 @@
         </thead>
         <tbody>
           @for (obs of observations; track obs.id) {
-            <tr app-activity-row [data]="obs" [type]="'observation'" (resolve)="resolveObservation($event)"></tr>
+            <tr
+              app-activity-row
+              [data]="obs"
+              [type]="'observation'"
+              (resolve)="resolveObservation($event)"
+            ></tr>
           }
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- Secțiune Log-uri -->
   <div class="table-section">
     <h3 class="section-title">📜 Istoric Log-uri</h3>
     <div class="table-container scrollable">

@@ -3,8 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map, throwError } from 'rxjs';
 import { Animal, DailyLogEntry } from '../models/farm';
 import { UserTrackingService } from './user-tracking.service';
-
-/** One combined row for POST /api/logs (matches ProductionLogDTO). */
+import { environment } from '../../environments/environment';
 export interface DailyProductionPayload {
   milkLitersCow: number;
   milkLitersGoat: number;
@@ -19,7 +18,7 @@ export interface DailyProductionPayload {
 export class FarmService {
   private http = inject(HttpClient);
   private trackingService = inject(UserTrackingService);
-  private apiUrl = 'https://192.168.101.24:8080/api/logs';
+  private apiUrl = `${environment.apiUrl}/api/logs`;
   private animals: Animal[] = [
     { id: 1, name: 'Vaca', icon: '/animals/cow.svg', count: 0, logs: [] },
     { id: 3, name: 'Porc', icon: '/animals/pig.svg', count: 0, logs: [] },
@@ -55,7 +54,6 @@ export class FarmService {
     }
   }
 
-  /** Saves all of today’s production in one request (avoids parallel POSTs overwriting the same row). */
   upsertDailyLog(fields: DailyProductionPayload): Observable<unknown> {
     const userId = this.trackingService.getCurrentUserId();
     if (userId < 1) {
@@ -78,11 +76,11 @@ export class FarmService {
   }
 
   getLogsInRange(userId: number, startIso: string, endIso: string): Observable<DailyLogEntry[]> {
-      const params = new HttpParams()
-        .set('startDate', startIso)
-        .set('endDate', endIso)
-        .set('page', '0')
-        .set('size', '400');
+    const params = new HttpParams()
+      .set('startDate', startIso)
+      .set('endDate', endIso)
+      .set('page', '0')
+      .set('size', '400');
 
     return this.http.get<any[]>(`${this.apiUrl}/history/${userId}`, { params }).pipe(
       map((logs) =>
@@ -98,13 +96,11 @@ export class FarmService {
         })),
       ),
     );
-    }
+  }
 
   private normalizeReportDate(reportDate: unknown): string {
-    // Most common: Spring serializes LocalDate as "YYYY-MM-DD"
     if (typeof reportDate === 'string') return reportDate;
 
-    // Some setups serialize LocalDate as { year, monthValue, dayOfMonth }
     if (reportDate && typeof reportDate === 'object') {
       const anyDate = reportDate as any;
       const y = Number(anyDate.year);
@@ -115,7 +111,6 @@ export class FarmService {
       }
     }
 
-    // Fallback: avoid breaking reports (they filter on ISO-like strings)
     return '';
   }
 

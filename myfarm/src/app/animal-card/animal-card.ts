@@ -21,17 +21,14 @@ export class AnimalCardComponent {
   @Output() edit = new EventEmitter<Animal>();
   @Output() delete = new EventEmitter<number>();
 
-  /** Handles the edit event. */
   onEdit() {
     this.edit.emit(this.animal);
   }
 
-  /** Handles the delete event. */
   onDelete() {
     this.delete.emit(this.animal.id);
   }
 
-  /** Retrieves the icon path. */
   getIconPath(type: string): string {
     const mapping: Record<string, string> = {
       vaca: '/animals/cow.svg',

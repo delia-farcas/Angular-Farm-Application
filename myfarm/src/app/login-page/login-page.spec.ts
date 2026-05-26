@@ -20,7 +20,9 @@ describe('LoginPage (spec stub)', () => {
   });
 
   it('should not call login when invalid', () => {
-    const userServiceSpy = vi.spyOn(component['userService'], 'login').mockImplementation((() => {}) as any);
+    const userServiceSpy = vi
+      .spyOn(component['userService'], 'login')
+      .mockImplementation((() => {}) as any);
 
     component.loginForm.setValue({ email: '', password: '' });
     component.onSubmit();
@@ -29,7 +31,9 @@ describe('LoginPage (spec stub)', () => {
   });
 
   it('should call login when valid', () => {
-    const userServiceSpy = vi.spyOn(component['userService'], 'login').mockReturnValue({ subscribe: () => {} } as any);
+    const userServiceSpy = vi
+      .spyOn(component['userService'], 'login')
+      .mockReturnValue({ subscribe: () => {} } as any);
 
     component.loginForm.setValue({ email: 'test@test.com', password: 'pass' });
     component.onSubmit();

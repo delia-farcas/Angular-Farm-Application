@@ -4,3 +4,12 @@
   height: 100%;
   width: 100%;
 }
+
+@media (min-width: 769px) {
+  .full-page-bg {
+    position: fixed;
+    inset: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+}

@@ -17,10 +17,22 @@
 
     <div class="filter-group">
       <span class="label">animal</span>
-      <div class="dropdown-wrapper">
-        <select class="dropdown" [(ngModel)]="selectedAnimalId">
-          <option *ngFor="let a of animals" [ngValue]="a.id">{{ a.icon }} {{ a.name }}</option>
-        </select>
+      <div class="animal-select">
+        <button type="button" class="animal-select-button" (click)="toggleAnimalSelect()">
+          <img *ngIf="selectedAnimal" [src]="selectedAnimal.icon" [alt]="selectedAnimal.name" />
+          <span>{{ selectedAnimal?.name }}</span>
+        </button>
+        <div *ngIf="isAnimalSelectOpen" class="animal-options">
+          <button
+            type="button"
+            *ngFor="let a of animals"
+            class="animal-option"
+            (click)="selectAnimal(a)"
+          >
+            <img [src]="a.icon" [alt]="a.name" />
+            <span>{{ a.name }}</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>

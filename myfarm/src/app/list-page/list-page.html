@@ -52,13 +52,13 @@
       </thead>
       <tbody>
         <tr
-            *ngFor="let animal of filteredAnimals"
-            app-animal-row
-            [animal]="animal"
-            [display]="'row'"
-            (edit)="editAnimal($event)"
-            (delete)="deleteAnimal($event)"
-          ></tr>
+          *ngFor="let animal of filteredAnimals"
+          app-animal-row
+          [animal]="animal"
+          [display]="'row'"
+          (edit)="editAnimal($event)"
+          (delete)="deleteAnimal($event)"
+        ></tr>
       </tbody>
     </table>
   </div>

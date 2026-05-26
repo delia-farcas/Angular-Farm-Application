@@ -7,7 +7,7 @@
 
 .main-content {
   flex: 1;
-  overflow-y: auto; 
+  overflow-y: auto;
   background: #f9f7f2;
   min-width: 0;
 }
@@ -28,7 +28,6 @@ body {
   display: flex;
   min-height: 100vh;
   width: 100%;
-  overflow-x: hidden;
 }
 
 .main-content {
@@ -108,7 +107,7 @@ body {
 }
 
 .user-account {
-  position: relative; 
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -116,9 +115,9 @@ body {
 
 .floating-menu {
   position: absolute;
-  bottom: 100%; 
+  bottom: 100%;
   left: 0;
-  width: 200px; 
+  width: 200px;
   z-index: 100;
   margin-bottom: 10px;
 }
@@ -180,6 +179,19 @@ body {
   z-index: 90;
 }
 
+@media (min-width: 769px) {
+  .app-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .side-nav {
+    position: sticky;
+    transform: translateX(0);
+  }
+}
+
 @media (max-width: 768px) {
   .hamburger {
     display: flex;
@@ -220,7 +232,6 @@ body {
   }
 }
 
-
 .content-panel {
   background: #f9f7f2;
   border-radius: 20px;
@@ -257,11 +268,10 @@ body {
   }
 }
 
-
 .activity-container {
   display: flex;
   flex-direction: column;
-  gap: 32px; 
+  gap: 32px;
 }
 
 .section-title {
@@ -275,12 +285,12 @@ body {
 }
 
 .alert-text {
-  color: #d32f2f; 
+  color: #d32f2f;
 }
 
 .table-container {
   width: 100%;
-  max-height: 400px; 
+  max-height: 400px;
   overflow: auto;
   border: 1px solid #c5d9b2;
   border-radius: 8px;
@@ -295,13 +305,13 @@ body {
   text-transform: uppercase;
 }
 
-.risk-badge[data-risk="HIGH"] {
+.risk-badge[data-risk='HIGH'] {
   background: #fdecea;
   color: #d32f2f;
   border: 1px solid #f5c6cb;
 }
 
-.risk-badge[data-risk="MEDIUM"] {
+.risk-badge[data-risk='MEDIUM'] {
   background: #fff8e1;
   color: #f57f17;
   border: 1px solid #ffeeba;
@@ -309,11 +319,11 @@ body {
 
 .status-badge {
   font-weight: 600;
-  color: #398333; 
+  color: #398333;
 }
 
 .error-status {
-  color: #d32f2f; 
+  color: #d32f2f;
 }
 
 .resolve-btn {
@@ -340,7 +350,7 @@ body {
 .users-table thead th {
   position: sticky;
   top: 0;
-  background: #f1f8e9; 
+  background: #f1f8e9;
   z-index: 10;
   padding: 12px;
   border-bottom: 2px solid #398333;

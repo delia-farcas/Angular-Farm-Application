@@ -19,8 +19,26 @@ describe('YearlyReports', () => {
         icon: '/animals/cow.svg',
         count: 1,
         logs: [
-          { date: `${year}-01-10`, milkCow: 10, milkGoat: 0, milkSheep: 0, eggs: 0, wool: 0, workHours: 0, meat: 0 },
-          { date: `${year}-02-10`, milkCow: 0, milkGoat: 0, milkSheep: 0, eggs: 4, wool: 0, workHours: 0, meat: 0 },
+          {
+            date: `${year}-01-10`,
+            milkCow: 10,
+            milkGoat: 0,
+            milkSheep: 0,
+            eggs: 0,
+            wool: 0,
+            workHours: 0,
+            meat: 0,
+          },
+          {
+            date: `${year}-02-10`,
+            milkCow: 0,
+            milkGoat: 0,
+            milkSheep: 0,
+            eggs: 4,
+            wool: 0,
+            workHours: 0,
+            meat: 0,
+          },
         ],
       },
     ];

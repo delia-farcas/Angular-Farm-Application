@@ -11,7 +11,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { AnimalService } from '../services/animal';
 import { Animal } from '../models/animal';
-import { FormsModule, NgForm, NgModel } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { UserTrackingService } from '../services/user-tracking.service';
 import { Router } from '@angular/router';
 import { UserOptions } from '../user-options/user-options';
@@ -73,7 +73,6 @@ export class AddAnimal implements OnChanges, OnInit {
     userId: this.trackingService.getCurrentUserId(),
   };
 
-  /** Instantiates the component and injects dependencies. */
   constructor(
     private animalService: AnimalService,
     private router: Router,
@@ -84,20 +83,18 @@ export class AddAnimal implements OnChanges, OnInit {
     }
   }
 
-  /** Initializes the component. */
   ngOnInit(): void {
     if (this.animalToEdit) {
       this.setupEditMode();
     }
   }
-  /** Handles the Ng on changes functionality. */
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['animalToEdit'] && this.animalToEdit) {
       this.setupEditMode();
     }
   }
 
-  /** Sets the Up edit mode. */
   private setupEditMode(): void {
     if (this.animalToEdit) {
       this.isEditMode = true;
@@ -105,11 +102,9 @@ export class AddAnimal implements OnChanges, OnInit {
       if (this.iconMapping[this.animal.type]) {
         this.selectedIcon = this.iconMapping[this.animal.type];
       }
-      console.log('Date încărcate în formular:', this.animal);
     }
   }
 
-  /** Handles the Should show error functionality. */
   shouldShowError(
     control:
       | { invalid: boolean | null; touched: boolean | null; dirty: boolean | null }
@@ -121,92 +116,69 @@ export class AddAnimal implements OnChanges, OnInit {
     );
   }
 
-  /** Handles the submit event. */
   onSubmit(form: NgForm) {
-  this.formSubmitted = true;
+    this.formSubmitted = true;
 
-  if (form.invalid) {
-    form.form.markAllAsTouched();
-    return;
+    if (form.invalid) {
+      form.form.markAllAsTouched();
+      return;
+    }
+
+    const trimmed: Animal = {
+      ...this.animal,
+      name: this.animal.name.trim(),
+      location: this.animal.location.trim(),
+      userId: this.trackingService.getCurrentUserId(),
+    };
+
+    if (this.isEditMode && trimmed.id) {
+      this.animalService.updateAnimal(trimmed).subscribe({
+        next: () => {
+          this.trackingService.logActivity('edit_animal');
+          this.trackingService.incrementCounter('animals_edited');
+          window.alert('Animal editat cu succes!');
+          this.router.navigate(['home']);
+        },
+        error: (err) => console.error('Eroare la editare:', err),
+      });
+    } else {
+      this.animalService.addAnimal(trimmed).subscribe({
+        next: () => {
+          this.trackingService.logActivity('add_animal');
+          this.trackingService.incrementCounter('animals_added');
+          window.alert('Animal adăugat cu succes!');
+          this.router.navigate(['home']);
+        },
+        error: (err) => console.error('Eroare la adăugare:', err),
+      });
+    }
   }
 
-  const trimmed: Animal = {
-    ...this.animal,
-    name: this.animal.name.trim(),
-    location: this.animal.location.trim(),
-    userId: this.trackingService.getCurrentUserId(),
-  };
-
-  if (this.isEditMode && trimmed.id) {
-    this.animalService.updateAnimal(trimmed).subscribe({
-      next: () => {
-        this.trackingService.logActivity('edit_animal');
-        this.trackingService.incrementCounter('animals_edited');
-        window.alert('Animal editat cu succes!');
-        this.router.navigate(['home']);
-      },
-      error: (err) => console.error('Eroare la editare:', err)
-    });
-  } else {
-    this.animalService.addAnimal(trimmed).subscribe({
-      next: () => {
-        this.trackingService.logActivity('add_animal');
-        this.trackingService.incrementCounter('animals_added');
-        window.alert('Animal adăugat cu succes!');
-        this.router.navigate(['home']);
-      },
-      error: (err) => console.error('Eroare la adăugare:', err)
-    });
-  }
-}
-
-  /** Handles the back click event. */
   onBackClick(): void {
     this.router.navigate(['home']);
   }
 
-  /** Handles the Toggle picker functionality. */
   togglePicker(event: Event) {
     event.preventDefault();
     this.isPickerVisible = !this.isPickerVisible;
   }
 
-  /** Handles the type change event. */
   onTypeChange(newType: string) {
     if (this.iconMapping[newType]) {
       this.selectedIcon = this.iconMapping[newType];
     }
   }
 
-  /** Handles the Select icon functionality. */
   selectIcon(icon: string) {
     this.selectedIcon = icon;
     this.animal.type = this.reverseIconMapping[icon] as Animal['type'];
     this.isPickerVisible = false;
   }
 
-  /** Handles the Reset form functionality. */
-  private resetForm(): void {
-    this.formSubmitted = false;
-    this.animal = {
-      id: 0,
-      name: '',
-      type: 'vaca',
-      sex: 'femela',
-      age: 0,
-      status: 'Sanatoasa',
-      location: '',
-      observations: '',
-      userId: this.trackingService.getCurrentUserId(),
-    };
-  }
-
-  /** Navigates to to bazinga. */
   navigateToBazinga(): void {
     this.router.navigate(['bazinga']);
   }
 
-  /** Navigates to to raports. */
   navigateToRaports(): void {
     this.router.navigate(['raports']);
   }

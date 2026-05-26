@@ -9,9 +9,7 @@ import {
 } from '@angular/forms';
 import { UserTrackingService } from '../services/user-tracking.service';
 import { UserService } from '../services/user.service';
-import { Router } from '@angular/router';
 
-/** Executes the Password match validator logic. */
 function passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
   const confirm = group.get('confirmPassword')?.value;
@@ -30,9 +28,8 @@ export class SignupPage {
   @Output() signupSuccess = new EventEmitter<void>();
 
   private fb = inject(FormBuilder);
-  private userService = inject(UserService); // Injectăm noul serviciu
+  private userService = inject(UserService);
   private trackingService = inject(UserTrackingService);
-  private router = inject(Router);
 
   signupForm: FormGroup = this.fb.group(
     {
@@ -44,7 +41,6 @@ export class SignupPage {
     { validators: passwordMatchValidator },
   );
 
-  /** Handles the submit event. */
   onSubmit(): void {
     if (this.signupForm.invalid) {
       this.signupForm.markAllAsTouched();
@@ -56,13 +52,11 @@ export class SignupPage {
     const newUser = { email, username, password };
 
     this.userService.register(newUser).subscribe({
-      next: (savedUser) => {
-        console.log('Utilizator înregistrat cu succes în Java:', savedUser);
-
+      next: () => {
         this.trackingService.logActivity('register');
 
         alert('Cont creat cu succes!');
-        this.goToLogin.emit(); // Sau this.router.navigate(['/login']);
+        this.goToLogin.emit();
       },
       error: (err) => {
         console.error('Eroare la înregistrare:', err);
@@ -71,7 +65,6 @@ export class SignupPage {
     });
   }
 
-  /** Handles the login click event. */
   onLoginClick(): void {
     this.goToLogin.emit();
   }

@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Client, IMessage } from '@stomp/stompjs';
 import { ChatMessage } from '../models/chat-message';
 import { User } from '../models/user';
-
+import { environment } from '../../environments/environment';
 @Injectable({
   providedIn: 'root',
 })
@@ -14,8 +14,8 @@ export class ChatService {
 
   message$ = this.messageSource.asObservable();
 
-  private readonly apiUrl = 'https://192.168.101.24:8080/api/chat';
-  private readonly websocketUrl = 'https://192.168.101.24:8080/ws-chat';
+  private readonly apiUrl = `${environment.apiUrl}/api/chat`;
+  private readonly websocketUrl = `${environment.apiUrl}/ws-chat`;
 
   constructor(private http: HttpClient) {}
 

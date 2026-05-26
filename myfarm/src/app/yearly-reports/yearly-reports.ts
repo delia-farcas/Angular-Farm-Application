@@ -1,4 +1,11 @@
-import { Component, ViewChildren, QueryList, ChangeDetectorRef, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  ViewChildren,
+  QueryList,
+  ChangeDetectorRef,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
@@ -18,6 +25,7 @@ export class YearlyReports implements OnInit {
   view: 'table' | 'chart' = 'table';
   category: FarmProductCategory = 'lapte';
   selectedAnimalId: number;
+  isAnimalSelectOpen = false;
 
   private readonly year = new Date().getFullYear();
 
@@ -47,6 +55,15 @@ export class YearlyReports implements OnInit {
     return this.farm.getAnimalById(this.selectedAnimalId);
   }
 
+  toggleAnimalSelect(): void {
+    this.isAnimalSelectOpen = !this.isAnimalSelectOpen;
+  }
+
+  selectAnimal(animal: Animal): void {
+    this.selectedAnimalId = animal.id;
+    this.isAnimalSelectOpen = false;
+  }
+
   refreshData(): void {
     const start = `${this.year}-01-01`;
     const end = `${this.year}-12-31`;
@@ -63,7 +80,20 @@ export class YearlyReports implements OnInit {
   }
 
   private processLogsIntoTable(): void {
-    const months = ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Ian',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mai',
+      'Iun',
+      'Iul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
 
     this.processedRows = months.map((label, idx) => {
       const prefix = `${this.year}-${this.pad2(idx + 1)}`;
@@ -83,15 +113,25 @@ export class YearlyReports implements OnInit {
   private getValueForCategory(entry: DailyLogEntry): number {
     switch (this.category) {
       case 'lapte':
-        return (entry.milkCow || 0) + (entry.milkGoat || 0) + (entry.milkSheep || 0) + (entry.milk || 0);
-      case 'lapte_vaca': return entry.milkCow || 0;
-      case 'lapte_capra': return entry.milkGoat || 0;
-      case 'lapte_oaie': return entry.milkSheep || 0;
-      case 'oua': return entry.eggs || 0;
-      case 'lana': return entry.wool || 0;
-      case 'ore_munca': return entry.workHours || 0;
-      case 'carne': return entry.meat || 0;
-      default: return 0;
+        return (
+          (entry.milkCow || 0) + (entry.milkGoat || 0) + (entry.milkSheep || 0) + (entry.milk || 0)
+        );
+      case 'lapte_vaca':
+        return entry.milkCow || 0;
+      case 'lapte_capra':
+        return entry.milkGoat || 0;
+      case 'lapte_oaie':
+        return entry.milkSheep || 0;
+      case 'oua':
+        return entry.eggs || 0;
+      case 'lana':
+        return entry.wool || 0;
+      case 'ore_munca':
+        return entry.workHours || 0;
+      case 'carne':
+        return entry.meat || 0;
+      default:
+        return 0;
     }
   }
 
@@ -104,12 +144,17 @@ export class YearlyReports implements OnInit {
       case 'lapte':
       case 'lapte_vaca':
       case 'lapte_capra':
-      case 'lapte_oaie': return 'L';
-      case 'oua': return 'ouă';
+      case 'lapte_oaie':
+        return 'L';
+      case 'oua':
+        return 'ouă';
       case 'lana':
-      case 'carne': return 'kg';
-      case 'ore_munca': return 'ore';
-      default: return '';
+      case 'carne':
+        return 'kg';
+      case 'ore_munca':
+        return 'ore';
+      default:
+        return '';
     }
   }
 

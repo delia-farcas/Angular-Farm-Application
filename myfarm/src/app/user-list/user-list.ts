@@ -47,8 +47,7 @@ export class UserList implements OnInit {
     const q = this.searchQuery.trim().toLowerCase();
     if (!q) return this.users;
     return this.users.filter(
-      (u) =>
-        u.username.toLowerCase().includes(q) || u.email.toLowerCase().includes(q),
+      (u) => u.username.toLowerCase().includes(q) || u.email.toLowerCase().includes(q),
     );
   }
 

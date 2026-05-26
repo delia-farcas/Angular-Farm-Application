@@ -22,7 +22,7 @@
       <app-user-options *ngIf="isMenuOpen" class="floating-menu"></app-user-options>
       <div class="user-pfp">C</div>
       <span class="user-name">Contul meu</span>
-      <span class="user-name" (click)="toggleMenu()" style="cursor:pointer">
+      <span class="user-name" (click)="toggleMenu()" style="cursor: pointer">
         {{ isMenuOpen ? 'v' : '^' }}
       </span>
     </div>
@@ -88,7 +88,7 @@
               <input
                 type="number"
                 min="0"
-                [disabled]="!isGestiuneEnabled(animal)"
+                [disabled]="!isGestiuneEnabled()"
                 [placeholder]="getGestiunePlaceholder(animal)"
                 [(ngModel)]="todaysInput[animal.id]"
                 (ngModelChange)="markValidity(animal.id, $event)"
@@ -117,7 +117,7 @@
               <input
                 type="number"
                 min="0"
-                [disabled]="!isGestiuneEnabled(animal)"
+                [disabled]="!isGestiuneEnabled()"
                 placeholder="ex: 2 (lapte)"
                 [(ngModel)]="todaysMilkInput[animal.id]"
                 (ngModelChange)="markMilkValidity(animal.id, $event)"
@@ -144,7 +144,7 @@
     </table>
 
     <div class="manage-row">
-      <button class="btn-cancel" type="button" (click)="onBackClick()">Anulează</button>
+      <button class="btn-cancel" type="button" (click)="navigateHome()">Anulează</button>
       <button class="btn-submit" type="button" (click)="onSaveToday()">Salvează</button>
     </div>
 

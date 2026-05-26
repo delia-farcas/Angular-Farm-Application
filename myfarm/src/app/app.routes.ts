@@ -8,18 +8,18 @@ import { ManagePage } from './manage-page/manage-page';
 import { UsersList } from './users-list/users-list';
 import { ChatPage } from './chat-page/chat-page';
 import { MonitoringComponent } from './monitoring-component/monitoring-component';
+import { logoutConfirmationGuard } from './app-page/home-deactivate.guard';
 
 export const routes: Routes = [
   {
     path: '',
     component: StartingPage,
   },
-  { path: 'login', 
-    component: StartingPage 
-  },
+  { path: 'login', component: StartingPage },
   {
     path: 'home',
     component: AppPage,
+    canDeactivate: [logoutConfirmationGuard],
   },
   {
     path: 'bazinga',
@@ -41,12 +41,12 @@ export const routes: Routes = [
     path: 'users',
     component: UsersList,
   },
-  { 
+  {
     path: 'chat',
     component: ChatPage,
   },
   {
     path: 'activity',
-    component: MonitoringComponent
-  }
+    component: MonitoringComponent,
+  },
 ];

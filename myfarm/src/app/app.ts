@@ -18,13 +18,11 @@ export class App implements OnInit {
   protected readonly title = signal('myfarm');
   private inactivityTimerService = inject(InactivityTimerService);
 
-  /** Instantiates the component and injects dependencies. */
   constructor(
     private router: Router,
     private trackingService: UserTrackingService,
   ) {}
 
-  /** Initializes the component. */
   ngOnInit() {
     this.inactivityTimerService.startMonitoring();
     this.router.events
