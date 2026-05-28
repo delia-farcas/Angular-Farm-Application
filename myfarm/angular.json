@@ -54,7 +54,7 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "allowedHosts": ["supportive-gentleness-production-d084.up.railway.app"]
+            "allowedHosts": ["ferma-mea.up.railway.app"]
           },
           "configurations": {
             "production": {
