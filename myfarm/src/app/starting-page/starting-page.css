@@ -1,5 +1,6 @@
 .full-page-bg {
-  background-color: #ade5f0;
+  background-image: url('/ferma.png');
+  background-size: cover;
   margin: 0;
   height: 100%;
   width: 100%;
