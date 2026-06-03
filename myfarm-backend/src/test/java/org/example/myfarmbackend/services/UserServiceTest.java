@@ -18,6 +18,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -76,7 +77,7 @@ class UserServiceTest {
         when(userRepository.save(any(User.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        User result = userService.registerUser(testDto);
+        User result = userService.registerUser(testDto).join();
 
         assertNotNull(result);
         assertEquals("george@farm.ro", result.getEmail());
@@ -90,7 +91,7 @@ class UserServiceTest {
     void registerUser_ShouldThrowException_WhenEmailAlreadyExists() {
         when(userRepository.findByEmail(testDto.getEmail())).thenReturn(Optional.of(testUser));
 
-        assertThrows(RuntimeException.class, () -> userService.registerUser(testDto));
+        assertThrows(ExecutionException.class, () -> userService.registerUser(testDto).get());
         verify(passwordEncoder, never()).encode(anyString());
         verify(userRepository, never()).save(any());
     }
@@ -101,9 +102,10 @@ class UserServiceTest {
         when(passwordEncoder.encode("parola123")).thenReturn("encoded-password");
         when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.registerUser(testDto));
+        ExecutionException exception = assertThrows(ExecutionException.class, () -> userService.registerUser(testDto).get());
+        assertTrue(exception.getCause() instanceof RuntimeException);
+        assertTrue(exception.getCause().getMessage().contains("ROLE_USER"));
 
-        assertTrue(exception.getMessage().contains("ROLE_USER"));
         verify(userRepository, never()).save(any());
     }
 
@@ -112,7 +114,7 @@ class UserServiceTest {
         when(userRepository.findByEmail("george@farm.ro")).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches("parola123", "parola123")).thenReturn(true);
 
-        Optional<User> result = userService.authenticate("george@farm.ro", "parola123");
+        Optional<User> result = userService.authenticate("george@farm.ro", "parola123").join();
 
         assertTrue(result.isPresent());
         assertEquals("GeorgeP", result.get().getUsername());
@@ -124,7 +126,7 @@ class UserServiceTest {
         when(userRepository.findByEmail("george@farm.ro")).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches("wrong", "parola123")).thenReturn(false);
 
-        Optional<User> result = userService.authenticate("george@farm.ro", "wrong");
+        Optional<User> result = userService.authenticate("george@farm.ro", "wrong").join();
 
         assertTrue(result.isEmpty());
     }
@@ -133,7 +135,7 @@ class UserServiceTest {
     void authenticate_ShouldReturnEmpty_WhenEmailMissing() {
         when(userRepository.findByEmail("missing@farm.ro")).thenReturn(Optional.empty());
 
-        Optional<User> result = userService.authenticate("missing@farm.ro", "parola123");
+        Optional<User> result = userService.authenticate("missing@farm.ro", "parola123").join();
 
         assertTrue(result.isEmpty());
         verify(passwordEncoder, never()).matches(anyString(), anyString());
@@ -180,7 +182,7 @@ class UserServiceTest {
                             return u;
                         });
 
-        Optional<User> result = userService.updateUser(1L, updatedData);
+        Optional<User> result = userService.updateUser(1L, updatedData).join();
 
         assertTrue(result.isPresent());
         assertEquals("NewName", result.get().getUsername());
@@ -199,7 +201,7 @@ class UserServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userRepository.findByEmail("dup@farm.ro")).thenReturn(Optional.of(existingOther));
 
-        assertThrows(RuntimeException.class, () -> userService.updateUser(1L, updatedData));
+        assertThrows(ExecutionException.class, () -> userService.updateUser(1L, updatedData).get());
         verify(userRepository, never()).save(any());
     }
 
@@ -207,7 +209,7 @@ class UserServiceTest {
     void updateUser_ShouldReturnEmpty_WhenUserNotFound() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Optional<User> result = userService.updateUser(1L, testDto);
+        Optional<User> result = userService.updateUser(1L, testDto).join();
 
         assertTrue(result.isEmpty());
         verify(userRepository, never()).save(any());
@@ -220,7 +222,7 @@ class UserServiceTest {
         testUser.getRoles().add(role);
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
-        boolean result = userService.deleteUser(1L);
+        boolean result = userService.deleteUser(1L).join();
 
         assertTrue(result);
         assertTrue(testUser.getRoles().isEmpty());
@@ -232,7 +234,7 @@ class UserServiceTest {
     void deleteUser_ShouldReturnFalse_WhenMissing() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
-        boolean result = userService.deleteUser(1L);
+        boolean result = userService.deleteUser(1L).join();
 
         assertFalse(result);
         verify(userRepository, never()).delete(any());

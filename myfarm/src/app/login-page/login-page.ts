@@ -4,6 +4,7 @@ import { UserTrackingService } from '../services/user-tracking.service';
 import { UserService } from '../services/user.service';
 import { Router } from '@angular/router';
 import { InactivityTimerService } from '../services/inactivity-timer.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-login-page',
@@ -25,7 +26,7 @@ export class LoginPage {
     password: ['', Validators.required],
   });
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
@@ -33,26 +34,24 @@ export class LoginPage {
 
     const { email, password } = this.loginForm.value;
 
-    this.userService.login(email, password).subscribe({
-      next: (response) => {
-        if (response && response.user) {
-          this.trackingService.setCurrentUser(
-            response.user.username,
-            response.user.role,
-            response.user.userId,
-          );
+    try {
+      const response = await firstValueFrom(this.userService.login(email, password));
+      if (response && response.user) {
+        this.trackingService.setCurrentUser(
+          response.user.username,
+          response.user.role,
+          response.user.userId,
+        );
 
-          this.trackingService.setLastLogin();
-          this.trackingService.logActivity('login');
-          this.inactivityTimer.startMonitoring();
-          this.router.navigate(['/home']);
-        }
-      },
-      error: (err) => {
-        alert('Email sau parolă incorectă, sau utilizator inexistent.');
-        console.error('Login error:', err);
-      },
-    });
+        this.trackingService.setLastLogin();
+        this.trackingService.logActivity('login');
+        this.inactivityTimer.startMonitoring();
+        await this.router.navigate(['/home']);
+      }
+    } catch (err) {
+      alert('Email sau parolă incorectă, sau utilizator inexistent.');
+      console.error('Login error:', err);
+    }
   }
 
   onSignupClick(): void {

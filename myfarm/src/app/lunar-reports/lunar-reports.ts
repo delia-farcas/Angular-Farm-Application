@@ -5,7 +5,6 @@ import {
   ViewChildren,
   QueryList,
   ChangeDetectorRef,
-  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +13,7 @@ import type { ChartConfiguration } from 'chart.js';
 import { FarmService } from '../services/farm.service';
 import { Animal, DailyLogEntry, FarmProductCategory } from '../models/farm';
 import { UserTrackingService } from '../services/user-tracking.service';
-import { Subscription } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-lunar-reports',
@@ -23,7 +22,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './lunar-reports.html',
   styleUrl: './lunar-reports.css',
 })
-export class LunarReports implements OnInit, OnDestroy {
+export class LunarReports implements OnInit {
   view: 'table' | 'chart' = 'table';
   category: FarmProductCategory = 'lapte';
   selectedAnimalId: number;
@@ -37,7 +36,6 @@ export class LunarReports implements OnInit, OnDestroy {
   processedRows: { label: string; total: number }[] = [];
   total = 0;
 
-  private logSubscription?: Subscription;
   private trackingService = inject(UserTrackingService);
 
   @ViewChildren(BaseChartDirective) charts!: QueryList<BaseChartDirective>;
@@ -54,10 +52,6 @@ export class LunarReports implements OnInit, OnDestroy {
     this.refreshData();
   }
 
-  ngOnDestroy(): void {
-    this.logSubscription?.unsubscribe();
-  }
-
   private loadPreferences(): void {
     const savedView = this.trackingService.getPreference('preferred_view');
     if (savedView === 'chart' || savedView === 'table') this.view = savedView;
@@ -68,21 +62,20 @@ export class LunarReports implements OnInit, OnDestroy {
     this.trackingService.logActivity('viewed_lunar_reports');
   }
 
-  refreshData(): void {
+  async refreshData(): Promise<void> {
     const startIso = this.monthStartIso();
     const endIso = this.monthEndIso();
 
-    this.logSubscription?.unsubscribe();
-    this.logSubscription = this.farm
-      .getLogsInRange(this.trackingService.getCurrentUserId(), startIso, endIso)
-      .subscribe({
-        next: (logs) => {
-          this.currentLogs = logs || [];
-          this.processLogsIntoTable();
-          this.cdr.detectChanges();
-        },
-        error: (err) => console.error('Eroare la încărcarea rapoartelor:', err),
-      });
+    try {
+      const logs = await firstValueFrom(
+        this.farm.getLogsInRange(this.trackingService.getCurrentUserId(), startIso, endIso),
+      );
+      this.currentLogs = logs || [];
+      this.processLogsIntoTable();
+      this.cdr.detectChanges();
+    } catch (err) {
+      console.error('Eroare la încărcarea rapoartelor:', err);
+    }
   }
 
   get selectedAnimal(): Animal | undefined {

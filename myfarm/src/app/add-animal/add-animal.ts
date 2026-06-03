@@ -15,6 +15,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { UserTrackingService } from '../services/user-tracking.service';
 import { Router } from '@angular/router';
 import { UserOptions } from '../user-options/user-options';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-add-animal',
@@ -116,7 +117,7 @@ export class AddAnimal implements OnChanges, OnInit {
     );
   }
 
-  onSubmit(form: NgForm) {
+  async onSubmit(form: NgForm): Promise<void> {
     this.formSubmitted = true;
 
     if (form.invalid) {
@@ -131,26 +132,21 @@ export class AddAnimal implements OnChanges, OnInit {
       userId: this.trackingService.getCurrentUserId(),
     };
 
-    if (this.isEditMode && trimmed.id) {
-      this.animalService.updateAnimal(trimmed).subscribe({
-        next: () => {
-          this.trackingService.logActivity('edit_animal');
-          this.trackingService.incrementCounter('animals_edited');
-          window.alert('Animal editat cu succes!');
-          this.router.navigate(['home']);
-        },
-        error: (err) => console.error('Eroare la editare:', err),
-      });
-    } else {
-      this.animalService.addAnimal(trimmed).subscribe({
-        next: () => {
-          this.trackingService.logActivity('add_animal');
-          this.trackingService.incrementCounter('animals_added');
-          window.alert('Animal adăugat cu succes!');
-          this.router.navigate(['home']);
-        },
-        error: (err) => console.error('Eroare la adăugare:', err),
-      });
+    try {
+      if (this.isEditMode && trimmed.id) {
+        await firstValueFrom(this.animalService.updateAnimal(trimmed));
+        this.trackingService.logActivity('edit_animal');
+        this.trackingService.incrementCounter('animals_edited');
+        window.alert('Animal editat cu succes!');
+      } else {
+        await firstValueFrom(this.animalService.addAnimal(trimmed));
+        this.trackingService.logActivity('add_animal');
+        this.trackingService.incrementCounter('animals_added');
+        window.alert('Animal adăugat cu succes!');
+      }
+      await this.router.navigate(['home']);
+    } catch (err) {
+      console.error(this.isEditMode ? 'Eroare la editare:' : 'Eroare la adăugare:', err);
     }
   }
 

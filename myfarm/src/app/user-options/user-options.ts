@@ -14,11 +14,10 @@ export class UserOptions {
     this.router.navigate(['/chat']);
   }
 
-  logout() {
-    this.router.navigate(['/login']).then((navigatCuSucces) => {
-      if (navigatCuSucces) {
-        this.trackingService.logout();
-      }
-    });
+  async logout(): Promise<void> {
+    const navigatCuSucces = await this.router.navigate(['/login']);
+    if (navigatCuSucces) {
+      this.trackingService.logout();
+    }
   }
 }

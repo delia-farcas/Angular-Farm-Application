@@ -5,8 +5,11 @@ import org.example.myfarmbackend.models.ObservationEntry;
 import org.example.myfarmbackend.repositories.ActivityLogRepository;
 import org.example.myfarmbackend.repositories.ObservationListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class MonitoringService {
@@ -17,7 +20,8 @@ public class MonitoringService {
     @Autowired
     private ObservationListRepository observationListRepository;
 
-    public void logAction(Long userId, String groupId, String action, int statusCode, String ip) {
+    @Async
+    public CompletableFuture<Void> logAction(Long userId, String groupId, String action, int statusCode, String ip) {
         ActivityLog log = new ActivityLog();
         log.setUserId(userId);
         log.setGroupId(groupId);
@@ -33,6 +37,8 @@ public class MonitoringService {
         if (statusCode == 403 && userId != null) {
             flagUser(userId, ip, "UNAUTHORIZED_ACCESS_ATTEMPT", "HIGH");
         }
+
+        return CompletableFuture.completedFuture(null);
     }
 
     private void checkBruteForce(Long userId, String ip) {

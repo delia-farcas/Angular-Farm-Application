@@ -5,8 +5,7 @@ import { FarmService } from '../services/farm.service';
 import { UserTrackingService } from '../services/user-tracking.service';
 import { Animal } from '../models/farm';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import type { DailyProductionPayload } from '../services/farm.service';
 import { UserOptions } from '../user-options/user-options';
 
@@ -111,7 +110,7 @@ export class ManagePage {
     this.invalidMilkInput[animalId] = !Number.isFinite(num) || num < 0;
   }
 
-  onSaveToday(): void {
+  async onSaveToday(): Promise<void> {
     this.saveMessage = null;
     this.saveMessageType = null;
 
@@ -169,28 +168,21 @@ export class ManagePage {
       return;
     }
 
-    this.farm
-      .upsertDailyLog(merged)
-      .pipe(
-        map(() => ({ ok: true as const })),
-        catchError((err) => of({ ok: false as const, err })),
-      )
-      .subscribe((result) => {
-        if (!result.ok) {
-          this.saveMessageType = 'warning';
-          this.saveMessage = 'Eroare la comunicarea cu serverul.';
-          return;
-        }
+    try {
+      await firstValueFrom(this.farm.upsertDailyLog(merged));
 
-        this.farm.getAnimals().forEach((a) => {
-          this.todaysInput[a.id] = null;
-          this.todaysMilkInput[a.id] = null;
-        });
-
-        this.saveMessageType = 'success';
-        this.saveMessage = 'Gestiunea a fost salvată cu succes.';
-        setTimeout(() => this.goBack.emit(), 600);
+      this.farm.getAnimals().forEach((a) => {
+        this.todaysInput[a.id] = null;
+        this.todaysMilkInput[a.id] = null;
       });
+
+      this.saveMessageType = 'success';
+      this.saveMessage = 'Gestiunea a fost salvată cu succes.';
+      setTimeout(() => this.goBack.emit(), 600);
+    } catch {
+      this.saveMessageType = 'warning';
+      this.saveMessage = 'Eroare la comunicarea cu serverul.';
+    }
   }
 
   isGestiuneEnabled(): boolean {

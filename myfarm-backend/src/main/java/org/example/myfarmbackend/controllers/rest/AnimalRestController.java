@@ -12,7 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @RestController
@@ -30,29 +30,30 @@ public class AnimalRestController {
     }
 
     @GetMapping("/owner/{ownerId}")
-    public List<AnimalDTO> getAnimalsByOwner(
+    public CompletableFuture<List<AnimalDTO>> getAnimalsByOwner(
             @PathVariable Long ownerId,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "5") @Min(1) int size,
             HttpServletRequest request) {
 
-        List<Animal> animals = animalService.getUserAnimals(ownerId, page, size);
-
-        monitoringService.logAction(ownerId, "USER", "FETCH_OWNED_ANIMALS", 200, request.getRemoteAddr());
-
-        return animals.stream()
-                .map(this::mapEntityToDto)
-                .collect(Collectors.toList());
+        return animalService.getUserAnimals(ownerId, page, size)
+                .thenApply(animals -> {
+                    monitoringService.logAction(ownerId, "USER", "FETCH_OWNED_ANIMALS", 200, request.getRemoteAddr());
+                    return animals.stream()
+                            .map(this::mapEntityToDto)
+                            .collect(Collectors.toList());
+                });
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AnimalDTO> getAnimalById(@PathVariable long id, HttpServletRequest request) {
+    public CompletableFuture<ResponseEntity<AnimalDTO>> getAnimalById(@PathVariable long id, HttpServletRequest request) {
         return animalService.getAnimalById(id)
-                .map(animal -> {
-                    monitoringService.logAction(animal.getOwner().getUserId(), "USER", "VIEW_ANIMAL_DETAILS_ID: " + id, 200, request.getRemoteAddr());
-                    return ResponseEntity.ok(mapEntityToDto(animal));
-                })
-                .orElse(ResponseEntity.notFound().build());
+                .thenApply(animal -> animal
+                        .map(found -> {
+                            monitoringService.logAction(found.getOwner().getUserId(), "USER", "VIEW_ANIMAL_DETAILS_ID: " + id, 200, request.getRemoteAddr());
+                            return ResponseEntity.ok(mapEntityToDto(found));
+                        })
+                        .orElse(ResponseEntity.notFound().build()));
     }
 
     @GetMapping("/owner/{ownerId}/count")
@@ -61,35 +62,40 @@ public class AnimalRestController {
     }
 
     @PostMapping
-    public ResponseEntity<AnimalDTO> addAnimal(@Valid @RequestBody AnimalDTO dto, HttpServletRequest request) {
-        Animal savedAnimal = animalService.addAnimal(dto);
-
-        monitoringService.logAction(dto.getUserId(), "USER", "ADD_NEW_ANIMAL: " + dto.getName(), 201, request.getRemoteAddr());
-
-        return ResponseEntity.ok(mapEntityToDto(savedAnimal));
+    public CompletableFuture<ResponseEntity<AnimalDTO>> addAnimal(@Valid @RequestBody AnimalDTO dto, HttpServletRequest request) {
+        return animalService.addAnimal(dto)
+                .thenApply(savedAnimal -> {
+                    monitoringService.logAction(dto.getUserId(), "USER", "ADD_NEW_ANIMAL: " + dto.getName(), 201, request.getRemoteAddr());
+                    return ResponseEntity.ok(mapEntityToDto(savedAnimal));
+                });
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Animal> updateAnimal(@PathVariable Long id, @Valid @RequestBody AnimalDTO animalDto, HttpServletRequest request) {
-        Animal updated = animalService.updateAnimal(id, animalDto);
-        if (updated != null) {
-            monitoringService.logAction(animalDto.getUserId(), "USER", "UPDATE_ANIMAL_ID: " + id, 200, request.getRemoteAddr());
-            return ResponseEntity.ok(updated);
-        }
-        return ResponseEntity.notFound().build();
+    public CompletableFuture<ResponseEntity<Animal>> updateAnimal(@PathVariable Long id, @Valid @RequestBody AnimalDTO animalDto, HttpServletRequest request) {
+        return animalService.updateAnimal(id, animalDto)
+                .thenApply(updated -> {
+                    if (updated != null) {
+                        monitoringService.logAction(animalDto.getUserId(), "USER", "UPDATE_ANIMAL_ID: " + id, 200, request.getRemoteAddr());
+                        return ResponseEntity.ok(updated);
+                    }
+                    return ResponseEntity.notFound().build();
+                });
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAnimal(@PathVariable Long id, HttpServletRequest request) {
-        // Obținem animalul înainte de ștergere pentru a știi cine era proprietarul în log
-        Optional<Animal> animal = animalService.getAnimalById(id);
-        Long ownerId = animal.isPresent() ? animal.get().getOwner().getUserId() : null;
-
-        if (animalService.deleteAnimal(id)) {
-            monitoringService.logAction(ownerId, "USER", "DELETE_ANIMAL_ID: " + id, 204, request.getRemoteAddr());
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    public CompletableFuture<ResponseEntity<Void>> deleteAnimal(@PathVariable Long id, HttpServletRequest request) {
+        return animalService.getAnimalById(id)
+                .thenCompose(animal -> {
+                    Long ownerId = animal.map(a -> a.getOwner().getUserId()).orElse(null);
+                    return animalService.deleteAnimal(id)
+                            .thenApply(deleted -> {
+                                if (deleted) {
+                                    monitoringService.logAction(ownerId, "USER", "DELETE_ANIMAL_ID: " + id, 204, request.getRemoteAddr());
+                                    return ResponseEntity.noContent().<Void>build();
+                                }
+                                return ResponseEntity.notFound().build();
+                            });
+                });
     }
 
     private AnimalDTO mapEntityToDto(Animal animal) {

@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,7 +63,7 @@ class AnimalServiceTest {
         when(userRepository.findById(10L)).thenReturn(Optional.of(owner));
         when(animalRepository.save(any(Animal.class))).thenReturn(saved);
 
-        Animal result = animalService.addAnimal(testDto);
+        Animal result = animalService.addAnimal(testDto).join();
 
         assertNotNull(result);
         assertEquals("Zuzu", result.getName());
@@ -73,10 +74,10 @@ class AnimalServiceTest {
     void addAnimal_ShouldThrowException_WhenOwnerDoesNotExist() {
         when(userRepository.findById(10L)).thenReturn(Optional.empty());
 
-        Exception exception =
-                assertThrows(RuntimeException.class, () -> animalService.addAnimal(testDto));
+        ExecutionException exception =
+                assertThrows(ExecutionException.class, () -> animalService.addAnimal(testDto).get());
 
-        assertEquals("Owner not found with ID: 10", exception.getMessage());
+        assertEquals("Owner not found with ID: 10", exception.getCause().getMessage());
         verify(animalRepository, never()).save(any());
     }
 
@@ -85,7 +86,7 @@ class AnimalServiceTest {
         when(animalRepository.existsById(1L)).thenReturn(true);
         doNothing().when(animalRepository).deleteById(1L);
 
-        boolean result = animalService.deleteAnimal(1L);
+        boolean result = animalService.deleteAnimal(1L).join();
 
         assertTrue(result);
     }
@@ -94,7 +95,7 @@ class AnimalServiceTest {
     void deleteAnimal_ShouldReturnFalse_WhenAnimalDoesNotExist() {
         when(animalRepository.existsById(1L)).thenReturn(false);
 
-        boolean result = animalService.deleteAnimal(1L);
+        boolean result = animalService.deleteAnimal(1L).join();
 
         assertFalse(result);
     }
@@ -124,7 +125,7 @@ class AnimalServiceTest {
         when(animalRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(animalRepository.save(any(Animal.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Animal updated = animalService.updateAnimal(1L, patch);
+        Animal updated = animalService.updateAnimal(1L, patch).join();
 
         assertNotNull(updated);
         assertEquals("NewName", updated.getName());
@@ -138,7 +139,7 @@ class AnimalServiceTest {
     void updateAnimal_ShouldReturnNull_WhenNotFound() {
         when(animalRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Animal result = animalService.updateAnimal(1L, testDto);
+        Animal result = animalService.updateAnimal(1L, testDto).join();
 
         assertNull(result);
         verify(animalRepository, never()).save(any());
@@ -153,7 +154,7 @@ class AnimalServiceTest {
 
         when(animalRepository.findById(1L)).thenReturn(Optional.of(a));
 
-        Optional<Animal> result = animalService.getAnimalById(1L);
+        Optional<Animal> result = animalService.getAnimalById(1L).join();
 
         assertTrue(result.isPresent());
         assertEquals("Zuzu", result.get().getName());
@@ -170,7 +171,7 @@ class AnimalServiceTest {
         when(animalRepository.findByOwnerUserId(eq(10L), eq(PageRequest.of(0, 5))))
                 .thenReturn(new PageImpl<>(List.of(a)));
 
-        List<Animal> result = animalService.getUserAnimals(10L, 0, 5);
+        List<Animal> result = animalService.getUserAnimals(10L, 0, 5).join();
 
         assertEquals(1, result.size());
         assertEquals(1L, result.get(0).getId());

@@ -6,7 +6,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { finalize } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { UserService } from '../services/user.service';
 import { ActivityRowComponent } from '../activity-row-component/activity-row-component';
 
@@ -30,30 +30,31 @@ export class ActivityList implements OnInit {
     this.loadData();
   }
 
-  loadData(): void {
+  async loadData(): Promise<void> {
     this.isLoading = true;
     this.cdr.markForCheck();
 
-    this.userService.getObservations().subscribe((data) => {
-      this.observations = data;
+    try {
+      const [observations, logs] = await Promise.all([
+        firstValueFrom(this.userService.getObservations()),
+        firstValueFrom(this.userService.getLogs()),
+      ]);
+      this.observations = observations;
+      this.logs = logs;
+    } catch (err) {
+      console.error('Eroare la încărcarea datelor de activitate:', err);
+    } finally {
+      this.isLoading = false;
       this.cdr.markForCheck();
-    });
-
-    this.userService
-      .getLogs()
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        }),
-      )
-      .subscribe((data) => {
-        this.logs = data;
-        this.cdr.markForCheck();
-      });
+    }
   }
 
-  resolveObservation(id: number): void {
-    this.userService.resolveObservation(id).subscribe(() => this.loadData());
+  async resolveObservation(id: number): Promise<void> {
+    try {
+      await firstValueFrom(this.userService.resolveObservation(id));
+      await this.loadData();
+    } catch (err) {
+      console.error('Eroare la rezolvarea observației:', err);
+    }
   }
 }

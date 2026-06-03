@@ -10,6 +10,7 @@ import org.example.myfarmbackend.repositories.RoleRepository;
 import org.example.myfarmbackend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Transactional
@@ -39,8 +41,10 @@ public class UserService implements IUserService {
         this.permisionRepository = permisionRepository;
     }
 
+    @Async
     @Override
-    public User registerUser(UserDTO dto) {
+    @Transactional
+    public CompletableFuture<User> registerUser(UserDTO dto) {
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new RuntimeException("Email already in use: " + dto.getEmail());
         }
@@ -53,7 +57,7 @@ public class UserService implements IUserService {
         Role defaultRole = roleRepository.findByName("ROLE_USER")
                 .orElseThrow(() -> new RuntimeException("Error: Role ROLE_USER not found in DB."));
         user.getRoles().add(defaultRole);
-        return userRepository.save(user);
+        return CompletableFuture.completedFuture(userRepository.save(user));
     }
 
     @Override
@@ -70,11 +74,14 @@ public class UserService implements IUserService {
         return userRepository.findByEmail(email);
     }
 
+    @Async
     @Override
-    public Optional<User> authenticate(String email, String password) {
-        return userRepository
+    @Transactional(readOnly = true)
+    public CompletableFuture<Optional<User>> authenticate(String email, String password) {
+        Optional<User> authenticated = userRepository
                 .findByEmail(email)
                 .filter(u -> passwordEncoder.matches(password, u.getPassword()));
+        return CompletableFuture.completedFuture(authenticated);
     }
 
     @Override
@@ -92,20 +99,24 @@ public class UserService implements IUserService {
         return userRepository.findAll(PageRequest.of(page, size)).getContent();
     }
 
+    @Async
     @Override
-    public List<UserListItemDTO> getUsersWithAnimalCounts(int page, int size) {
+    @Transactional(readOnly = true)
+    public CompletableFuture<List<UserListItemDTO>> getUsersWithAnimalCounts(int page, int size) {
         List<User> users = userRepository.findAll(PageRequest.of(page, size)).getContent();
         List<UserListItemDTO> rows = new ArrayList<>(users.size());
         for (User u : users) {
             long count = animalRepository.countByOwnerUserId(u.getUserId());
             rows.add(new UserListItemDTO(u.getUserId(), u.getUsername(), u.getEmail(), count));
         }
-        return rows;
+        return CompletableFuture.completedFuture(rows);
     }
 
+    @Async
     @Override
-    public Optional<User> updateUser(long id, UserDTO dto) {
-        return userRepository.findById(id).map(existingUser -> {
+    @Transactional
+    public CompletableFuture<Optional<User>> updateUser(long id, UserDTO dto) {
+        Optional<User> updated = userRepository.findById(id).map(existingUser -> {
             Optional<User> userWithSameEmail = userRepository.findByEmail(dto.getEmail());
             if (userWithSameEmail.isPresent() && userWithSameEmail.get().getUserId() != id) {
                 throw new RuntimeException("Email-ul este deja utilizat de alt cont!");
@@ -118,18 +129,19 @@ public class UserService implements IUserService {
 
             return userRepository.save(existingUser);
         });
+        return CompletableFuture.completedFuture(updated);
     }
 
+    @Async
     @Override
-    public boolean deleteUser(long id) {
-        return userRepository.findById(id).map(user -> {
-
+    @Transactional
+    public CompletableFuture<Boolean> deleteUser(long id) {
+        boolean deleted = userRepository.findById(id).map(user -> {
             user.getRoles().clear();
             userRepository.save(user);
-
             userRepository.delete(user);
-
             return true;
         }).orElse(false);
+        return CompletableFuture.completedFuture(deleted);
     }
 }

@@ -8,11 +8,13 @@ import org.example.myfarmbackend.repositories.AnimalRepository;
 import org.example.myfarmbackend.repositories.UserRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class AnimalService implements IAnimalService {
@@ -25,25 +27,26 @@ public class AnimalService implements IAnimalService {
         this.userRepository = userRepository;
     }
 
+    @Async
     @Override
-    public Animal addAnimal(AnimalDTO dto) {
+    @Transactional
+    public CompletableFuture<Animal> addAnimal(AnimalDTO dto) {
         User owner = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("Owner not found with ID: " + dto.getUserId()));
         Animal animal = new Animal();
         mapDtoToEntity(dto, animal);
-
         animal.setOwner(owner);
-
-        return animalRepository.save(animal);
+        return CompletableFuture.completedFuture(animalRepository.save(animal));
     }
 
+    @Async
     @Override
-    public Animal updateAnimal(long id, AnimalDTO dto) { // Schimbăm în DTO
-        return animalRepository.findById(id)
+    @Transactional
+    public CompletableFuture<Animal> updateAnimal(long id, AnimalDTO dto) {
+        Animal updated = animalRepository.findById(id)
                 .map(existingAnimal -> {
                     mapDtoToEntity(dto, existingAnimal);
 
-                    // Reîncarcă proprietarul doar dacă ID-ul din DTO diferă de cel curent (evită apel inutil și erori când frontend trimite același userId).
                     if (dto.getUserId() != null) {
                         Long currentOwnerId =
                                 existingAnimal.getOwner() != null
@@ -63,6 +66,7 @@ public class AnimalService implements IAnimalService {
 
                     return animalRepository.save(existingAnimal);
                 }).orElse(null);
+        return CompletableFuture.completedFuture(updated);
     }
 
     private void mapDtoToEntity(AnimalDTO dto, Animal animal) {
@@ -75,27 +79,32 @@ public class AnimalService implements IAnimalService {
         animal.setObservations(dto.getObservations());
     }
 
+    @Async
     @Override
     @Transactional
-    public boolean deleteAnimal(long id) {
+    public CompletableFuture<Boolean> deleteAnimal(long id) {
+        boolean deleted = false;
         if (animalRepository.existsById(id)) {
             animalRepository.deleteById(id);
-            return true;
+            deleted = true;
         }
-        return false;
+        return CompletableFuture.completedFuture(deleted);
     }
 
+    @Async
     @Override
-    public Optional<Animal> getAnimalById(long id) {
-        return animalRepository.findById(id);
+    @Transactional()
+    public CompletableFuture<Optional<Animal>> getAnimalById(long id) {
+        return CompletableFuture.completedFuture(animalRepository.findById(id));
     }
 
+    @Async
     @Override
     @Transactional
-    public List<Animal> getUserAnimals(long ownerId, int page, int size) {
+    public CompletableFuture<List<Animal>> getUserAnimals(long ownerId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-
-        return animalRepository.findByOwnerUserId(ownerId, pageable).getContent();
+        return CompletableFuture.completedFuture(
+                animalRepository.findByOwnerUserId(ownerId, pageable).getContent());
     }
 
     @Override

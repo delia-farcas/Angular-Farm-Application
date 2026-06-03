@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -77,7 +78,7 @@ class UserRestControllerTest {
                 .password("encoded-secret")
                 .roles(Set.of(role))
                 .build();
-        when(userService.registerUser(any(UserDTO.class))).thenReturn(savedUser);
+        when(userService.registerUser(any(UserDTO.class))).thenReturn(CompletableFuture.completedFuture(savedUser));
 
         mockMvc.perform(
                         post("/api/users/register")
@@ -112,7 +113,7 @@ class UserRestControllerTest {
     void register_ShouldReturn400_WhenEmailAlreadyExists() throws Exception {
         UserDTO payload = validUserDto();
         when(userService.registerUser(any(UserDTO.class)))
-                .thenThrow(new RuntimeException("Email already in use: ana@farm.ro"));
+                .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Email already in use: ana@farm.ro")));
 
         mockMvc.perform(
                         post("/api/users/register")
@@ -133,7 +134,8 @@ class UserRestControllerTest {
                 .roles(Set.of(adminRole))
                 .build();
         LoginRequest body = new LoginRequest("admin@farm.ro", "correct-password");
-        when(userService.authenticate("admin@farm.ro", "correct-password")).thenReturn(Optional.of(user));
+        when(userService.authenticate("admin@farm.ro", "correct-password"))
+                .thenReturn(CompletableFuture.completedFuture(Optional.of(user)));
         when(tokenProvider.generateToken("admin@farm.ro", List.of("ROLE_ADMIN"))).thenReturn("jwt-token");
 
         mockMvc.perform(
@@ -161,7 +163,8 @@ class UserRestControllerTest {
                 .roles(Set.of())
                 .build();
         LoginRequest body = new LoginRequest("user@farm.ro", "correct-password");
-        when(userService.authenticate("user@farm.ro", "correct-password")).thenReturn(Optional.of(user));
+        when(userService.authenticate("user@farm.ro", "correct-password"))
+                .thenReturn(CompletableFuture.completedFuture(Optional.of(user)));
         when(tokenProvider.generateToken("user@farm.ro", List.of())).thenReturn("jwt-token");
 
         mockMvc.perform(
@@ -178,7 +181,8 @@ class UserRestControllerTest {
     @Test
     void login_ShouldReturn401_WhenCredentialsInvalid() throws Exception {
         LoginRequest body = new LoginRequest("x@x.com", "wrong");
-        when(userService.authenticate("x@x.com", "wrong")).thenReturn(Optional.empty());
+        when(userService.authenticate("x@x.com", "wrong"))
+                .thenReturn(CompletableFuture.completedFuture(Optional.empty()));
 
         mockMvc.perform(
                         post("/api/users/login")
@@ -228,7 +232,7 @@ class UserRestControllerTest {
     @Test
     void summary_ShouldReturnRows_WhenRequesterIsAdmin() throws Exception {
         when(userService.getUsersWithAnimalCounts(0, 15))
-                .thenReturn(List.of(new UserListItemDTO(2L, "user", "user@farm.ro", 3)));
+                .thenReturn(CompletableFuture.completedFuture(List.of(new UserListItemDTO(2L, "user", "user@farm.ro", 3))));
 
         mockMvc.perform(get("/api/users/summary"))
                 .andExpect(status().isOk())
@@ -243,7 +247,8 @@ class UserRestControllerTest {
         payload.setUsername("user-valid");
         payload.setPassword("parola123");
 
-        when(userService.updateUser(eq(99L), any(UserDTO.class))).thenReturn(Optional.empty());
+        when(userService.updateUser(eq(99L), any(UserDTO.class)))
+                .thenReturn(CompletableFuture.completedFuture(Optional.empty()));
 
         mockMvc.perform(
                         put("/api/users/99")

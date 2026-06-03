@@ -14,12 +14,12 @@ import org.example.myfarmbackend.services.IUserService;
 import org.example.myfarmbackend.services.MonitoringService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder; // Import nou pentru context
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @RestController
@@ -39,41 +39,45 @@ public class UserRestController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@Valid @RequestBody UserDTO userDto, HttpServletRequest request) {
-        User savedUser = userService.registerUser(userDto);
-        monitoringService.logAction(savedUser.getUserId(), "USER", "REGISTER_SUCCESS", 201, request.getRemoteAddr());
-        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+    public CompletableFuture<ResponseEntity<User>> register(@Valid @RequestBody UserDTO userDto, HttpServletRequest request) {
+        return userService.registerUser(userDto)
+                .thenApply(savedUser -> {
+                    monitoringService.logAction(savedUser.getUserId(), "USER", "REGISTER_SUCCESS", 201, request.getRemoteAddr());
+                    return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+                });
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
-        Optional<User> authUser = userService.authenticate(loginRequest.email(), loginRequest.password());
+    public CompletableFuture<ResponseEntity<?>> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        return userService.authenticate(loginRequest.email(), loginRequest.password())
+                .thenApply(authUser -> {
+                    if (authUser.isPresent()) {
+                        User user = authUser.get();
+                        List<String> roles = user.getRoles().stream()
+                                .map(Role::getName)
+                                .collect(Collectors.toList());
 
-        if (authUser.isPresent()) {
-            User user = authUser.get();
-            List<String> roles = user.getRoles().stream()
-                    .map(Role::getName)
-                    .collect(Collectors.toList());
+                        String primaryRole = roles.isEmpty() ? "ROLE_USER" : roles.get(0);
+                        String token = tokenProvider.generateToken(user.getEmail(), roles);
 
-            String primaryRole = roles.isEmpty() ? "ROLE_USER" : roles.get(0);
-            String token = tokenProvider.generateToken(user.getEmail(), roles);
+                        monitoringService.logAction(user.getUserId(), primaryRole, "LOGIN_SUCCESS", 200, request.getRemoteAddr());
 
-            monitoringService.logAction(user.getUserId(), primaryRole, "LOGIN_SUCCESS", 200, request.getRemoteAddr());
+                        UserDTO userDto = toPublicUserDto(user);
+                        return ResponseEntity.ok(new LoginResponseDTO(token, userDto));
+                    }
 
-            UserDTO userDto = toPublicUserDto(user);
-            return ResponseEntity.ok(new LoginResponseDTO(token, userDto));
-        } else {
-            monitoringService.logAction(null, "GUEST", "FAILED_LOGIN", 401, request.getRemoteAddr());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+                    monitoringService.logAction(null, "GUEST", "FAILED_LOGIN", 401, request.getRemoteAddr());
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                });
     }
 
     @GetMapping("/summary")
-    public ResponseEntity<List<UserListItemDTO>> listUsersWithAnimalCounts(
+    public CompletableFuture<ResponseEntity<List<UserListItemDTO>>> listUsersWithAnimalCounts(
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "15") @Min(1) int size) {
 
-        return ResponseEntity.ok(userService.getUsersWithAnimalCounts(page, size));
+        return userService.getUsersWithAnimalCounts(page, size)
+                .thenApply(ResponseEntity::ok);
     }
 
     @GetMapping("/{id}")
@@ -95,22 +99,26 @@ public class UserRestController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable Long id, @RequestBody @Valid UserDTO userDto, HttpServletRequest request) {
+    public CompletableFuture<ResponseEntity<User>> update(@PathVariable Long id, @RequestBody @Valid UserDTO userDto, HttpServletRequest request) {
         return userService.updateUser(id, userDto)
-                .map(user -> {
-                    monitoringService.logAction(user.getUserId(), "USER", "UPDATE_USER_DATA", 200, request.getRemoteAddr());
-                    return ResponseEntity.ok(user);
-                })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .thenApply(updated -> updated
+                        .map(user -> {
+                            monitoringService.logAction(user.getUserId(), "USER", "UPDATE_USER_DATA", 200, request.getRemoteAddr());
+                            return ResponseEntity.ok(user);
+                        })
+                        .orElseGet(() -> ResponseEntity.notFound().build()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id, HttpServletRequest request) {
-        if (userService.deleteUser(id)) {
-            monitoringService.logAction(null, "ADMIN", "DELETE_USER_SUCCESS_ID: " + id + " BY: " + getAuthenticatedUserEmail(), 204, request.getRemoteAddr());
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    public CompletableFuture<ResponseEntity<Void>> delete(@PathVariable Long id, HttpServletRequest request) {
+        return userService.deleteUser(id)
+                .thenApply(deleted -> {
+                    if (deleted) {
+                        monitoringService.logAction(null, "ADMIN", "DELETE_USER_SUCCESS_ID: " + id + " BY: " + getAuthenticatedUserEmail(), 204, request.getRemoteAddr());
+                        return ResponseEntity.noContent().<Void>build();
+                    }
+                    return ResponseEntity.notFound().build();
+                });
     }
 
     private UserDTO toPublicUserDto(User user) {

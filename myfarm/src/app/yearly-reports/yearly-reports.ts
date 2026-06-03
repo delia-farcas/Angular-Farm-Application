@@ -13,6 +13,7 @@ import type { ChartConfiguration } from 'chart.js';
 import { FarmService } from '../services/farm.service';
 import { Animal, FarmProductCategory, DailyLogEntry } from '../models/farm';
 import { UserTrackingService } from '../services/user-tracking.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-yearly-reports',
@@ -64,19 +65,19 @@ export class YearlyReports implements OnInit {
     this.isAnimalSelectOpen = false;
   }
 
-  refreshData(): void {
+  async refreshData(): Promise<void> {
     const start = `${this.year}-01-01`;
     const end = `${this.year}-12-31`;
     const userId = this.trackingService.getCurrentUserId();
 
-    this.farm.getLogsInRange(userId, start, end).subscribe({
-      next: (logs) => {
-        this.currentLogs = logs || [];
-        this.processLogsIntoTable();
-        this.cdr.detectChanges();
-      },
-      error: (err) => console.error(err),
-    });
+    try {
+      const logs = await firstValueFrom(this.farm.getLogsInRange(userId, start, end));
+      this.currentLogs = logs || [];
+      this.processLogsIntoTable();
+      this.cdr.detectChanges();
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   private processLogsIntoTable(): void {

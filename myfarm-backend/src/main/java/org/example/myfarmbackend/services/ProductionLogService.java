@@ -7,10 +7,12 @@ import org.example.myfarmbackend.models.User;
 import org.example.myfarmbackend.repositories.AnimalRepository;
 import org.example.myfarmbackend.repositories.ProductionLogRepository;
 import org.example.myfarmbackend.repositories.UserRepository;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ProductionLogService implements IProductionLogService {
@@ -25,13 +27,14 @@ public class ProductionLogService implements IProductionLogService {
         this.userRepository = userRepository;
     }
 
+    @Async
     @Override
     @Transactional
-    public ProductionLog saveOrUpdateLog(ProductionLogDTO dto) {
+    public CompletableFuture<ProductionLog> saveOrUpdateLog(ProductionLogDTO dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + dto.getUserId()));
 
-        return logRepository.findByReportDateAndUserUserId(dto.getReportDate(), dto.getUserId())
+        ProductionLog saved = logRepository.findByReportDateAndUserUserId(dto.getReportDate(), dto.getUserId())
                 .map(existingLog -> {
                     updateLogFields(existingLog, dto);
                     return logRepository.save(existingLog);
@@ -42,6 +45,7 @@ public class ProductionLogService implements IProductionLogService {
                     updateLogFields(newLog, dto);
                     return logRepository.save(newLog);
                 });
+        return CompletableFuture.completedFuture(saved);
     }
 
     private void updateLogFields(ProductionLog log, ProductionLogDTO dto) {
@@ -98,14 +102,18 @@ public class ProductionLogService implements IProductionLogService {
     }
 
 
+    @Async
     @Override
-    public Map<String, Double> getReport(long userId, int year, Integer month, String resourceField) {
+    public CompletableFuture<Map<String, Double>> getReport(long userId, int year, Integer month, String resourceField) {
         List<ProductionLog> filteredLogs = getFilteredLogs(userId, year);
 
+        Map<String, Double> report;
         if (month != null) {
-            return calculateWeeklyReport(filteredLogs, month, resourceField);
+            report = calculateWeeklyReport(filteredLogs, month, resourceField);
+        } else {
+            report = calculateAnnualReport(filteredLogs, resourceField);
         }
-        return calculateAnnualReport(filteredLogs, resourceField);
+        return CompletableFuture.completedFuture(report);
     }
 
     private List<ProductionLog> getFilteredLogs(long userId, int year) {
@@ -167,9 +175,12 @@ public class ProductionLogService implements IProductionLogService {
         };
     }
 
-    public List<ProductionLog> getLogsByUserAndDateRange(Long userId, String startDate, String endDate) {
+    @Async
+    @Override
+    public CompletableFuture<List<ProductionLog>> getLogsByUserAndDateRange(Long userId, String startDate, String endDate) {
         LocalDate start = LocalDate.parse(startDate);
         LocalDate end = LocalDate.parse(endDate);
-        return logRepository.findByUserUserIdAndReportDateBetween(userId, start, end);
+        return CompletableFuture.completedFuture(
+                logRepository.findByUserUserIdAndReportDateBetween(userId, start, end));
     }
 }

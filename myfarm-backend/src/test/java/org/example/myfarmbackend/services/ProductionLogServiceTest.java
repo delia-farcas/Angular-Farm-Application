@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -66,7 +67,7 @@ class ProductionLogServiceTest {
 
         when(logRepository.findAll()).thenReturn(List.of(log1, log2));
 
-        Map<String, Double> report = productionLogService.getReport(100L, 2024, 5, "lapte");
+        Map<String, Double> report = productionLogService.getReport(100L, 2024, 5, "lapte").join();
 
         assertNotNull(report);
         assertEquals(15.0, report.get("1-7"));
@@ -81,7 +82,7 @@ class ProductionLogServiceTest {
 
         when(logRepository.findAll()).thenReturn(List.of(logIan, logFeb));
 
-        Map<String, Double> report = productionLogService.getReport(100L, 2024, null, "lapte");
+        Map<String, Double> report = productionLogService.getReport(100L, 2024, null, "lapte").join();
 
         assertEquals(100.0, report.get("Ianuarie"));
         assertEquals(50.0, report.get("Februarie"));
@@ -112,7 +113,7 @@ class ProductionLogServiceTest {
                 .thenReturn(Optional.empty());
         when(logRepository.save(any(ProductionLog.class))).thenReturn(saved);
 
-        ProductionLog result = productionLogService.saveOrUpdateLog(dto);
+        ProductionLog result = productionLogService.saveOrUpdateLog(dto).join();
 
         assertNotNull(result);
         assertEquals(10.0, result.getMilkLitersCow());
@@ -144,7 +145,7 @@ class ProductionLogServiceTest {
                 .thenReturn(Optional.of(existing));
         when(logRepository.save(any(ProductionLog.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        ProductionLog updated = productionLogService.saveOrUpdateLog(dto);
+        ProductionLog updated = productionLogService.saveOrUpdateLog(dto).join();
 
         assertEquals(5.0, updated.getMilkLitersCow());
     }
@@ -164,9 +165,9 @@ class ProductionLogServiceTest {
 
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
-        RuntimeException ex =
-                assertThrows(RuntimeException.class, () -> productionLogService.saveOrUpdateLog(dto));
-        assertTrue(ex.getMessage().contains("User not found"));
+        ExecutionException ex =
+                assertThrows(ExecutionException.class, () -> productionLogService.saveOrUpdateLog(dto).get());
+        assertTrue(ex.getCause().getMessage().contains("User not found"));
     }
 
     @Test
@@ -175,7 +176,7 @@ class ProductionLogServiceTest {
         ProductionLog log = logForUser(u, LocalDate.of(2024, 5, 2), 10.0, 0);
         when(logRepository.findAll()).thenReturn(List.of(log));
 
-        Map<String, Double> report = productionLogService.getReport(100L, 2024, null, "invalid");
+        Map<String, Double> report = productionLogService.getReport(100L, 2024, null, "invalid").join();
 
         assertEquals(0.0, report.get("Ianuarie"));
     }
@@ -186,7 +187,7 @@ class ProductionLogServiceTest {
                 .thenReturn(List.of());
 
         List<ProductionLog> result =
-                productionLogService.getLogsByUserAndDateRange(100L, "2024-01-01", "2024-01-31");
+                productionLogService.getLogsByUserAndDateRange(100L, "2024-01-01", "2024-01-31").join();
 
         assertNotNull(result);
         verify(logRepository).findByUserUserIdAndReportDateBetween(eq(100L), any(), any());

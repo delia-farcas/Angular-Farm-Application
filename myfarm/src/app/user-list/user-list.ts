@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import type { UserListRow } from '../models/user-list-row';
 import { UserCardComponent } from '../user-card/user-card';
 import { UserService } from '../services/user.service';
@@ -68,37 +68,31 @@ export class UserList implements OnInit {
     this.loadNextPage();
   }
 
-  private loadNextPage(): void {
+  private async loadNextPage(): Promise<void> {
     if (this.isLoading || !this.hasMoreData) return;
 
     this.isLoading = true;
     this.cdr.markForCheck();
 
-    this.userService
-      .listUsersWithSummary(this.currentPage, this.pageSize)
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        }),
-      )
-      .subscribe({
-        next: (rows) => {
-          if (rows.length < this.pageSize) {
-            this.hasMoreData = false;
-          }
-          this.users = [...this.users, ...rows];
-          this.currentPage++;
-          this.cdr.markForCheck();
-        },
-        error: (err) => {
-          console.error('Eroare la încărcarea utilizatorilor:', err);
-          this.cdr.markForCheck();
-        },
-      });
+    try {
+      const rows = await firstValueFrom(
+        this.userService.listUsersWithSummary(this.currentPage, this.pageSize),
+      );
+
+      if (rows.length < this.pageSize) {
+        this.hasMoreData = false;
+      }
+      this.users = [...this.users, ...rows];
+      this.currentPage++;
+    } catch (err) {
+      console.error('Eroare la încărcarea utilizatorilor:', err);
+    } finally {
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    }
   }
 
-  deleteUser(userId: number): void {
+  async deleteUser(userId: number): Promise<void> {
     const currentId = this.trackingService.getCurrentUserId();
     if (userId === currentId) {
       alert('Nu poți șterge contul cu care ești autentificat.');
@@ -106,14 +100,12 @@ export class UserList implements OnInit {
     }
     if (!confirm('Sigur vrei să ștergi acest utilizator?')) return;
 
-    this.userService.deleteUser(userId).subscribe({
-      next: () => {
-        this.resetAndLoad();
-      },
-      error: (err) => {
-        console.error('Eroare la ștergere:', err);
-        alert('Nu s-a putut șterge utilizatorul.');
-      },
-    });
+    try {
+      await firstValueFrom(this.userService.deleteUser(userId));
+      this.resetAndLoad();
+    } catch (err) {
+      console.error('Eroare la ștergere:', err);
+      alert('Nu s-a putut șterge utilizatorul.');
+    }
   }
 }

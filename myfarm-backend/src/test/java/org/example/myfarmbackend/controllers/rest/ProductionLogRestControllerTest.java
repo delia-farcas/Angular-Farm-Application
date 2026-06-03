@@ -7,7 +7,7 @@ import org.example.myfarmbackend.exceptions.GlobalExceptionHandler;
 import org.example.myfarmbackend.models.ProductionLog;
 import org.example.myfarmbackend.models.User;
 import org.example.myfarmbackend.services.MonitoringService;
-import org.example.myfarmbackend.services.ProductionLogService;
+import org.example.myfarmbackend.services.IProductionLogService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -37,7 +38,7 @@ class ProductionLogRestControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private ProductionLogService productionLogService;
+    private IProductionLogService productionLogService;
 
     @MockBean
     private MonitoringService monitoringService;
@@ -60,7 +61,7 @@ class ProductionLogRestControllerTest {
     @Test
     void report_ShouldReturnOk() throws Exception {
         when(productionLogService.getReport(1L, 2024, null, "lapte"))
-                .thenReturn(Map.of("Ianuarie", 10.0));
+                .thenReturn(CompletableFuture.completedFuture(Map.of("Ianuarie", 10.0)));
 
         mockMvc.perform(
                         get("/api/logs/report")
@@ -97,7 +98,7 @@ class ProductionLogRestControllerTest {
         log2.setUser(u);
 
         when(productionLogService.getLogsByUserAndDateRange(1L, "2024-01-01", "2024-01-31"))
-                .thenReturn(List.of(log1, log2));
+                .thenReturn(CompletableFuture.completedFuture(List.of(log1, log2)));
 
         mockMvc.perform(
                         get("/api/logs/history/1")

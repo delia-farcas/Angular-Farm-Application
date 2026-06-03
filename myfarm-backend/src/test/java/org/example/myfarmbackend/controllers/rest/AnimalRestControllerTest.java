@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -73,7 +74,7 @@ class AnimalRestControllerTest {
 
     @Test
     void getById_ShouldReturn404_WhenMissing() throws Exception {
-        when(animalService.getAnimalById(99L)).thenReturn(Optional.empty());
+        when(animalService.getAnimalById(99L)).thenReturn(CompletableFuture.completedFuture(Optional.empty()));
 
         mockMvc.perform(get("/api/animals/99")).andExpect(status().isNotFound());
     }
@@ -100,7 +101,7 @@ class AnimalRestControllerTest {
         a.setLocation("stână");
         a.setOwner(owner);
 
-        when(animalService.getUserAnimals(1L, 0, 5)).thenReturn(List.of(a));
+        when(animalService.getUserAnimals(1L, 0, 5)).thenReturn(CompletableFuture.completedFuture(List.of(a)));
 
         mockMvc.perform(get("/api/animals/owner/1").queryParam("page", "0").queryParam("size", "5"))
                 .andExpect(status().isOk())
@@ -109,7 +110,8 @@ class AnimalRestControllerTest {
 
     @Test
     void put_ShouldReturn404_WhenUpdateReturnsNull() throws Exception {
-        when(animalService.updateAnimal(anyLong(), any(AnimalDTO.class))).thenReturn(null);
+        when(animalService.updateAnimal(anyLong(), any(AnimalDTO.class)))
+                .thenReturn(CompletableFuture.completedFuture(null));
 
         AnimalDTO payload = new AnimalDTO();
         payload.setUserId(1L);

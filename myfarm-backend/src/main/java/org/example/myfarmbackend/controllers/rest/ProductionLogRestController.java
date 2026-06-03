@@ -5,8 +5,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.example.myfarmbackend.dto.ProductionLogDTO;
 import org.example.myfarmbackend.models.ProductionLog;
+import org.example.myfarmbackend.services.IProductionLogService;
 import org.example.myfarmbackend.services.MonitoringService;
-import org.example.myfarmbackend.services.ProductionLogService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -17,6 +17,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,52 +26,52 @@ import java.util.stream.Collectors;
 @Validated
 public class ProductionLogRestController {
 
-    private final ProductionLogService logService;
+    private final IProductionLogService logService;
     private final MonitoringService monitoringService;
 
-    public ProductionLogRestController(ProductionLogService logService, MonitoringService monitoringService) {
+    public ProductionLogRestController(IProductionLogService logService, MonitoringService monitoringService) {
         this.logService = logService;
         this.monitoringService = monitoringService;
     }
 
     @PostMapping
-    public ResponseEntity<ProductionLogDTO> createOrUpdateLog(@Valid @RequestBody ProductionLogDTO logDTO, HttpServletRequest request) {
-        ProductionLog savedLog = logService.saveOrUpdateLog(logDTO);
-
-        monitoringService.logAction(
-                logDTO.getUserId(),
-                "USER",
-                "PRODUCTION_DATA_SAVE: " + logDTO.getReportDate(),
-                201,
-                request.getRemoteAddr()
-        );
-
-        return new ResponseEntity<>(mapToDTO(savedLog), HttpStatus.CREATED);
+    public CompletableFuture<ResponseEntity<ProductionLogDTO>> createOrUpdateLog(@Valid @RequestBody ProductionLogDTO logDTO, HttpServletRequest request) {
+        return logService.saveOrUpdateLog(logDTO)
+                .thenApply(savedLog -> {
+                    monitoringService.logAction(
+                            logDTO.getUserId(),
+                            "USER",
+                            "PRODUCTION_DATA_SAVE: " + logDTO.getReportDate(),
+                            201,
+                            request.getRemoteAddr()
+                    );
+                    return new ResponseEntity<>(mapToDTO(savedLog), HttpStatus.CREATED);
+                });
     }
 
     @GetMapping("/report")
-    public ResponseEntity<Map<String, Double>> getReport(
+    public CompletableFuture<ResponseEntity<Map<String, Double>>> getReport(
             @RequestParam long userId,
             @RequestParam int year,
             @RequestParam(required = false) Integer month,
             @RequestParam String resourceField,
             HttpServletRequest request) {
 
-        Map<String, Double> report = logService.getReport(userId, year, month, resourceField);
-
-        monitoringService.logAction(
-                userId,
-                "USER",
-                "VIEW_PRODUCTION_REPORT: " + resourceField,
-                200,
-                request.getRemoteAddr()
-        );
-
-        return ResponseEntity.ok(report);
+        return logService.getReport(userId, year, month, resourceField)
+                .thenApply(report -> {
+                    monitoringService.logAction(
+                            userId,
+                            "USER",
+                            "VIEW_PRODUCTION_REPORT: " + resourceField,
+                            200,
+                            request.getRemoteAddr()
+                    );
+                    return ResponseEntity.ok(report);
+                });
     }
 
     @GetMapping("/history/{userId}")
-    public ResponseEntity<List<ProductionLogDTO>> getHistory(
+    public CompletableFuture<ResponseEntity<List<ProductionLogDTO>>> getHistory(
             @PathVariable Long userId,
             @RequestParam String startDate,
             @RequestParam String endDate,
@@ -82,37 +83,33 @@ public class ProductionLogRestController {
             LocalDate.parse(startDate);
             LocalDate.parse(endDate);
         } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().build();
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().build());
         }
 
-        Object historyRaw = logService.getLogsByUserAndDateRange(userId, startDate, endDate);
+        return logService.getLogsByUserAndDateRange(userId, startDate, endDate)
+                .thenApply(logs -> {
+                    List<ProductionLogDTO> dtoList = logs.stream()
+                            .map(this::mapToDTO)
+                            .collect(Collectors.toList());
 
-        if (!(historyRaw instanceof List<?> rawList)) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+                    monitoringService.logAction(
+                            userId,
+                            "USER",
+                            "VIEW_PRODUCTION_HISTORY: " + startDate + " to " + endDate,
+                            200,
+                            request.getRemoteAddr()
+                    );
 
-        List<ProductionLogDTO> dtoList = rawList.stream()
-                .filter(ProductionLog.class::isInstance)
-                .map(obj -> mapToDTO((ProductionLog) obj))
-                .collect(Collectors.toList());
+                    int totalElements = dtoList.size();
+                    int start = page * size;
 
-        monitoringService.logAction(
-                userId,
-                "USER",
-                "VIEW_PRODUCTION_HISTORY: " + startDate + " to " + endDate,
-                200,
-                request.getRemoteAddr()
-        );
+                    if (start >= totalElements) {
+                        return ResponseEntity.ok(Collections.<ProductionLogDTO>emptyList());
+                    }
 
-        int totalElements = dtoList.size();
-        int start = page * size;
-
-        if (start >= totalElements) {
-            return ResponseEntity.ok(Collections.emptyList());
-        }
-
-        int end = Math.min(start + size, totalElements);
-        return ResponseEntity.ok(dtoList.subList(start, end));
+                    int end = Math.min(start + size, totalElements);
+                    return ResponseEntity.ok(dtoList.subList(start, end));
+                });
     }
 
     private ProductionLogDTO mapToDTO(ProductionLog log) {

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { ChatMessage } from '../models/chat-message';
 import { User } from '../models/user';
 import { ChatService } from '../services/chat';
@@ -61,36 +61,31 @@ export class ChatPage implements OnInit, OnDestroy {
     });
   }
 
-  loadUsers(): void {
+  async loadUsers(): Promise<void> {
     this.isLoadingUsers = true;
-    this.chatService.getContacts(this.currentUserId).subscribe({
-      next: (users) => {
-        this.allUsers = users;
-        this.isLoadingUsers = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.errorMessage = 'Nu s-a putut incarca lista de utilizatori.';
-        this.isLoadingUsers = false;
-        this.cdr.detectChanges();
-      },
-    });
+    try {
+      this.allUsers = await firstValueFrom(this.chatService.getContacts(this.currentUserId));
+    } catch {
+      this.errorMessage = 'Nu s-a putut incarca lista de utilizatori.';
+    } finally {
+      this.isLoadingUsers = false;
+      this.cdr.detectChanges();
+    }
   }
 
-  selectUser(user: User): void {
+  async selectUser(user: User): Promise<void> {
     this.selectedUser = user;
     this.selectedUserId = user.userId ?? null;
     if (!this.selectedUserId) return;
 
-    this.chatService.getHistory(this.currentUserId, this.selectedUserId).subscribe({
-      next: (history) => {
-        this.messages = history;
-        this.scrollToBottom();
-      },
-      error: () => {
-        this.errorMessage = 'Nu s-a putut incarca istoricul conversatiei.';
-      },
-    });
+    try {
+      this.messages = await firstValueFrom(
+        this.chatService.getHistory(this.currentUserId, this.selectedUserId),
+      );
+      this.scrollToBottom();
+    } catch {
+      this.errorMessage = 'Nu s-a putut incarca istoricul conversatiei.';
+    }
   }
 
   toggleSidebar(): void {

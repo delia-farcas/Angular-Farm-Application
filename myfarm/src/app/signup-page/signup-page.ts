@@ -9,6 +9,7 @@ import {
 } from '@angular/forms';
 import { UserTrackingService } from '../services/user-tracking.service';
 import { UserService } from '../services/user.service';
+import { firstValueFrom } from 'rxjs';
 
 function passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
@@ -41,7 +42,7 @@ export class SignupPage {
     { validators: passwordMatchValidator },
   );
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (this.signupForm.invalid) {
       this.signupForm.markAllAsTouched();
       return;
@@ -51,18 +52,15 @@ export class SignupPage {
 
     const newUser = { email, username, password };
 
-    this.userService.register(newUser).subscribe({
-      next: () => {
-        this.trackingService.logActivity('register');
-
-        alert('Cont creat cu succes!');
-        this.goToLogin.emit();
-      },
-      error: (err) => {
-        console.error('Eroare la înregistrare:', err);
-        alert('Eroare: Email-ul este deja folosit sau serverul este offline.');
-      },
-    });
+    try {
+      await firstValueFrom(this.userService.register(newUser));
+      this.trackingService.logActivity('register');
+      alert('Cont creat cu succes!');
+      this.goToLogin.emit();
+    } catch (err) {
+      console.error('Eroare la înregistrare:', err);
+      alert('Eroare: Email-ul este deja folosit sau serverul este offline.');
+    }
   }
 
   onLoginClick(): void {

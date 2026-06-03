@@ -14,7 +14,7 @@ import { Animal } from '../models/animal';
 import { AnimalCardComponent } from '../animal-card/animal-card';
 import { UserTrackingService } from '../services/user-tracking.service';
 import { Router } from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-list-page',
   standalone: true,
@@ -46,34 +46,32 @@ export class ListPage implements OnInit {
     this.loadAnimals();
   }
 
-  loadAnimals() {
+  async loadAnimals(): Promise<void> {
     if (this.isLoading || !this.hasMoreData) return;
 
     this.isLoading = true;
     this.cdr.markForCheck();
 
-    this.animalService
-      .getAnimalsPaginated(this.trackingService.getCurrentUserId(), this.currentPage, this.pageSize)
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        }),
-      )
-      .subscribe({
-        next: (newAnimals) => {
-          if (newAnimals.length < this.pageSize) {
-            this.hasMoreData = false;
-          }
-          this.animals = [...this.animals, ...newAnimals];
-          this.currentPage++;
-          this.cdr.markForCheck();
-        },
-        error: (err) => {
-          console.error('Eroare la încărcarea animalelor', err);
-          this.cdr.markForCheck();
-        },
-      });
+    try {
+      const newAnimals = await firstValueFrom(
+        this.animalService.getAnimalsPaginated(
+          this.trackingService.getCurrentUserId(),
+          this.currentPage,
+          this.pageSize,
+        ),
+      );
+
+      if (newAnimals.length < this.pageSize) {
+        this.hasMoreData = false;
+      }
+      this.animals = [...this.animals, ...newAnimals];
+      this.currentPage++;
+    } catch (err) {
+      console.error('Eroare la încărcarea animalelor', err);
+    } finally {
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    }
   }
 
   onTableScroll(event: any) {
@@ -95,16 +93,19 @@ export class ListPage implements OnInit {
     return this.animals.filter((a) => a.type === this.selectedType);
   }
 
-  deleteAnimal(id: number) {
+  async deleteAnimal(id: number): Promise<void> {
     const confirmed = window.confirm('Sigur vrei să ștergi animalul?');
     if (!confirmed) return;
 
-    this.animalService.deleteAnimal(id).subscribe(() => {
+    try {
+      await firstValueFrom(this.animalService.deleteAnimal(id));
       this.animals = [];
       this.currentPage = 0;
       this.hasMoreData = true;
-      this.loadAnimals();
-    });
+      await this.loadAnimals();
+    } catch (err) {
+      console.error('Eroare la ștergerea animalului', err);
+    }
   }
 
   editAnimal(animal: Animal) {
